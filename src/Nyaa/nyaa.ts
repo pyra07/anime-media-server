@@ -31,6 +31,8 @@ class Nyaa {
     this.rssLink =
       "https://nyaa.si/?page=rss&q=" + searchQuery.split(" ").join("+");
 
+      console.log(this.rssLink);
+
     const rss = await this.parser.parseURL(this.rssLink);
 
     // Sort rss.items by nyaa:seeders

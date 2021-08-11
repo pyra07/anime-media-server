@@ -79,7 +79,10 @@ class Anilist {
       userId: userId,
     };
 
-    return await this.getData(query, variables);
+    const response = await this.getData(query, variables);
+
+
+    return response.data
   }
 }
 
