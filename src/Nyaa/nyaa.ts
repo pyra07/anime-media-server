@@ -1,7 +1,6 @@
 // This um retrieves something from nyaa.si rss
 // and returns it as a json object
 
-import axios from "axios";
 import Parser from "rss-parser";
 import { Resolution } from "../utils/types";
 
@@ -24,8 +23,11 @@ class Nyaa {
    */
   public async getRSS(
     searchQuery: string,
+    episodeNumber : string,
     resolution: Resolution
   ): Promise<any> {
+    searchQuery += " - " + episodeNumber;
+
     this.rssLink =
       "https://nyaa.si/?page=rss&q=" + searchQuery.split(" ").join("+");
 
@@ -44,7 +46,7 @@ class Nyaa {
     for (const item of rss.items) {
       if (item["nyaa:category"] === "Anime - English-translated") {
         if (
-          item.title.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1 &&
+          item.title.toLowerCase().match(searchQuery.toLowerCase()) !== -1 &&
           item.title.toLowerCase().indexOf(resolution.toLowerCase()) !== -1
         ) {
           return item;
