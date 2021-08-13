@@ -20,5 +20,8 @@
     "axios": "^0.21.1",
     "cron": "^1.8.2",
     "rss-parser": "^3.12.0"
+  },
+  "devDependencies": {
+    "@types/node": "^16.6.0"
   }
 }

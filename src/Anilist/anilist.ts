@@ -43,7 +43,7 @@ class Anilist {
    * Returns what the user current WATCHING list is.
    * @returns Promise
    */
-  public async getAnimeUserList(userId : string): Promise<any> {
+  public async getAnimeUserList(userId : string): Promise<object[]> {
     // I love loooong lines
     var query = `
     query ($userId: Int) {
@@ -51,9 +51,7 @@ class Anilist {
           lists {
             name
             entries {
-              createdAt
               progress
-              status
               mediaId
               media {
                 episodes
@@ -61,12 +59,10 @@ class Anilist {
                   id
                   episode
                 }
-                duration
                 title {
                   romaji
                   english
                   native
-                  userPreferred
                 }
               }
             }
@@ -79,10 +75,10 @@ class Anilist {
       userId: userId,
     };
 
-    const response = await this.getData(query, variables);
+    let response = await this.getData(query, variables);
+    response = response.data.data.MediaListCollection.lists[0].entries;
 
-
-    return response.data
+    return response
   }
 }
 
