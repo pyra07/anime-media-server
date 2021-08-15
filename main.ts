@@ -1,11 +1,7 @@
-import Anilist from "./src/Anilist/anilist";
-import fs from "fs";
-import Nyaa from "./src/Nyaa/nyaa";
-import d from "./users.json";
-
+import DB from "./src/database/db";
+import data from "./users.json";
 (async () => {
 
-  
-
+await new DB().addtodb(data);
 
 })();
