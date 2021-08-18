@@ -75,7 +75,7 @@ class Nyaa {
    * @param  {string} searchQuery
    * @returns {Promise<AnimeTorrent>}
    */
-  private async getTorrent(
+  public async getTorrent(
     searchQuery: string,
     episodeNumber: string,
     resolution: Resolution

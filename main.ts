@@ -3,7 +3,18 @@ import Anilist from "./src/Anilist/anilist";
 import DB from "./src/database/db";
 import Scheduler from "./src/Scheduler/schedule";
 import data from "./users.json";
+import cron from "cron";
 
 (async () => {
-   Scheduler.init();
+  
+  const CronJob = cron.CronJob;
+  const job = new CronJob(
+    "*/10 * * * * *",
+    () => {
+       Scheduler.check();
+    },
+    null,
+    true,
+    "Europe/London"
+  );
 })();
