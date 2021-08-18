@@ -24,6 +24,7 @@
     "rss-parser": "^3.12.0"
   },
   "devDependencies": {
+    "@types/cron": "^1.7.3",
     "@types/node": "^16.6.0"
   }
 }

@@ -1,18 +1,43 @@
 import fb from "firebase";
 import { firebaseConfig } from "./creds.json";
+import { id } from "../../profile.json";
 
 class DB {
   myProject: fb.app.App;
   constructor() {
-      this.myProject = fb.initializeApp(firebaseConfig);
+    this.myProject = fb.initializeApp(firebaseConfig);
   }
 
-  public async addtodb(data : any[]) {
+  /**
+   * Adds data to firestore
+   * @param  {any[]} data
+   * @returns Promise
+   */
+  public async addToDb(data: any[]): Promise<void> {
     for (let i = 0; i < data.length; i++) {
-      // console.log(data[i]["mediaId"].toString());]);
-      
-      await this.myProject.firestore().collection("animelists").doc("387521").collection("anime").doc(data[i]["mediaId"].toString()).set(data[i]);
+      await this.myProject
+        .firestore()
+        .collection("animelists")
+        .doc(id.toString())
+        .collection("anime")
+        .doc(data[i]["mediaId"].toString())
+        .set(data[i]);
     }
   }
+  /**
+   * Gets the users animelist
+   * @param  {string} mediaId
+   * @returns Promise
+   */
+  public async getFromDb(): Promise<
+    fb.firestore.QuerySnapshot<fb.firestore.DocumentData>
+  > {
+    return await this.myProject
+      .firestore()
+      .collection("animelists")
+      .doc(id.toString())
+      .collection("anime")
+      .get();
+  }
 }
-export default DB;
+export default new DB();

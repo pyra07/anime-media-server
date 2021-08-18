@@ -53,8 +53,9 @@ class Nyaa {
 
       const episodeList = this.getNumbers(progress, nextAiringEpisode);
       for (let j = 0; j < episodeList.length; j++) {
-        const episode = episodeList[j];
+        console.log("Downloading", anime.media.title.romaji, "\nEpisode", episodeList[j]);
 
+        const episode = episodeList[j];
         let episodeString = this.legitAddAZero(episode);
 
         var animeRSS = await this.getTorrent(

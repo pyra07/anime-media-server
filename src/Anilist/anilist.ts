@@ -1,5 +1,5 @@
 import axios from "axios";
-
+import { id as userId } from "../../profile.json";
 class Anilist {
   api: string;
   authLink: string;
@@ -8,12 +8,14 @@ class Anilist {
     this.api = "https://graphql.anilist.co";
     this.authLink = "https://anilist.co/api/v2/oauth/token";
   }
+  
   /**
    * Sends a POST req to the Anilist API with the given query and variables
    * @param  {string} query
    * @param  {Object} variables?
    * @returns Promise<any> - The response from the API
    */
+
   private async getData(query: string, variables?: Object): Promise<any> {
     return await axios(this.api, {
       headers: {
@@ -43,7 +45,7 @@ class Anilist {
    * Returns what the user current WATCHING list is.
    * @returns Promise
    */
-  public async getAnimeUserList(userId : string): Promise<object[]> {
+  public async getAnimeUserList(): Promise<any[]> {
     // I love loooong lines
     var query = `
     query ($userId: Int) {
@@ -78,8 +80,8 @@ class Anilist {
     let response = await this.getData(query, variables);
     response = response.data.data.MediaListCollection.lists[0].entries;
 
-    return response
+    return response;
   }
 }
 
-export default Anilist;
+export default new Anilist();
