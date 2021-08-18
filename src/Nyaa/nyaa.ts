@@ -104,12 +104,12 @@ class Nyaa {
     // Check if the title contains mentions of both the query and resolution
 
     for (const item of rss.items) {
-      if (
-        item.title.toLowerCase().match(searchQuery.toLowerCase()) !== -1 &&
-        item.title.toLowerCase().indexOf(resolution.toLowerCase()) !== -1
-      ) {
-        return item as AnimeTorrent;
-      }
+      let title : string = item.title;
+      title = title.replace(/^(.*?)\]/, "").trim();
+      // Match until the last occurence of - (not including the -)
+      let animeTitle = title.match(/.*-/);
+
+      return item as AnimeTorrent;
     }
     return {} as AnimeTorrent;
   }
