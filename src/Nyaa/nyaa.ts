@@ -24,7 +24,7 @@ class Nyaa {
 
   private getNumbers(start: number, end: number): number[] {
     let numbers = [];
-    for (let i = start + 1; i < end; i++) {
+    for (let i = start + 1; i <= end; i++) {
       numbers.push(i);
     }
     return numbers;
@@ -41,17 +41,13 @@ class Nyaa {
    * @param {object} animeList
    * @returns {Promise<any>}
    */
-  public async getTorrents(animeList: any[]): Promise<AnimeTorrent[]> {
+  public async getTorrents(animeList: any[], startEpisode : number, endEpisode : number): Promise<AnimeTorrent[]> {
     let animeTorrentList: any[] = new Array();
 
     for (let i = 0; i < animeList.length; i++) {
       const anime = animeList[i];
-      var progress = anime.progress;
-      var nextAiringEpisode = anime.media.nextAiringEpisode?.episode;
 
-      if (!nextAiringEpisode) continue;
-
-      const episodeList = this.getNumbers(progress, nextAiringEpisode);
+      const episodeList = this.getNumbers(startEpisode, endEpisode);
       for (let j = 0; j < episodeList.length; j++) {
         console.log("Downloading", anime.media.title.romaji, "\nEpisode", episodeList[j]);
 
@@ -75,7 +71,7 @@ class Nyaa {
    * @param  {string} searchQuery
    * @returns {Promise<AnimeTorrent>}
    */
-  public async getTorrent(
+  private async getTorrent(
     searchQuery: string,
     episodeNumber: string,
     resolution: Resolution
@@ -109,4 +105,4 @@ class Nyaa {
   }
 }
 
-export default Nyaa;
+export default new Nyaa();

@@ -45,17 +45,19 @@ class Scheduler {
       const fireDBAnime = fireDBData.find(
         (item) => item.mediaId === anime.mediaId
       );
-      if (fireDBAnime) {
-        console.log(anime.media.title.romaji, anime.mediaId);
-        if (anime.media.nextAiringEpisode)
-          console.log(
-            "The newest episode is: ",
-            anime.media.nextAiringEpisode.episode - 1
-          );
-        else console.log("Last episode", anime.media.episodes);
-        console.log("Your current progress is: ", fireDBAnime.progress);
-        console.log();
-      }
+      if (!fireDBAnime) continue;
+      // NextAiringEpisode can be null if the anime is finished. So check for that
+      let endEpisode = anime.media.nextAiringEpisode
+        ? anime.media.nextAiringEpisode.episode - 1
+        : anime.media.episodes;
+
+      const downloadList = await Nyaa.getTorrents(
+        [anime],
+        fireDBAnime.progress,
+        endEpisode
+      );
+      console.log("finish for");
+      
     }
   }
 }
