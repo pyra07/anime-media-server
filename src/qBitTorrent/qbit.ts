@@ -1,18 +1,19 @@
 import { QBittorrent } from "@ctrl/qbittorrent";
+import { torrent_url, password, username } from "../../profile.json";
 
 class QbitTorrent {
   client: QBittorrent;
 
   constructor() {
     this.client = new QBittorrent({
-      baseUrl: "http://localhost:8080/",
-      username: "admin",
-      password: "owoowo",
+      baseUrl: torrent_url,
+      username: username,
+      password: password,
     });
   }
 
-  public async addTorrent(link: string): Promise<boolean> {
-    const result = await this.client.addMagnet(link);
+  public async addTorrent(links: string): Promise<boolean> {
+    const result = await this.client.addMagnet(links);
     return result;
   }
 }

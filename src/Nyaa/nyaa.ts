@@ -3,6 +3,7 @@
 
 import Parser from "rss-parser";
 import { AnimeTorrent, Resolution } from "../utils/types";
+import { resolution } from "../../profile.json";
 
 class Nyaa {
   rssLink: string;
@@ -41,7 +42,11 @@ class Nyaa {
    * @param {object} animeList
    * @returns {Promise<any>}
    */
-  public async getTorrents(animeList: any[], startEpisode : number, endEpisode : number): Promise<AnimeTorrent[]> {
+  public async getTorrents(
+    animeList: any[],
+    startEpisode: number,
+    endEpisode: number
+  ): Promise<AnimeTorrent[]> {
     let animeTorrentList: any[] = new Array();
 
     for (let i = 0; i < animeList.length; i++) {
@@ -49,7 +54,12 @@ class Nyaa {
 
       const episodeList = this.getNumbers(startEpisode, endEpisode);
       for (let j = 0; j < episodeList.length; j++) {
-        console.log("Downloading", anime.media.title.romaji, "\nEpisode", episodeList[j]);
+        console.log(
+          "Downloading",
+          anime.media.title.romaji,
+          "\nEpisode",
+          episodeList[j]
+        );
 
         const episode = episodeList[j];
         let episodeString = this.legitAddAZero(episode);
@@ -57,7 +67,7 @@ class Nyaa {
         var animeRSS = await this.getTorrent(
           anime.media.title.romaji,
           episodeString,
-          "1080"
+          resolution as Resolution
         );
         animeTorrentList.push(animeRSS);
       }

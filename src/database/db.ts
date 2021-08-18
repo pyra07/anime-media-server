@@ -24,6 +24,17 @@ class DB {
         .set(data[i]);
     }
   }
+
+  public async updateProgress(mediaId: string, progress: number) {
+    await this.myProject
+      .firestore()
+      .collection("animelists")
+      .doc(id.toString())
+      .collection("anime")
+      .doc(mediaId)
+      .update({ progress });
+  }
+
   /**
    * Gets the users animelist
    * @param  {string} mediaId

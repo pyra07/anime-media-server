@@ -4,6 +4,7 @@ import Anilist from "../Anilist/anilist";
 import DB from "../database/db";
 import Nyaa from "../Nyaa/nyaa";
 import firebase from "firebase";
+import qbit from "../qBitTorrent/qbit";
 
 class Scheduler {
   constructor() {}
@@ -46,6 +47,7 @@ class Scheduler {
         (item) => item.mediaId === anime.mediaId
       );
       if (!fireDBAnime) continue;
+
       // NextAiringEpisode can be null if the anime is finished. So check for that
       let endEpisode = anime.media.nextAiringEpisode
         ? anime.media.nextAiringEpisode.episode - 1
@@ -56,8 +58,15 @@ class Scheduler {
         fireDBAnime.progress,
         endEpisode
       );
-      console.log("finish for");
-      
+
+      if (downloadList.length > 0) {
+        const names = downloadList.map((item) => item.title);
+        const links = downloadList.map((item) => item.link).join("\n");
+        console.log(names,links);
+        
+        //const isAdded = await qbit.addTorrent(links);
+        //if (isAdded) await DB.updateProgress(anime.mediaId, endEpisode);
+      }
     }
   }
 }
