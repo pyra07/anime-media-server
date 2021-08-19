@@ -8,7 +8,7 @@ class Anilist {
     this.api = "https://graphql.anilist.co";
     this.authLink = "https://anilist.co/api/v2/oauth/token";
   }
-  
+
   /**
    * Sends a POST req to the Anilist API with the given query and variables
    * @param  {string} query
@@ -77,7 +77,7 @@ class Anilist {
       userId: userId,
     };
 
-    let response = await this.getData(query, variables);
+    let response = await this.getData(query, variables);    
     response = response.data.data.MediaListCollection.lists[0].entries;
 
     return response;

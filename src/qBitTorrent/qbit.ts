@@ -2,7 +2,7 @@ import { QBittorrent } from "@ctrl/qbittorrent";
 import { torrent_url, password, username } from "../../profile.json";
 
 class QbitTorrent {
-  client: QBittorrent;
+  private client: QBittorrent;
 
   constructor() {
     this.client = new QBittorrent({
