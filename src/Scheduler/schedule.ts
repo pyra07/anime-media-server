@@ -32,7 +32,26 @@ class Scheduler {
     return animeListCopy;
   }
 
-  public async check() {
+  /**
+   * Runs the scheduler periodically
+   */
+  public async run() {
+    const CronJob = cron.CronJob;
+    const job = new CronJob(
+      "*/20 * * * * *",
+      async () => {
+        await this.check();
+      },
+      null,
+      true,
+      "Europe/London"
+    );
+  }
+  
+  /**
+   * Checks for new animes, new episodes, and downloads them. wow
+   */
+  private async check() {
     const animeDb = await Anilist.getAnimeUserList();
     let fireDB = await DB.getFromDb();
 
