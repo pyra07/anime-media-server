@@ -1,4 +1,4 @@
-# anime-media-server
+# animu
 
 It dowloads anime for you automatically. Uses your existing anime list does some stuff syncs it to the cloud and yeah.
 It's pretty bad, the code is bad but I don't care.
