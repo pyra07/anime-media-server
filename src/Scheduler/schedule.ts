@@ -32,6 +32,7 @@ class Scheduler {
     return animeListCopy;
   }
 
+
   public async check() {
     const animeDb = await Anilist.getAnimeUserList();
     const fireDB = await DB.getFromDb();
@@ -62,8 +63,9 @@ class Scheduler {
       if (downloadList.length > 0) {
         const names = downloadList.map((item) => item.title);
         const links = downloadList.map((item) => item.link).join("\n");
-        console.log(names,links);
+        console.log(names, '\n', links, '\n\n');
         
+
         //const isAdded = await qbit.addTorrent(links);
         //if (isAdded) await DB.updateProgress(anime.mediaId, endEpisode);
       }

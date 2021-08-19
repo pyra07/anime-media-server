@@ -16,6 +16,48 @@ class Nyaa {
       },
     });
   }
+
+  private editDistance(s1: string, s2: string) {
+    s1 = s1.toLowerCase();
+    s2 = s2.toLowerCase();
+
+    var costs = new Array();
+    for (var i = 0; i <= s1.length; i++) {
+      var lastValue = i;
+      for (var j = 0; j <= s2.length; j++) {
+        if (i == 0) costs[j] = j;
+        else {
+          if (j > 0) {
+            var newValue = costs[j - 1];
+            if (s1.charAt(i - 1) != s2.charAt(j - 1))
+              newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+            costs[j - 1] = lastValue;
+            lastValue = newValue;
+          }
+        }
+      }
+      if (i > 0) costs[s2.length] = lastValue;
+    }
+    return costs[s2.length];
+  }
+
+  private similarity(s1: string, s2: string) {
+    var longer = s1;
+    var shorter = s2;
+    if (s1.length < s2.length) {
+      longer = s2;
+      shorter = s1;
+    }
+    var longerLength = longer.length;
+    if (longerLength == 0) {
+      return 1.0;
+    }
+    return (
+      (longerLength - this.editDistance(longer, shorter)) /
+      parseFloat(longerLength.toString())
+    );
+  }
+
   /**
    * Gets the numbers between start and end
    * @param  {number} start
@@ -54,12 +96,12 @@ class Nyaa {
 
       const episodeList = this.getNumbers(startEpisode, endEpisode);
       for (let j = 0; j < episodeList.length; j++) {
-        console.log(
-          "Downloading",
-          anime.media.title.romaji,
-          "\nEpisode",
-          episodeList[j]
-        );
+        // console.log(
+        //   "Downloading",
+        //   anime.media.title.romaji,
+        //   "\nEpisode",
+        //   episodeList[j]
+        // );
 
         const episode = episodeList[j];
         let episodeString = this.legitAddAZero(episode);
@@ -81,16 +123,16 @@ class Nyaa {
    * @param  {string} searchQuery
    * @returns {Promise<AnimeTorrent>}
    */
-  private async getTorrent(
+  public async getTorrent(
     searchQuery: string,
     episodeNumber: string,
     resolution: Resolution
   ): Promise<AnimeTorrent> {
-    searchQuery += " - " + episodeNumber;
+    const finalQuery = searchQuery + " - " + episodeNumber;
 
     this.rssLink =
       "https://nyaa.si/?page=rss&q=" +
-      searchQuery.split(" ").join("+") +
+      finalQuery.split(" ").join("+") +
       "&c=1_2&f=0";
 
     const rss = await this.parser.parseURL(this.rssLink);
@@ -102,15 +144,31 @@ class Nyaa {
 
     // Iterate through rss.items
     // Check if the title contains mentions of both the query and resolution
-
     for (const item of rss.items) {
-      let title : string = item.title;
+      let title: string = item.title;
+      let subGroup = title.match(/^(.*?)\]/);
       title = title.replace(/^(.*?)\]/, "").trim();
-      // Match until the last occurence of - (not including the -)
-      let animeTitle = title.match(/.*-/);
+      let animeTitle = title.match(/.*(?=\-)/);
+      title = title.replace(/.*-/, "").trim();
+      let episode = title.match(/[0-9]{2}/);
+      title = title.replace(/[0-9]{2}/, "").trim();
+      let res = title.match(/[\[\(][0-9]*?p[\]\)]/);
 
-      return item as AnimeTorrent;
+      if (subGroup && animeTitle && episode && res) {
+        const titleSim = this.similarity(animeTitle[0].trim(), searchQuery);
+        const episodeSim = this.similarity(episode[0].trim(), episodeNumber);
+
+        if (
+          titleSim > 0.8 &&
+          episodeSim > 0.8 &&
+          title.indexOf(resolution) > -1
+        ) {
+          return item as AnimeTorrent;
+        }
+      }
     }
+    console.log(searchQuery, "not found");
+
     return {} as AnimeTorrent;
   }
 }
