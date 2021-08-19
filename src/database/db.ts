@@ -25,7 +25,13 @@ class DB {
     }
   }
 
-  public async updateProgress(mediaId: string, progress: number) {
+  /**
+   * Updates your anime progression
+   * @param  {string} mediaId
+   * @param  {number} progress
+   * @returns {Promise}
+   */
+  public async updateProgress(mediaId: string, progress: number): Promise<void> {
     await this.myProject
       .firestore()
       .collection("animelists")
@@ -38,7 +44,7 @@ class DB {
   /**
    * Gets the users animelist
    * @param  {string} mediaId
-   * @returns Promise
+   * @returns {Promise}
    */
   public async getFromDb(): Promise<
     fb.firestore.QuerySnapshot<fb.firestore.DocumentData>

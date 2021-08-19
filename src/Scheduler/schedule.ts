@@ -32,7 +32,6 @@ class Scheduler {
     return animeListCopy;
   }
 
-
   public async check() {
     const animeDb = await Anilist.getAnimeUserList();
     const fireDB = await DB.getFromDb();
@@ -49,15 +48,18 @@ class Scheduler {
       );
       if (!fireDBAnime) continue;
 
+      // Takes whichever user progress is the latest
+      let startEpisode =
+        anime.progress > fireDBAnime.progress
+          ? anime.progress
+          : fireDBAnime.progress;
+
       // NextAiringEpisode can be null if the anime is finished. So check for that
-
-      let startEpisode = anime.progress > fireDBAnime.progress ? anime.progress : fireDBAnime.progress;
-
       let endEpisode = anime.media.nextAiringEpisode
         ? anime.media.nextAiringEpisode.episode - 1
         : anime.media.episodes;
 
-      if (startEpisode === endEpisode) continue
+      if (startEpisode === endEpisode) continue;
 
       const downloadList = await Nyaa.getTorrents(
         [anime],
@@ -66,13 +68,20 @@ class Scheduler {
       );
 
       if (downloadList.length > 0) {
-        const names = downloadList.map((item) => item.title);
-        const links = downloadList.map((item) => item.link).join("\n");
-        console.log(names, '\n', links, '\n\n');
-        
+        downloadList.forEach((torrent) => {
+          console.log(torrent.title, torrent.link, torrent.episode);
+        });
 
         //const isAdded = await qbit.addTorrent(links);
-        //if (isAdded) await DB.updateProgress(anime.mediaId, endEpisode);
+        console.log(
+          anime.mediaId,
+          parseInt(downloadList[downloadList.length - 1].episode)
+        );
+
+        await DB.updateProgress(
+          anime.mediaId.toString(),
+          parseInt(downloadList[downloadList.length - 1].episode)
+        );
       }
     }
   }

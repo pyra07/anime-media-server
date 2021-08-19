@@ -111,7 +111,8 @@ class Nyaa {
           episodeString,
           resolution as Resolution
         );
-        animeTorrentList.push(animeRSS);
+        // Check if animeRSS is empty
+        if (Object.keys(animeRSS).length > 0) animeTorrentList.push(animeRSS);
       }
     }
 
@@ -163,7 +164,8 @@ class Nyaa {
           episodeSim > 0.8 &&
           title.indexOf(resolution) > -1
         ) {
-          return item as AnimeTorrent;
+          item.episode = episode[0].trim();
+          return item;
         }
       }
     }

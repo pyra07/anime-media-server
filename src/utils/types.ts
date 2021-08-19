@@ -9,4 +9,5 @@ export interface AnimeTorrent {
     contentSnipet : string;
     guid : string;
     isoDate : string;
+    episode : string;
 }
