@@ -1,3 +1,4 @@
+profile.json
 # Logs
 logs
 *.log
@@ -103,3 +104,4 @@ dist
 # TernJS port file
 .tern-port
 src/data/data.json
+profile.json
