@@ -50,13 +50,18 @@ class Scheduler {
       if (!fireDBAnime) continue;
 
       // NextAiringEpisode can be null if the anime is finished. So check for that
+
+      let startEpisode = anime.progress > fireDBAnime.progress ? anime.progress : fireDBAnime.progress;
+
       let endEpisode = anime.media.nextAiringEpisode
         ? anime.media.nextAiringEpisode.episode - 1
         : anime.media.episodes;
 
+      if (startEpisode === endEpisode) continue
+
       const downloadList = await Nyaa.getTorrents(
         [anime],
-        fireDBAnime.progress,
+        startEpisode,
         endEpisode
       );
 

@@ -19,8 +19,5 @@ import nyaa from "./src/Nyaa/nyaa";
     true,
     "Europe/London"
   );
-
-  // var y = await nyaa.getTorrent("Tokyo Revengers", "04", "1080");
-  // console.log(y);
   
 })();
