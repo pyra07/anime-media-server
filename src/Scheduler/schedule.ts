@@ -34,7 +34,13 @@ class Scheduler {
 
   public async check() {
     const animeDb = await Anilist.getAnimeUserList();
-    const fireDB = await DB.getFromDb();
+    let fireDB = await DB.getFromDb();
+
+    if (!fireDB) {
+      await DB.addToDb(animeDb);
+      fireDB = await DB.getFromDb();
+    }
+
     const fireDBData = fireDB.docs.map((doc) => doc.data()); // convert to array
 
     // If the user add a new anime, add it to the firebase database
