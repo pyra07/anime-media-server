@@ -100,9 +100,9 @@ class Scheduler {
           
         });
 
-        const links = downloadList.map((torrent) => torrent.link).join("\n");
+        const links = downloadList.map((torrent) => torrent.link)
 
-        //await qbit.addTorrent(links);
+        await qbit.addTorrent(links);
 
         // await DB.updateProgress(
         //   anime.mediaId.toString(),
