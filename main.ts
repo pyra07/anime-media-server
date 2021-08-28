@@ -1,4 +1,3 @@
-import qbit from "./src/qBitTorrent/qbit";
 import Scheduler from "./src/Scheduler/schedule";
 
 (async () => {

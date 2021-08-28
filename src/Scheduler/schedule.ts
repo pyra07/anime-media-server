@@ -57,6 +57,8 @@ class Scheduler {
     let fireDB = await DB.getFromDb();
 
     if (!fireDB) {
+      console.log("No firebase data found. Creating new one");
+      
       await DB.addToDb(animeDb);
       fireDB = await DB.getFromDb();
     }
@@ -67,7 +69,7 @@ class Scheduler {
     const listDifferences = this.getDifferences(animeDb, fireDBData);
     if (listDifferences) await DB.addToDb(listDifferences);
 
-    // Loops through anime list 
+    // Loops through anime list
     for (let index = 0; index < animeDb.length; index++) {
       const anime = animeDb[index];
       const fireDBAnime = fireDBData.find(
@@ -96,18 +98,22 @@ class Scheduler {
 
       if (downloadList.length > 0) {
         downloadList.forEach((torrent) => {
-          console.log("Downloading :",torrent.title, torrent.link);
-          //console.log(torrent.link);
-          
+          console.log(
+            "Downloading :",
+            torrent.title,
+            torrent.link,
+            torrent.episode
+          );
         });
 
-        const links = downloadList.map((torrent) => torrent.link)
+        const links = downloadList.map((torrent) => torrent.link);
 
         await qbit.addTorrent(links);
 
         await DB.updateProgress(
           anime.mediaId.toString(),
-          parseInt(downloadList[downloadList.length - 1].episode)
+          parseInt(downloadList[downloadList.length - 1].episode),
+          anime.media.nextAiringEpisode
         );
       }
     }
