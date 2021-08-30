@@ -95,8 +95,8 @@ class Scheduler {
 
       if (downloadList.length > 0) {
         downloadList.forEach((torrent) => {
-          //console.log("Downloading :",torrent.title, torrent.link, torrent.episode);
-          console.log(torrent.link);
+          console.log("Downloading :",torrent.title, torrent.link, torrent.episode);
+          //console.log(torrent.link);
           
         });
 
@@ -104,10 +104,10 @@ class Scheduler {
 
         await qbit.addTorrent(links);
 
-        // await DB.updateProgress(
-        //   anime.mediaId.toString(),
-        //   parseInt(downloadList[downloadList.length - 1].episode)
-        // );
+        await DB.updateProgress(
+          anime.mediaId.toString(),
+          parseInt(downloadList[downloadList.length - 1].episode)
+        );
       }
     }
   }
