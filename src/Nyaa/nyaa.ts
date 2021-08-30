@@ -135,8 +135,13 @@ class Nyaa {
       "https://nyaa.si/?page=rss&q=" +
       finalQuery.split(" ").join("+") +
       "&c=1_2&f=0";
-
-    const rss = await this.parser.parseURL(this.rssLink);
+    let rss;
+    try {
+      rss = await this.parser.parseURL(this.rssLink);
+    } catch (error) {
+      console.log(error);
+      return {} as AnimeTorrent;
+    }
 
     // Sort rss.items by nyaa:seeders
     rss.items.sort((a: { [x: string]: string }, b: { [x: string]: string }) => {
