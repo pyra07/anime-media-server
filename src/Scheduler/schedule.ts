@@ -40,6 +40,7 @@ class Scheduler {
     const job = new CronJob(
       "0 */30 * * * *",
       async () => {
+        console.log("Running scheduler");
         await this.check();
       },
       null,
@@ -95,7 +96,7 @@ class Scheduler {
 
       if (downloadList.length > 0) {
         downloadList.forEach((torrent) => {
-          console.log("Downloading :",torrent.title, torrent.link, torrent.episode);
+          console.log("Downloading :",torrent.title, torrent.link);
           //console.log(torrent.link);
           
         });
