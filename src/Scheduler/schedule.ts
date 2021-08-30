@@ -35,7 +35,7 @@ class Scheduler {
   /**
    * Runs the scheduler periodically every 30 minutes
    */
-  public async run() {
+  public async run() : Promise<void> {
     const CronJob = cron.CronJob;
     const job = new CronJob(
       "0 */30 * * * *",
