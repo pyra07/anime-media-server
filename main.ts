@@ -2,7 +2,7 @@ import qbit from "./src/qBitTorrent/qbit";
 import Scheduler from "./src/Scheduler/schedule";
 
 (async () => {
-  await Scheduler.check();
+  await Scheduler.run();
 })();
 
 // Keep this for reference lol

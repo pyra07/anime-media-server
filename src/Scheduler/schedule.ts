@@ -33,12 +33,12 @@ class Scheduler {
   }
 
   /**
-   * Runs the scheduler periodically
+   * Runs the scheduler periodically every 30 minutes
    */
   public async run() {
     const CronJob = cron.CronJob;
     const job = new CronJob(
-      "*/20 * * * * *",
+      "0 */30 * * * *",
       async () => {
         await this.check();
       },
