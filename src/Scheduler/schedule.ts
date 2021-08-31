@@ -114,7 +114,7 @@ class Scheduler {
         await DB.updateProgress(
           anime.mediaId.toString(),
           parseInt(downloadList[downloadList.length - 1].episode),
-          anime.media.nextAiringEpisode
+          anime.media
         );
       }
     }
