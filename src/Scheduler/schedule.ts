@@ -38,7 +38,7 @@ class Scheduler {
   public async run() : Promise<void> {
     const CronJob = cron.CronJob;
     const job = new CronJob(
-      "0 */30 * * * *",
+      "0 */10 * * * *",
       async () => {
         // log with current time
         console.log("Checking",new Date().toLocaleTimeString());
