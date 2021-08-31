@@ -40,7 +40,8 @@ class Scheduler {
     const job = new CronJob(
       "0 */30 * * * *",
       async () => {
-        console.log("Running scheduler");
+        // log with current time
+        console.log("Checking",new Date().toLocaleTimeString());
         await this.check();
       },
       null,
@@ -58,7 +59,6 @@ class Scheduler {
 
     if (!fireDB) {
       console.log("No firebase data found. Creating new one");
-      
       await DB.addToDb(animeDb);
       fireDB = await DB.getFromDb();
     }
@@ -68,6 +68,7 @@ class Scheduler {
     // If the user add a new anime, add it to the firebase database
     const listDifferences = this.getDifferences(animeDb, fireDBData);
     if (listDifferences) await DB.addToDb(listDifferences);
+    fireDBData.push(...listDifferences);
 
     // Loops through anime list
     for (let index = 0; index < animeDb.length; index++) {
