@@ -31,14 +31,14 @@ class DB {
    * @param  {number} progress
    * @returns {Promise}
    */
-  public async updateProgress(mediaId: string, progress: number, nextAiringEpisode : object): Promise<void> {
+  public async updateProgress(mediaId: string, progress: number, media : object): Promise<void> {
     await this.myProject
       .firestore()
       .collection("animelists")
       .doc(id.toString())
       .collection("anime")
       .doc(mediaId)
-      .update({ progress, nextAiringEpisode });
+      .update({ progress, media });
   }
 
   /**

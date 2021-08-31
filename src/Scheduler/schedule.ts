@@ -35,13 +35,13 @@ class Scheduler {
   /**
    * Runs the scheduler periodically every 30 minutes
    */
-  public async run() : Promise<void> {
+  public async run(): Promise<void> {
     const CronJob = cron.CronJob;
     const job = new CronJob(
       "*/30 * * * * *",
       async () => {
         // log with current time
-        console.log("Checking",new Date().toLocaleTimeString());
+        console.log("Checking", new Date().toLocaleTimeString());
         await this.check();
       },
       null,
@@ -109,13 +109,17 @@ class Scheduler {
 
         const links = downloadList.map((torrent) => torrent.link);
 
-        await qbit.addTorrent(links);
+        try {
+          await qbit.addTorrent(links);
 
-        await DB.updateProgress(
-          anime.mediaId.toString(),
-          parseInt(downloadList[downloadList.length - 1].episode),
-          anime.media
-        );
+          await DB.updateProgress(
+            anime.mediaId.toString(),
+            parseInt(downloadList[downloadList.length - 1].episode),
+            anime.media
+          );
+        } catch (error) {
+          console.log(error);
+        }
       }
     }
   }
