@@ -133,9 +133,11 @@ class Nyaa {
 
     this.rssLink =
       "https://nyaa.si/?page=rss&q=" +
-      finalQuery.split(" ").join("+") +
+      encodeURIComponent(finalQuery) +
       "&c=1_2&f=0";
     let rss;
+    console.log(this.rssLink);
+
     try {
       rss = await this.parser.parseURL(this.rssLink);
     } catch (error) {
