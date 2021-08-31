@@ -35,10 +35,10 @@ class Scheduler {
   /**
    * Runs the scheduler periodically every 30 minutes
    */
-  public async run(): Promise<void> {
+  public async run(cronTime : string): Promise<void> {
     const CronJob = cron.CronJob;
     const job = new CronJob(
-      "* * * * *",
+      cronTime,
       async () => {
         // log with current time
         console.log("Checking", new Date().toLocaleTimeString());
