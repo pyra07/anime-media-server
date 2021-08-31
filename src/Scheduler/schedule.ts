@@ -35,7 +35,7 @@ class Scheduler {
   /**
    * Runs the scheduler periodically every 30 minutes
    */
-  public async run(cronTime : string): Promise<void> {
+  public async run(cronTime: string): Promise<void> {
     const CronJob = cron.CronJob;
     const job = new CronJob(
       cronTime,
@@ -79,22 +79,36 @@ class Scheduler {
       if (!fireDBAnime) continue;
 
       // Takes whichever user progress is the latest
-      let startEpisode =
-        anime.progress > fireDBAnime.progress
-          ? anime.progress
-          : fireDBAnime.progress;
+      const startEpisode = anime.progress;
+      // anime.progress > fireDBAnime.progress
+      //   ? anime.progress
+      //   : fireDBAnime.progress;
 
       // NextAiringEpisode can be null if the anime is finished. So check for that
-      let endEpisode = anime.media.nextAiringEpisode
+      const endEpisode = anime.media.nextAiringEpisode
         ? anime.media.nextAiringEpisode.episode - 1
         : anime.media.episodes;
+
+      const fsDownloadedEpisodes: number[] =
+        fireDBAnime.downloadedEpisodes || [];
+
+      console.log(
+        anime.media.title.romaji,
+        "startEpisode",
+        startEpisode,
+        "endEpisode",
+        endEpisode,
+        "fsDownloadedEpisodes",
+        fsDownloadedEpisodes
+      );
 
       if (startEpisode === endEpisode) continue;
 
       const downloadList = await Nyaa.getTorrents(
         [anime],
         startEpisode,
-        endEpisode
+        endEpisode,
+        fsDownloadedEpisodes
       );
 
       if (downloadList.length > 0) {
@@ -107,15 +121,22 @@ class Scheduler {
           );
         });
 
-        const links = downloadList.map((torrent) => torrent.link);
-
+        // Individually download each episode
+        let epDownloadedList: number[] = [];
         try {
-          await qbit.addTorrent(links);
-
+          for (let i = 0; i < downloadList.length; i++) {
+            const torrent = downloadList[i];
+            const isAdded = await qbit.addTorrent(torrent.link);
+            if (isAdded) epDownloadedList.push(parseInt(torrent.episode));
+            // Wait for 1 second. Avoids torrents not being added
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          }
+          epDownloadedList.push(...fsDownloadedEpisodes);
           await DB.updateProgress(
             anime.mediaId.toString(),
             parseInt(downloadList[downloadList.length - 1].episode),
-            anime.media
+            anime.media,
+            epDownloadedList
           );
         } catch (error) {
           console.log(error);

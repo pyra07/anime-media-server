@@ -12,14 +12,9 @@ class QbitTorrent {
     });
   }
 
-  public async addTorrent(links: string[]): Promise<boolean> {
-    // Add each torrent link, and wait 1000ms for each
-    for (const link of links) {
-      await this.client.addMagnet(link);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    }
-
-    return true;
+  public async addTorrent(link: string): Promise<boolean> {
+    const isAdded = await this.client.addMagnet(link);
+    return isAdded;
   }
 }
 

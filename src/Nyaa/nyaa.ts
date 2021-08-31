@@ -65,10 +65,14 @@ class Nyaa {
    * @returns {number[]}
    */
 
-  private getNumbers(start: number, end: number): number[] {
+  private getNumbers(
+    start: number,
+    inBetween: number[],
+    end: number
+  ): number[] {
     let numbers = [];
     for (let i = start + 1; i <= end; i++) {
-      numbers.push(i);
+      if (inBetween.indexOf(i) === -1) numbers.push(i);
     }
     return numbers;
   }
@@ -87,14 +91,19 @@ class Nyaa {
   public async getTorrents(
     animeList: any[],
     startEpisode: number,
-    endEpisode: number
+    endEpisode: number,
+    fsDownloadedEpisodes: number[]
   ): Promise<AnimeTorrent[]> {
     let animeTorrentList: any[] = new Array();
 
     for (let i = 0; i < animeList.length; i++) {
       const anime = animeList[i];
 
-      const episodeList = this.getNumbers(startEpisode, endEpisode);
+      const episodeList = this.getNumbers(
+        startEpisode,
+        fsDownloadedEpisodes,
+        endEpisode
+      );
       for (let j = 0; j < episodeList.length; j++) {
         // console.log(
         //   "Downloading",
@@ -136,7 +145,6 @@ class Nyaa {
       encodeURIComponent(finalQuery) +
       "&c=1_2&f=0";
     let rss;
-    console.log(this.rssLink);
 
     try {
       rss = await this.parser.parseURL(this.rssLink);
