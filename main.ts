@@ -1,7 +1,7 @@
 import Scheduler from "./src/Scheduler/schedule";
 
 (async () => {
-  await Scheduler.run("* * * * *");
+  await Scheduler.run("0 */45 * * * *");
 })();
 
 // Keep this for reference lol

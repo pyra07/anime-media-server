@@ -92,16 +92,6 @@ class Scheduler {
       const fsDownloadedEpisodes: number[] =
         fireDBAnime.downloadedEpisodes || [];
 
-      console.log(
-        anime.media.title.romaji,
-        "startEpisode",
-        startEpisode,
-        "endEpisode",
-        endEpisode,
-        "fsDownloadedEpisodes",
-        fsDownloadedEpisodes
-      );
-
       if (startEpisode === endEpisode) continue;
 
       const downloadList = await Nyaa.getTorrents(
