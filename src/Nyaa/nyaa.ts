@@ -132,8 +132,9 @@ class Nyaa {
     const finalQuery = searchQuery + " - " + episodeNumber;
 
     this.rssLink =
-      "https://nyaa.si/?page=rss&q=" + encodeURIComponent(finalQuery);
-    ("&c=1_2&f=0");
+      "https://nyaa.si/?page=rss&q=" +
+      encodeURIComponent(finalQuery) +
+      "&c=1_2&f=0";
     let rss;
     console.log(this.rssLink);
 
