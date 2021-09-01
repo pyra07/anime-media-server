@@ -3,11 +3,15 @@ import cron from "cron";
 import Anilist from "../Anilist/anilist";
 import DB from "../database/db";
 import Nyaa from "../Nyaa/nyaa";
-import firebase from "firebase";
 import qbit from "../qBitTorrent/qbit";
+import webhook from "webhook-discord";
+import { discord_webhook } from "../../profile.json";
 
 class Scheduler {
-  constructor() {}
+  hook: webhook.Webhook;
+  constructor() {
+    this.hook = new webhook.Webhook(discord_webhook);
+  }
 
   private getDifferences(animeList: any[], fireDBList: any[]) {
     // Go through both lists. If key mediaId does not exist in firedblist, add it to animeList
@@ -120,7 +124,16 @@ class Scheduler {
               torrent.link,
               anime.media.title.romaji
             );
-            if (isAdded) epDownloadedList.push(parseInt(torrent.episode));
+            if (isAdded) {
+              const msg = new webhook.MessageBuilder()
+                .setColor("#0ca4eb")
+                .setTitle(
+                  `**${anime.media.title.romaji} - ${torrent.episode}**`
+                )
+                .setDescription("is currently being downloaded!");
+              await this.hook.send(msg);
+              epDownloadedList.push(parseInt(torrent.episode));
+            }
             // Wait for 1 second. Avoids torrents not being added
             await new Promise((resolve) => setTimeout(resolve, 1000));
           }
