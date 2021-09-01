@@ -3,5 +3,6 @@
     "resolution" : "1080",
     "torrent_url" : "http://localhost:8080/",
     "username" : "admin",
-    "password" : "owoowo"
+    "password" : "owoowo",
+    "rootDir" : "/media/AniHDD/animu/"
 }
