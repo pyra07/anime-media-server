@@ -1,1 +1,1 @@
-ts-node notif.ts
+python notif.py $1
