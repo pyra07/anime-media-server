@@ -104,3 +104,4 @@ dist
 .tern-port
 src/data/data.json
 profile.json
+src/qBitTorrent/script.sh
