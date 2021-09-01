@@ -126,6 +126,7 @@ class Scheduler {
             );
             if (isAdded) {
               const msg = new webhook.MessageBuilder()
+                .setName("Animu")
                 .setColor("#0ca4eb")
                 .setTitle(
                   `**${anime.media.title.romaji} - ${torrent.episode}**`
