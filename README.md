@@ -31,7 +31,7 @@ You give the program your Anilist profile. It looks at your current "*WATCHING*"
 
 * _root_dir_, where you want your downloads to be stored.
 
-5. Run `ts-node main.ts`
+5. Run `ts-node main.ts` (P.S you might need VPN)
 
 
 NOTE: This is still a work in-progress. The code is messy and unoptimized. Also, this will probably brick if you want to download old anime such as Naruto, so maybe keep it to new anime
