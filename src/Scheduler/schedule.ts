@@ -118,7 +118,7 @@ class Scheduler {
             const torrent = downloadList[i];
             const isAdded = await qbit.addTorrent(
               torrent.link,
-              torrent.title
+              anime.media.title.romaji
             );
             if (isAdded) epDownloadedList.push(parseInt(torrent.episode));
             // Wait for 1 second. Avoids torrents not being added
