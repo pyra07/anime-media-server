@@ -116,7 +116,10 @@ class Scheduler {
         try {
           for (let i = 0; i < downloadList.length; i++) {
             const torrent = downloadList[i];
-            const isAdded = await qbit.addTorrent(torrent.link);
+            const isAdded = await qbit.addTorrent(
+              torrent.link,
+              torrent.title
+            );
             if (isAdded) epDownloadedList.push(parseInt(torrent.episode));
             // Wait for 1 second. Avoids torrents not being added
             await new Promise((resolve) => setTimeout(resolve, 1000));
