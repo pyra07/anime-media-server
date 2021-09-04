@@ -5,6 +5,7 @@ import DB from "../database/db";
 import Nyaa from "../Nyaa/nyaa";
 import firebase from "firebase";
 import qbit from "../qBitTorrent/qbit";
+import { AniQuery } from "../utils/types";
 
 class Scheduler {
   constructor() {}
@@ -54,7 +55,7 @@ class Scheduler {
    * Checks for new animes, new episodes, and downloads them. wow
    */
   public async check() {
-    const animeDb = await Anilist.getAnimeUserList();
+    const animeDb : AniQuery[] = await Anilist.getAnimeUserList();
     let fireDB = await DB.getFromDb();
 
     if (!fireDB) {

@@ -1,5 +1,6 @@
 import axios from "axios";
 import { id as userId } from "../../profile.json";
+import { AniQuery } from "../utils/types";
 class Anilist {
   api: string;
   authLink: string;
@@ -45,7 +46,7 @@ class Anilist {
    * Returns what the user current WATCHING list is.
    * @returns Promise
    */
-  public async getAnimeUserList(): Promise<any[]> {
+  public async getAnimeUserList(): Promise<AniQuery[]> {
     // I love loooong lines
     var query = `
     query ($userId: Int) {
@@ -77,10 +78,10 @@ class Anilist {
       userId: userId,
     };
 
-    let response = await this.getData(query, variables);    
+    let response = await this.getData(query, variables);
     response = response.data.data.MediaListCollection.lists[0].entries;
 
-    return response;
+    return response as AniQuery[];
   }
 }
 

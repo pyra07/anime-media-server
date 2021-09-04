@@ -96,7 +96,7 @@ class Nyaa {
   ): Promise<AnimeTorrent[]> {
     let animeTorrentList: any[] = new Array();
 
-    for (let i = 0; i < animeList.length; i++) {
+    for (let i = 0; i < animeList.length; i++) {  
       const anime = animeList[i];
 
       const episodeList = this.getNumbers(

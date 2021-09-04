@@ -1,13 +1,36 @@
 // Type that contains 480 720 or 1080p resolution
-export type Resolution = '480' | '720' | '1080';
+export type Resolution = "480" | "720" | "1080";
 export interface AnimeTorrent {
-    title : string;
-    link : string;
-    pubDate : string;
-    "nyaa:seeders" : string;
-    content : string;
-    contentSnipet : string;
-    guid : string;
-    isoDate : string;
-    episode : string;
+  title: string;
+  link: string;
+  pubDate: string;
+  "nyaa:seeders": string;
+  content: string;
+  contentSnipet: string;
+  guid: string;
+  isoDate: string;
+  episode: string;
+}
+
+export interface AniQuery {
+  progress: number;
+  mediaId: number;
+  media: {
+    episodes: number;
+    nextAiringEpisode: {
+      episode: number;
+      id: number;
+    } | null;
+    title: {
+      romaji: string;
+      english: string;
+      native: string;
+    };
+    coverImage: {
+      extraLarge: string;
+      large: string;
+      medium: string;
+      color: string;
+    };
+  };
 }
