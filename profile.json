@@ -4,5 +4,6 @@
     "torrent_url" : "http://localhost:8080/",
     "username" : "admin",
     "password" : "owoowo",
-    "rootDir" : "/media/AniHDD/animu/"
+    "rootDir" : "/media/AniHDD/animu/",
+    "webhook" : "https://discord.com/api/webhooks/882646716757708801/pPS-sj8ZVWtVjSTIXpvG5d11ebjEUbgPzOBYCib5xmwoANCdCdoiAudtnKnjxKI3pmHU"
 }

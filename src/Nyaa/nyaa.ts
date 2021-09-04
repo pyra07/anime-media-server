@@ -105,12 +105,6 @@ class Nyaa {
         endEpisode
       );
       for (let j = 0; j < episodeList.length; j++) {
-        // console.log(
-        //   "Downloading",
-        //   anime.media.title.romaji,
-        //   "\nEpisode",
-        //   episodeList[j]
-        // );
 
         const episode = episodeList[j];
         let episodeString = this.legitAddAZero(episode);
