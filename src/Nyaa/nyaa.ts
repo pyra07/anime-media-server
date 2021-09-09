@@ -2,7 +2,7 @@
 // and returns it as a json object
 
 import Parser from "rss-parser";
-import { AnimeTorrent, Resolution } from "../utils/types";
+import { AnimeTorrent, AniQuery, Resolution } from "../utils/types";
 import { resolution } from "../../profile.json";
 
 class Nyaa {
@@ -41,6 +41,11 @@ class Nyaa {
     return costs[s2.length];
   }
 
+  /**
+   * Returns how closely similar two strings are to each other.
+   * @param  {string} s1
+   * @param  {string} s2
+   */
   private similarity(s1: string, s2: string) {
     var longer = s1;
     var shorter = s2;
@@ -89,14 +94,14 @@ class Nyaa {
    * @returns {Promise<any>}
    */
   public async getTorrents(
-    animeList: any[],
+    animeList: AniQuery[],
     startEpisode: number,
     endEpisode: number,
     fsDownloadedEpisodes: number[]
   ): Promise<AnimeTorrent[]> {
     let animeTorrentList: any[] = new Array();
 
-    for (let i = 0; i < animeList.length; i++) {  
+    for (let i = 0; i < animeList.length; i++) {
       const anime = animeList[i];
 
       const episodeList = this.getNumbers(
@@ -105,7 +110,6 @@ class Nyaa {
         endEpisode
       );
       for (let j = 0; j < episodeList.length; j++) {
-
         const episode = episodeList[j];
         let episodeString = this.legitAddAZero(episode);
 

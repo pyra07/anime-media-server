@@ -12,15 +12,17 @@ export interface AnimeTorrent {
   episode: string;
 }
 
+export interface nextAiringEpisode {
+  episode: number;
+  id: number;
+}
+
 export interface AniQuery {
   progress: number;
   mediaId: number;
   media: {
     episodes: number;
-    nextAiringEpisode: {
-      episode: number;
-      id: number;
-    } | null;
+    nextAiringEpisode: nextAiringEpisode | null;
     title: {
       romaji: string;
       english: string;

@@ -13,6 +13,7 @@ class QbitTorrent {
   }
 
   public async addTorrent(link: string, title: string): Promise<boolean> {
+    await this.client.login();
     const isAdded = await this.client.addMagnet(link, {
       savepath: `${rootDir}/${title}/`,
     });
