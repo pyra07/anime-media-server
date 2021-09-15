@@ -94,33 +94,43 @@ class Nyaa {
    * @returns {Promise<any>}
    */
   public async getTorrents(
-    animeList: AniQuery[],
+    anime: AniQuery,
     startEpisode: number,
     endEpisode: number,
     fsDownloadedEpisodes: number[]
-  ): Promise<AnimeTorrent[]> {
-    let animeTorrentList: any[] = new Array();
-
-    for (let i = 0; i < animeList.length; i++) {
-      const anime = animeList[i];
-
-      const episodeList = this.getNumbers(
-        startEpisode,
-        fsDownloadedEpisodes,
-        endEpisode
+  ): Promise<AnimeTorrent[] | AnimeTorrent> {
+    if (
+      anime.media.status === "FINISHED" &&
+      startEpisode === 0 &&
+      fsDownloadedEpisodes.length === 0
+    ) {
+      return await this.getTorrent(
+        anime.media.title.romaji,
+        resolution as Resolution,
+        true
       );
-      for (let j = 0; j < episodeList.length; j++) {
-        const episode = episodeList[j];
-        let episodeString = this.legitAddAZero(episode);
+    }
 
-        var animeRSS = await this.getTorrent(
-          anime.media.title.romaji,
-          episodeString,
-          resolution as Resolution
-        );
-        // Check if animeRSS is empty
-        if (Object.keys(animeRSS).length > 0) animeTorrentList.push(animeRSS);
-      }
+    let animeTorrentList: AnimeTorrent[] = new Array();
+
+    // Generate a list of episodes to download
+    const episodeList = this.getNumbers(
+      startEpisode,
+      fsDownloadedEpisodes,
+      endEpisode
+    );
+    for (let j = 0; j < episodeList.length; j++) {
+      const episode = episodeList[j];
+      const episodeString = this.legitAddAZero(episode);
+
+      const animeRSS = await this.getTorrent(
+        anime.media.title.romaji,
+        resolution as Resolution,
+        false,
+        episodeString
+      );
+      // Check if animeRSS is empty
+      if (Object.keys(animeRSS).length > 0) animeTorrentList.push(animeRSS);
     }
 
     return animeTorrentList;
@@ -133,10 +143,13 @@ class Nyaa {
    */
   public async getTorrent(
     searchQuery: string,
-    episodeNumber: string,
-    resolution: Resolution
+    resolution: Resolution,
+    isBatch: boolean,
+    episodeNumber?: string
   ): Promise<AnimeTorrent> {
-    const finalQuery = searchQuery + " - " + episodeNumber;
+    const finalQuery = isBatch
+      ? searchQuery + " Batch"
+      : searchQuery + " - " + episodeNumber;
 
     this.rssLink =
       "https://nyaa.si/?page=rss&q=" +
@@ -155,6 +168,7 @@ class Nyaa {
     rss.items.sort((a: { [x: string]: string }, b: { [x: string]: string }) => {
       return parseInt(b["nyaa:seeders"], 10) - parseInt(a["nyaa:seeders"], 10);
     });
+    // console.log(`Found ${rss.items.length} items via ${this.rssLink}`);
 
     // Iterate through rss.items
     // Check if the title contains mentions of both the query and resolution
@@ -168,15 +182,16 @@ class Nyaa {
       title = title.replace(/[0-9]{2}/, "").trim();
       let res = title.match(/[\[\(][0-9]*?p[\]\)]/);
 
-      if (subGroup && animeTitle && episode && res) {
+      if (isBatch && animeTitle) {
+        const titleSim = this.similarity(animeTitle[0].trim(), searchQuery);
+        if (titleSim > 0.8) return item;
+      }
+
+      if (subGroup && animeTitle && episode && res && episodeNumber) {
         const titleSim = this.similarity(animeTitle[0].trim(), searchQuery);
         const episodeSim = this.similarity(episode[0].trim(), episodeNumber);
 
-        if (
-          titleSim > 0.8 &&
-          episodeSim > 0.8 &&
-          title.indexOf(resolution) > -1
-        ) {
+        if (titleSim > 0.8 && episodeSim > 0.8 && title.includes(resolution)) {
           item.episode = episode[0].trim();
           return item;
         }
