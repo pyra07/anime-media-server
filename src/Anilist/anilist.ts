@@ -1,5 +1,5 @@
 import axios from "axios";
-import { id as userId } from "../../profile.json";
+import { aniUserName } from "../../profile.json";
 import { AniQuery } from "../utils/types";
 class Anilist {
   api: string;
@@ -49,8 +49,8 @@ class Anilist {
   public async getAnimeUserList(): Promise<AniQuery[]> {
     // I love loooong lines
     var query = `
-    query ($userId: Int) {
-        MediaListCollection(userId: $userId, type: ANIME, status_in: CURRENT) {
+    query ($userName: String) {
+        MediaListCollection(userName: $userName, type: ANIME, status_in: CURRENT) {
           lists {
             name
             entries {
@@ -58,6 +58,7 @@ class Anilist {
               mediaId
               media {
                 episodes
+                status
                 nextAiringEpisode {
                   id
                   episode
@@ -75,7 +76,7 @@ class Anilist {
     `;
 
     var variables = {
-      userId: userId,
+      userName: aniUserName,
     };
 
     let response = await this.getData(query, variables);
