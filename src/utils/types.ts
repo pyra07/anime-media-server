@@ -1,5 +1,8 @@
-// Type that contains 480 720 or 1080p resolution
 export type Resolution = "480" | "720" | "1080";
+export type status = "FINISHED" | "RELEASING" | "NOT_YET_RELEASED";
+
+/*************************************************************************************** */
+
 export interface AnimeTorrent {
   title: string;
   link: string;
@@ -22,6 +25,7 @@ export interface AniQuery {
   mediaId: number;
   media: {
     episodes: number;
+    status: status;
     nextAiringEpisode: nextAiringEpisode | null;
     title: {
       romaji: string;
