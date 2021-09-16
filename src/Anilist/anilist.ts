@@ -57,6 +57,12 @@ class Anilist {
               progress
               mediaId
               media {
+                coverImage {
+                  extraLarge
+                  large
+                  medium
+                  color
+                }
                 episodes
                 status
                 nextAiringEpisode {

@@ -100,9 +100,10 @@ class Scheduler {
           // Send a webhook to Discord
         await this.hook.send(new MessageBuilder()
         .setTimestamp()
-        .setTitle(`**${torrent.title}**`)
+        .setTitle(`**${anime.media.title.romaji}**`)
         .setColor(0x0997e3)
         .setDescription(`Currently downloading episode ${torrent.episode}`)
+        .setImage(anime.media.coverImage.extraLarge)
         )
           await qbit.addTorrent(torrent.link, anime.media.title.romaji);
           // Wait for 500ms to prevent qbit from crashing
