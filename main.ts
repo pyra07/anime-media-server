@@ -17,6 +17,6 @@ import fs from "fs";
       } else throw new Error(`${key} is not defined in profile.json`);
     }
   });
-
-  await Scheduler.check();
+// Run the scheduler every 25 minutes
+  await Scheduler.run('*/25 * * * *')
 })();
