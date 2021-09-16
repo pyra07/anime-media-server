@@ -100,7 +100,7 @@ class Scheduler {
           // Send a webhook to Discord
         await this.hook.send(new MessageBuilder()
         .setTimestamp()
-        .setTitle(`${torrent.title}`)
+        .setTitle(`**${torrent.title}**`)
         .setColor(0x0997e3)
         .setDescription(`Currently downloading episode ${torrent.episode}`)
         )
