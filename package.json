@@ -21,6 +21,7 @@
     "@supabase/supabase-js": "^1.21.1",
     "axios": "^0.21.1",
     "cron": "^1.8.2",
+    "discord-webhook-node": "^1.1.8",
     "firebase": "^8.9.1",
     "qbittorrent-api-v2": "^1.2.2",
     "rss-parser": "^3.12.0",
