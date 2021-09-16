@@ -18,5 +18,5 @@ import fs from "fs";
     }
   });
 
-  await Scheduler.check2();
+  await Scheduler.check();
 })();
