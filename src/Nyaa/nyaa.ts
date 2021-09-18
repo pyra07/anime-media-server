@@ -47,8 +47,8 @@ class Nyaa {
    * @param  {string} s2
    */
   private similarity(s1: string, s2: string) {
-    var longer = s1;
-    var shorter = s2;
+    var longer = s1.toLowerCase();
+    var shorter = s2.toLowerCase();
     if (s1.length < s2.length) {
       longer = s2;
       shorter = s1;
@@ -176,24 +176,36 @@ class Nyaa {
       let title: string = item.title;
       let subGroup = title.match(/^(.*?)\]/);
       title = title.replace(/^(.*?)\]/, "").trim();
-      let animeTitle = title.match(/.*(?=\-)/);
-      title = title.replace(/.*-/, "").trim();
-      let episode = title.match(/[0-9]{2}/);
-      title = title.replace(/[0-9]{2}/, "").trim();
-      let res = title.match(/[\[\(][0-9]*?p[\]\)]/);
+      if (isBatch) {
+        let animeTitle = title.match(/[^\(]*/);
+        title.replace(/[^\(]*/, "").trim();
+        // If animetitle is found, check similarity and if it's above the threshold, return
+        if (animeTitle) {
+          const similarity = this.similarity(searchQuery, animeTitle[0]);
+          if (similarity > 0.75) return item as AnimeTorrent;
+        } else {
+          let animeTitle = title.match(/.*(?=\-)/);
+          title = title.replace(/.*-/, "").trim();
+          let episode = title.match(/[0-9]{2}/);
+          title = title.replace(/[0-9]{2}/, "").trim();
+          let res = title.match(/[\[\(][0-9]*?p[\]\)]/);
 
-      if (isBatch && animeTitle) {
-        const titleSim = this.similarity(animeTitle[0].trim(), searchQuery);
-        if (titleSim > 0.8) return item;
-      }
+          if (subGroup && animeTitle && episode && res && episodeNumber) {
+            const titleSim = this.similarity(animeTitle[0].trim(), searchQuery);
+            const episodeSim = this.similarity(
+              episode[0].trim(),
+              episodeNumber
+            );
 
-      if (subGroup && animeTitle && episode && res && episodeNumber) {
-        const titleSim = this.similarity(animeTitle[0].trim(), searchQuery);
-        const episodeSim = this.similarity(episode[0].trim(), episodeNumber);
-
-        if (titleSim > 0.8 && episodeSim > 0.8 && title.includes(resolution)) {
-          item.episode = episode[0].trim();
-          return item;
+            if (
+              titleSim > 0.8 &&
+              episodeSim > 0.8 &&
+              title.includes(resolution)
+            ) {
+              item.episode = episode[0].trim();
+              return item as AnimeTorrent;
+            }
+          }
         }
       }
     }

@@ -5,8 +5,8 @@ import Nyaa from "../Nyaa/nyaa";
 import firebase from "firebase";
 import qbit from "../qBitTorrent/qbit";
 import { AniQuery } from "../utils/types";
-import {MessageBuilder, Webhook} from "discord-webhook-node";
-import {webhook} from "../../profile.json"
+import { MessageBuilder, Webhook } from "discord-webhook-node";
+import { webhook } from "../../profile.json";
 
 class Scheduler {
   private hook: Webhook;
@@ -98,13 +98,16 @@ class Scheduler {
           const torrent = torrents[index];
           console.log("Downloading", torrent.title, torrent.link);
           // Send a webhook to Discord
-        await this.hook.send(new MessageBuilder()
-        .setTimestamp()
-        .setTitle(`**${anime.media.title.romaji}**`)
-        .setColor(0x0997e3)
-        .setDescription(`Currently downloading episode ${torrent.episode}`)
-        .setImage(anime.media.coverImage.extraLarge)
-        )
+          await this.hook.send(
+            new MessageBuilder()
+              .setTimestamp()
+              .setTitle(`**${anime.media.title.romaji}**`)
+              .setColor(0x0997e3)
+              .setDescription(
+                `Currently downloading episode ${torrent.episode}`
+              )
+              .setImage(anime.media.coverImage.extraLarge)
+          );
           await qbit.addTorrent(torrent.link, anime.media.title.romaji);
           // Wait for 500ms to prevent qbit from crashing
           await new Promise((resolve) => setTimeout(resolve, 500));
@@ -114,14 +117,14 @@ class Scheduler {
           ...torrents.map((torrent) => parseInt(torrent.episode))
         );
 
-        
-
         await DB.updateProgress(
           anime.mediaId.toString(),
           parseInt(torrents[torrents.length - 1].episode),
           anime.media,
           fsDownloadedEpisodes
         );
+        // Download anime batch instead of one by one. 
+        // NOTE : This only applies to anime that have finished airing.
       } else {
         if (Object.keys(torrents).length === 0) continue;
         console.log("Downloading Batch", torrents.title, torrents.link);
@@ -137,10 +140,6 @@ class Scheduler {
           anime.media,
           episodeArray
         );
-        
-
-        
-
       }
     }
   }
