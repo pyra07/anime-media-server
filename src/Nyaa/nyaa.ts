@@ -183,28 +183,25 @@ class Nyaa {
         if (animeTitle) {
           const similarity = this.similarity(searchQuery, animeTitle[0]);
           if (similarity > 0.75) return item as AnimeTorrent;
-        } else {
-          let animeTitle = title.match(/.*(?=\-)/);
-          title = title.replace(/.*-/, "").trim();
-          let episode = title.match(/[0-9]{2}/);
-          title = title.replace(/[0-9]{2}/, "").trim();
-          let res = title.match(/[\[\(][0-9]*?p[\]\)]/);
+        }
+      } else {
+        let animeTitle = title.match(/.*(?=\-)/);
+        title = title.replace(/.*-/, "").trim();
+        let episode = title.match(/[0-9]{2}/);
+        title = title.replace(/[0-9]{2}/, "").trim();
+        let res = title.match(/[\[\(][0-9]*?p[\]\)]/);
 
-          if (subGroup && animeTitle && episode && res && episodeNumber) {
-            const titleSim = this.similarity(animeTitle[0].trim(), searchQuery);
-            const episodeSim = this.similarity(
-              episode[0].trim(),
-              episodeNumber
-            );
+        if (subGroup && animeTitle && episode && res && episodeNumber) {
+          const titleSim = this.similarity(animeTitle[0].trim(), searchQuery);
+          const episodeSim = this.similarity(episode[0].trim(), episodeNumber);
 
-            if (
-              titleSim > 0.8 &&
-              episodeSim > 0.8 &&
-              title.includes(resolution)
-            ) {
-              item.episode = episode[0].trim();
-              return item as AnimeTorrent;
-            }
+          if (
+            titleSim > 0.8 &&
+            episodeSim > 0.8 &&
+            title.includes(resolution)
+          ) {
+            item.episode = episode[0].trim();
+            return item as AnimeTorrent;
           }
         }
       }
