@@ -147,6 +147,9 @@ class Scheduler {
   public async check() {
     const animeDb: AniQuery[] = await Anilist.getAnimeUserList();
     const fireDB = await DB.getFromDb();
+    // check if animeDb is empty
+    
+    if (animeDb.length === 0) return;
 
     if (fireDB.docs.length === 0) {
       console.log("No firebase data found. Creating new one");
