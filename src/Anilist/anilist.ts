@@ -85,10 +85,17 @@ class Anilist {
       userName: aniUserName,
     };
 
-    let response = await this.getData(query, variables);
-    response = response.data.data.MediaListCollection.lists[0].entries;
+    // Errors can sometimes happen here, so we need to catch it
+    try {
 
-    return response as AniQuery[];
+      let response = await this.getData(query, variables);
+      response = response.data.data.MediaListCollection.lists[0].entries;
+      return response as AniQuery[];
+    } catch (e) {
+      console.error(e);
+      return [] as AniQuery[];
+    }
+
   }
 }
 
