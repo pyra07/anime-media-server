@@ -24,8 +24,7 @@ You give the program your Anilist profile. It looks at your current "*WATCHING*"
   
 *  _username_ and _password_
   
-* Get your Anilist _profile ID_ (details on how to do that will be implemented later)
-
+* Get your Anilist _username_ 
 
 * Choose which _resolution_ to download anime. "480","720" or "1080" accepted
 
