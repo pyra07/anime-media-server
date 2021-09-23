@@ -1,6 +1,7 @@
 import fb from "firebase";
 import { firebaseConfig } from "./creds.json";
 import { id } from "../../profile.json";
+import { nextAiringEpisode, status } from "../utils/types";
 
 class DB {
   myProject: fb.app.App;
@@ -31,14 +32,25 @@ class DB {
    * @param  {number} progress
    * @returns {Promise}
    */
-  public async updateProgress(mediaId: string, progress: number, media : object, downloadedEpisodes : number[]): Promise<void> {
+  public async updateProgress(
+    mediaId: string,
+    progress: number,
+    nextAiringEpisode: nextAiringEpisode | null,
+    status: status,
+    downloadedEpisodes: number[]
+  ): Promise<void> {
     await this.myProject
       .firestore()
       .collection("animelists")
       .doc(id.toString())
       .collection("anime")
       .doc(mediaId)
-      .update({ progress, media, downloadedEpisodes });
+      .update({
+        progress,
+        "media.nextAiringEpisode": nextAiringEpisode,
+        "media.status": status,
+        downloadedEpisodes,
+      });
   }
 
   /**
