@@ -94,9 +94,11 @@ class Scheduler {
       // Check if torrents are empty
       if (Array.isArray(torrents)) {
         if (torrents.length === 0) continue;
+
         for (let index = 0; index < torrents.length; index++) {
           const torrent = torrents[index];
           console.log("Downloading", torrent.title, torrent.link);
+
           // Send a webhook to Discord
           await this.hook.send(
             new MessageBuilder()
@@ -108,9 +110,14 @@ class Scheduler {
               )
               .setImage(anime.media.coverImage.extraLarge)
           );
-          await qbit.addTorrent(torrent.link, anime.media.title.romaji);
+
+          const isAdded = await qbit.addTorrent(
+            torrent.link,
+            anime.media.title.romaji
+          );
+
           // Wait for 500ms to prevent qbit from crashing
-          await new Promise((resolve) => setTimeout(resolve, 500));
+          if (isAdded) await new Promise((resolve) => setTimeout(resolve, 500));
         }
 
         fsDownloadedEpisodes.push(
@@ -124,24 +131,31 @@ class Scheduler {
           anime.media.status,
           fsDownloadedEpisodes
         );
-        // Download anime batch instead of one by one. 
+        // Download anime batch instead of one by one.
         // NOTE : This only applies to anime that have finished airing.
       } else {
         if (Object.keys(torrents).length === 0) continue;
+
         console.log("Downloading Batch", torrents.title, torrents.link);
-        await qbit.addTorrent(torrents.link, anime.media.title.romaji);
+        const isAdded = await qbit.addTorrent(
+          torrents.link,
+          anime.media.title.romaji
+        );
+
         // Generate array of numbers between start and end
         const episodeArray = Array.from(
           { length: endEpisode - startEpisode },
           (v, k) => k + startEpisode + 1
         );
-        await DB.updateProgress(
-          anime.mediaId.toString(),
-          endEpisode,
-          anime.media.nextAiringEpisode,
-          anime.media.status,
-          episodeArray
-        );
+
+        if (isAdded)
+          await DB.updateProgress(
+            anime.mediaId.toString(),
+            endEpisode,
+            anime.media.nextAiringEpisode,
+            anime.media.status,
+            episodeArray
+          );
       }
     }
   }
@@ -150,7 +164,7 @@ class Scheduler {
     const animeDb: AniQuery[] = await Anilist.getAnimeUserList();
     const fireDB = await DB.getFromDb();
     // check if animeDb is empty
-    
+
     if (animeDb.length === 0) return;
 
     if (fireDB.docs.length === 0) {
