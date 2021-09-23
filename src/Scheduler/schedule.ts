@@ -120,7 +120,8 @@ class Scheduler {
         await DB.updateProgress(
           anime.mediaId.toString(),
           parseInt(torrents[torrents.length - 1].episode),
-          anime.media,
+          anime.media.nextAiringEpisode,
+          anime.media.status,
           fsDownloadedEpisodes
         );
         // Download anime batch instead of one by one. 
@@ -136,8 +137,9 @@ class Scheduler {
         );
         await DB.updateProgress(
           anime.mediaId.toString(),
-          0,
-          anime.media,
+          endEpisode,
+          anime.media.nextAiringEpisode,
+          anime.media.status,
           episodeArray
         );
       }
