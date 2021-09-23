@@ -20,23 +20,31 @@ export interface nextAiringEpisode {
   id: number;
 }
 
+
+export interface AniMedia {
+  episodes: number;
+  status: status;
+  endDate : {
+    year: number | null;
+    month: number | null;
+    day: number | null;
+  }
+  nextAiringEpisode: nextAiringEpisode | null;
+  title: {
+    romaji: string;
+    english: string;
+    native: string;
+  };
+  coverImage: AniCoverImage;
+}
+export interface AniCoverImage {
+  extraLarge: string;
+  large: string;
+  medium: string;
+  color: string;
+}
 export interface AniQuery {
   progress: number;
   mediaId: number;
-  media: {
-    episodes: number;
-    status: status;
-    nextAiringEpisode: nextAiringEpisode | null;
-    title: {
-      romaji: string;
-      english: string;
-      native: string;
-    };
-    coverImage: {
-      extraLarge: string;
-      large: string;
-      medium: string;
-      color: string;
-    };
-  };
+  media: AniMedia;
 }
