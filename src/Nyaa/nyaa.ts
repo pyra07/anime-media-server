@@ -81,17 +81,7 @@ class Nyaa {
     }
     return numbers;
   }
-  /**
-   * Adds a 0 to the front of a number if it is less than 10
-   * @param  {number} number
-   * @returns string
-   */
-  private legitAddAZero(number: number): string {
-    if (number < 10) {
-      return "0" + number;
-    }
-    return number.toString();
-  }
+
   /**
    * Determines which animes need to be downloaded or something.
    * Pass in your anime list entries and see the magic happen.
@@ -142,7 +132,7 @@ class Nyaa {
     // Search for episodes individually
     for (let j = 0; j < episodeList.length; j++) {
       const episode = episodeList[j];
-      const episodeString = this.legitAddAZero(episode);
+      const episodeString = episode < 10 ? "0" + episode : episode.toString();
 
       const animeRSS = await this.getTorrent(
         anime.media.title.romaji,
