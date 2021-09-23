@@ -1,4 +1,4 @@
-// This um retrieves something from nyaa.si rss
+// This retrieves something from nyaa.si rss
 // and returns it as a json object
 
 import Parser from "rss-parser";
@@ -6,10 +6,10 @@ import { AnimeTorrent, AniQuery, Resolution } from "../utils/types";
 import { resolution } from "../../profile.json";
 
 class Nyaa {
-  rssLink: string;
+  rssLink: URL;
   parser: any;
   constructor() {
-    this.rssLink = "https://nyaa.si/?page=rss";
+    this.rssLink = new URL("https://nyaa.si/");
     this.parser = new Parser({
       customFields: {
         item: ["nyaa:seeders"],
@@ -81,7 +81,11 @@ class Nyaa {
     }
     return numbers;
   }
-
+  /**
+   * Adds a 0 to the front of a number if it is less than 10
+   * @param  {number} number
+   * @returns string
+   */
   private legitAddAZero(number: number): string {
     if (number < 10) {
       return "0" + number;
@@ -89,7 +93,8 @@ class Nyaa {
     return number.toString();
   }
   /**
-   * Determines which animes need to be downloaded or something. Pass in your anime list entries and see the magic happen.
+   * Determines which animes need to be downloaded or something.
+   * Pass in your anime list entries and see the magic happen.
    * @param {object} animeList
    * @returns {Promise<any>}
    */
@@ -99,6 +104,8 @@ class Nyaa {
     endEpisode: number,
     fsDownloadedEpisodes: number[]
   ): Promise<AnimeTorrent[] | AnimeTorrent> {
+    // Find batch of episodes to download if the
+    // Anime has already finished airing
     if (
       anime.media.status === "FINISHED" &&
       startEpisode === 0 &&
@@ -119,6 +126,7 @@ class Nyaa {
       fsDownloadedEpisodes,
       endEpisode
     );
+    // Search for episodes individually
     for (let j = 0; j < episodeList.length; j++) {
       const episode = episodeList[j];
       const episodeString = this.legitAddAZero(episode);
@@ -139,9 +147,12 @@ class Nyaa {
   /**
    * Pass in [ANIME_NAME] - [EPISODE_NUMBER]. You should get data from Nyaa.si
    * @param  {string} searchQuery
+   * @param  {Resolution} resolution
+   * @param  {boolean} isBatch
+   * @param  {string} episodeNumber
    * @returns {Promise<AnimeTorrent>}
    */
-  public async getTorrent(
+  private async getTorrent(
     searchQuery: string,
     resolution: Resolution,
     isBatch: boolean,
@@ -151,10 +162,11 @@ class Nyaa {
       ? searchQuery + " Batch"
       : searchQuery + " - " + episodeNumber;
 
-    this.rssLink =
-      "https://nyaa.si/?page=rss&q=" +
-      encodeURIComponent(finalQuery) +
-      "&c=1_2&f=0";
+    this.rssLink.searchParams.set("page", "rss");
+    this.rssLink.searchParams.set("q", finalQuery);
+    this.rssLink.searchParams.set("c", "1_2");
+    this.rssLink.searchParams.set("f", "0");
+
     let rss;
 
     try {
@@ -168,7 +180,6 @@ class Nyaa {
     rss.items.sort((a: { [x: string]: string }, b: { [x: string]: string }) => {
       return parseInt(b["nyaa:seeders"], 10) - parseInt(a["nyaa:seeders"], 10);
     });
-    // console.log(`Found ${rss.items.length} items via ${this.rssLink}`);
 
     // Iterate through rss.items
     // Check if the title contains mentions of both the query and resolution
@@ -176,6 +187,7 @@ class Nyaa {
       let title: string = item.title;
       let subGroup = title.match(/^(.*?)\]/);
       title = title.replace(/^(.*?)\]/, "").trim();
+
       if (isBatch) {
         let animeTitle = title.match(/[^\(]*/);
         title.replace(/[^\(]*/, "").trim();
@@ -195,6 +207,7 @@ class Nyaa {
           const titleSim = this.similarity(animeTitle[0].trim(), searchQuery);
           const episodeSim = this.similarity(episode[0].trim(), episodeNumber);
 
+          // If the title and episode are similar, and the resolution is similar, return
           if (
             titleSim > 0.8 &&
             episodeSim > 0.8 &&
