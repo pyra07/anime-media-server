@@ -170,7 +170,7 @@ class Nyaa {
     let rss;
 
     try {
-      rss = await this.parser.parseURL(this.rssLink);
+      rss = await this.parser.parseURL(this.rssLink.href);
     } catch (error) {
       console.log(error);
       return {} as AnimeTorrent;
