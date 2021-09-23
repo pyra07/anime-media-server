@@ -65,6 +65,11 @@ class Anilist {
                 }
                 episodes
                 status
+                endDate {
+                  year
+                  month
+                  day
+                }
                 nextAiringEpisode {
                   id
                   episode
@@ -87,7 +92,6 @@ class Anilist {
 
     // Errors can sometimes happen here, so we need to catch it
     try {
-
       let response = await this.getData(query, variables);
       response = response.data.data.MediaListCollection.lists[0].entries;
       return response as AniQuery[];
@@ -95,7 +99,6 @@ class Anilist {
       console.error(e);
       return [] as AniQuery[];
     }
-
   }
 }
 
