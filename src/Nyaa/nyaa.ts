@@ -104,12 +104,25 @@ class Nyaa {
     endEpisode: number,
     fsDownloadedEpisodes: number[]
   ): Promise<AnimeTorrent[] | AnimeTorrent> {
-    // Find batch of episodes to download if the
-    // Anime has already finished airing
+    /* Find batch of episodes to download if the
+       Anime has already finished airing */
+
+    /* Here we check whether the anime has recently finished airing.
+       Usually batches aren't produced until like 1-2 week(s) after finishing */
+    const todayDate = new Date();
+    const endDate = new Date(
+      `${anime.media.endDate.month}/${anime.media.endDate.day}/${anime.media.endDate.year}`
+    );
+    const daysLeft = Math.floor(
+      (todayDate.getTime() - endDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    console.log(`Days left: ${daysLeft} ---- ${anime.media.title.romaji}`);
+
     if (
       anime.media.status === "FINISHED" &&
       startEpisode === 0 &&
-      fsDownloadedEpisodes.length === 0
+      fsDownloadedEpisodes.length === 0 &&
+      daysLeft > 10
     ) {
       return await this.getTorrent(
         anime.media.title.romaji,
