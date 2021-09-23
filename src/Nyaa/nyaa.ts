@@ -94,9 +94,6 @@ class Nyaa {
     endEpisode: number,
     fsDownloadedEpisodes: number[]
   ): Promise<AnimeTorrent[] | AnimeTorrent> {
-    /* Find batch of episodes to download if the
-       Anime has already finished airing */
-
     /* Here we check whether the anime has recently finished airing.
        Usually batches aren't produced until like 1-2 week(s) after finishing */
     const todayDate = new Date();
@@ -108,20 +105,23 @@ class Nyaa {
     );
     console.log(`Days left: ${daysLeft} ---- ${anime.media.title.romaji}`);
 
+    /* Find batch of episodes to download if the
+       Anime has already finished airing */
     if (
       anime.media.status === "FINISHED" &&
       startEpisode === 0 &&
       fsDownloadedEpisodes.length === 0 &&
       daysLeft > 10
     ) {
-      return await this.getTorrent(
+      const animeRSS = await this.getTorrent(
         anime.media.title.romaji,
         resolution as Resolution,
         true
-      );
-    }
+        );
+        if (animeRSS !== null) return animeRSS;
+      }
 
-    let animeTorrentList: AnimeTorrent[] = new Array();
+    const animeTorrentList: AnimeTorrent[] = new Array();
 
     // Generate a list of episodes to download
     const episodeList = this.getNumbers(
@@ -140,15 +140,15 @@ class Nyaa {
         false,
         episodeString
       );
-      // Check if animeRSS is empty
-      if (Object.keys(animeRSS).length > 0) animeTorrentList.push(animeRSS);
+      // Check if animeRSS is not null
+      if (animeRSS !== null) animeTorrentList.push(animeRSS);
     }
 
     return animeTorrentList;
   }
 
   /**
-   * Pass in [ANIME_NAME] - [EPISODE_NUMBER]. You should get data from Nyaa.si
+   * Gets the torrent info for a specific anime and episode
    * @param  {string} searchQuery
    * @param  {Resolution} resolution
    * @param  {boolean} isBatch
@@ -160,7 +160,7 @@ class Nyaa {
     resolution: Resolution,
     isBatch: boolean,
     episodeNumber?: string
-  ): Promise<AnimeTorrent> {
+  ): Promise<AnimeTorrent | null> {
     const finalQuery = isBatch
       ? searchQuery + " Batch"
       : searchQuery + " - " + episodeNumber;
@@ -223,8 +223,7 @@ class Nyaa {
       }
     }
     console.log(searchQuery, "not found");
-
-    return {} as AnimeTorrent;
+    return null;
   }
 }
 
