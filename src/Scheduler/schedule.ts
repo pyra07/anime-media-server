@@ -4,7 +4,7 @@ import DB from "../database/db";
 import Nyaa from "../Nyaa/nyaa";
 import firebase from "firebase";
 import qbit from "../qBitTorrent/qbit";
-import { AniQuery } from "../utils/types";
+import { AnimeTorrent, AniQuery, AniTitle } from "../utils/types";
 import { MessageBuilder, Webhook } from "discord-webhook-node";
 import { webhook } from "../../profile.json";
 
@@ -44,6 +44,51 @@ class Scheduler {
       null,
       true,
       "Europe/London"
+    );
+  }
+
+  private async downloadTorrents(
+    anime: AniQuery,
+    isBatch: boolean,
+    ...animeTorrent: AnimeTorrent[]
+  ): Promise<void> {
+    const downloadedEpisodes = new Array<number>();
+    for (const torrent of animeTorrent) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      console.log(`Downloading ${torrent.title} @ ${torrent.link}`);
+
+      // Send message to discord
+      await this.hook.send(
+        new MessageBuilder()
+          .setTimestamp()
+          .setTitle(`**${anime.media.title.romaji}**`)
+          .setColor(0x0997e3)
+          .setDescription(
+            isBatch
+              ? `Currently downloading batch.`
+              : `Currently downloading episode ${torrent.episode}.`
+          )
+          .setImage(anime.media.coverImage.extraLarge)
+      );
+
+      // Download torrent
+      var isAdded: boolean = await qbit.addTorrent(
+        torrent.link,
+        anime.media.title.romaji
+      );
+      if (isAdded)
+        isBatch
+          ? downloadedEpisodes.push(
+              ...Array.from({ length: anime.media.episodes }, (_, i) => i + 1)
+            )
+          : downloadedEpisodes.push(parseInt(torrent.episode));
+    }
+
+    await DB.updateProgress(
+      anime.mediaId.toString(),
+      anime.media.nextAiringEpisode,
+      anime.media.status,
+      downloadedEpisodes
     );
   }
 
@@ -91,72 +136,9 @@ class Scheduler {
         fsDownloadedEpisodes
       );
 
-      // Check if torrents are empty
-      if (Array.isArray(torrents)) {
-        if (torrents.length === 0) continue;
-
-        for (let index = 0; index < torrents.length; index++) {
-          const torrent = torrents[index];
-          console.log("Downloading", torrent.title, torrent.link);
-
-          // Send a webhook to Discord
-          await this.hook.send(
-            new MessageBuilder()
-              .setTimestamp()
-              .setTitle(`**${anime.media.title.romaji}**`)
-              .setColor(0x0997e3)
-              .setDescription(
-                `Currently downloading episode ${torrent.episode}`
-              )
-              .setImage(anime.media.coverImage.extraLarge)
-          );
-
-          const isAdded = await qbit.addTorrent(
-            torrent.link,
-            anime.media.title.romaji
-          );
-
-          // Wait for 500ms to prevent qbit from crashing
-          if (isAdded) await new Promise((resolve) => setTimeout(resolve, 500));
-        }
-
-        fsDownloadedEpisodes.push(
-          ...torrents.map((torrent) => parseInt(torrent.episode))
-        );
-
-        await DB.updateProgress(
-          anime.mediaId.toString(),
-          parseInt(torrents[torrents.length - 1].episode),
-          anime.media.nextAiringEpisode,
-          anime.media.status,
-          fsDownloadedEpisodes
-        );
-        // Download anime batch instead of one by one.
-        // NOTE : This only applies to anime that have finished airing.
-      } else {
-        if (Object.keys(torrents).length === 0) continue;
-
-        console.log("Downloading Batch", torrents.title, torrents.link);
-        const isAdded = await qbit.addTorrent(
-          torrents.link,
-          anime.media.title.romaji
-        );
-
-        // Generate array of numbers between start and end
-        const episodeArray = Array.from(
-          { length: endEpisode - startEpisode },
-          (v, k) => k + startEpisode + 1
-        );
-
-        if (isAdded)
-          await DB.updateProgress(
-            anime.mediaId.toString(),
-            endEpisode,
-            anime.media.nextAiringEpisode,
-            anime.media.status,
-            episodeArray
-          );
-      }
+      if (Array.isArray(torrents))
+        await this.downloadTorrents(anime, false, ...torrents);
+      else await this.downloadTorrents(anime, true, torrents);
     }
   }
 
