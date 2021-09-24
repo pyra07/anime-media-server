@@ -20,6 +20,12 @@ export interface nextAiringEpisode {
   id: number;
 }
 
+export interface AniTitle {
+  romaji: string;
+  english: string;
+  native: string;
+}
+
 
 export interface AniMedia {
   episodes: number;
@@ -30,11 +36,7 @@ export interface AniMedia {
     day: number | null;
   }
   nextAiringEpisode: nextAiringEpisode | null;
-  title: {
-    romaji: string;
-    english: string;
-    native: string;
-  };
+  title: AniTitle
   coverImage: AniCoverImage;
 }
 export interface AniCoverImage {
