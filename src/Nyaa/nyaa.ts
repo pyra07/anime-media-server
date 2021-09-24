@@ -103,7 +103,6 @@ class Nyaa {
     const daysLeft = Math.floor(
       (todayDate.getTime() - endDate.getTime()) / (1000 * 60 * 60 * 24)
     );
-    console.log(`Days left: ${daysLeft} ---- ${anime.media.title.romaji}`);
 
     /* Find batch of episodes to download if the
        Anime has already finished airing */
