@@ -57,25 +57,8 @@ class Scheduler {
       await new Promise((resolve) => setTimeout(resolve, 500));
       console.log(`Downloading ${torrent.title} @ ${torrent.link}`);
 
-      // Send message to discord
-      await this.hook.send(
-        new MessageBuilder()
-          .setTimestamp()
-          .setTitle(`**${anime.media.title.romaji}**`)
-          .setColor(0x0997e3)
-          .setDescription(
-            isBatch
-              ? `Currently downloading batch.`
-              : `Currently downloading episode ${torrent.episode}.`
-          )
-          .setImage(anime.media.coverImage.extraLarge)
-      );
-
       // Download torrent
-      var isAdded: boolean = await qbit.addTorrent(
-        torrent.link,
-        anime.media.title.romaji
-      );
+      var isAdded: boolean = await qbit.addTorrent(torrent.link, torrent.title);
       if (isAdded)
         isBatch
           ? downloadedEpisodes.push(
@@ -83,6 +66,23 @@ class Scheduler {
             )
           : downloadedEpisodes.push(parseInt(torrent.episode));
     }
+
+    await this.hook.send(
+      new MessageBuilder()
+        .setTimestamp()
+        .setTitle(`**${anime.media.title.romaji}**`)
+        .setColor(0x0997e3)
+        .setDescription(
+          isBatch
+            ? `Currently downloading batch.`
+            : downloadedEpisodes.length === 1
+            ? `Currently downloading episodes ${downloadedEpisodes[0]}`
+            : `Currently downloading episodes ${downloadedEpisodes[0]}-${
+                downloadedEpisodes[downloadedEpisodes.length - 1]
+              }`
+        )
+        .setImage(anime.media.coverImage.extraLarge)
+    );
 
     await DB.updateProgress(
       anime.mediaId.toString(),
@@ -135,7 +135,7 @@ class Scheduler {
         endEpisode,
         fsDownloadedEpisodes
       );
-
+      if (torrents === null) return;
       if (Array.isArray(torrents))
         await this.downloadTorrents(anime, false, ...torrents);
       else await this.downloadTorrents(anime, true, torrents);
@@ -151,6 +151,7 @@ class Scheduler {
 
     if (fireDB.docs.length === 0) {
       console.log("No firebase data found. Creating new one");
+      await DB.createUserDB();
       await DB.addToDb(animeDb);
       await this.handleAnime(animeDb);
     } else {
