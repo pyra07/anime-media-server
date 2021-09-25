@@ -93,7 +93,7 @@ class Nyaa {
     startEpisode: number,
     endEpisode: number,
     fsDownloadedEpisodes: number[]
-  ): Promise<AnimeTorrent[] | AnimeTorrent> {
+  ): Promise<AnimeTorrent[] | AnimeTorrent | null> {
     /* Here we check whether the anime has recently finished airing.
        Usually batches aren't produced until like 1-2 week(s) after finishing */
     const todayDate = new Date();
@@ -116,9 +116,9 @@ class Nyaa {
         anime.media.title.romaji,
         resolution as Resolution,
         true
-        );
-        if (animeRSS !== null) return animeRSS;
-      }
+      );
+      return animeRSS;
+    }
 
     const animeTorrentList: AnimeTorrent[] = new Array();
 
@@ -142,7 +142,7 @@ class Nyaa {
       // Check if animeRSS is not null
       if (animeRSS !== null) animeTorrentList.push(animeRSS);
     }
-
+    if (animeTorrentList.length === 0) return null;
     return animeTorrentList;
   }
 
@@ -175,7 +175,7 @@ class Nyaa {
       rss = await this.parser.parseURL(this.rssLink.href);
     } catch (error) {
       console.log(error);
-      return {} as AnimeTorrent;
+      return null;
     }
 
     // Sort rss.items by nyaa:seeders
