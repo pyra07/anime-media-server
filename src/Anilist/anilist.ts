@@ -93,7 +93,10 @@ class Anilist {
     // Errors can sometimes happen here, so we need to catch it
     try {
       let response = await this.getData(query, variables);
-      response = response.data.data.MediaListCollection.lists[0].entries;
+      response =
+        response.data.data.MediaListCollection.lists.length > 0
+          ? response.data.data.MediaListCollection.lists[0].entries
+          : [];
       return response as AniQuery[];
     } catch (e) {
       console.error(e);
