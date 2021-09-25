@@ -1,9 +1,9 @@
-import anilist from "./src/Anilist/anilist";
-import qbit from "./src/qBitTorrent/qbit";
+import db from "./src/database/db";
 import schedule from "./src/Scheduler/schedule";
 
 (async () => {
- 
+
+  await db.logIn(); 
   await schedule.check();
   
 })();
