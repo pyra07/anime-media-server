@@ -2,6 +2,7 @@ import Scheduler from "./src/Scheduler/schedule";
 import profile from "./profile.json";
 import anilist from "./src/Anilist/anilist";
 import fs from "fs";
+import db from "./src/database/db";
 
 (async () => {
   // Check if every key in profile is not null or empty
@@ -17,6 +18,7 @@ import fs from "fs";
       } else throw new Error(`${key} is not defined in profile.json`);
     }
   });
-// Run the scheduler every 25 minutes
-  await Scheduler.run('*/25 * * * *')
+  await db.logIn();
+  // Run the scheduler every 20 minutes
+  await Scheduler.run("*/20 * * * *");
 })();
