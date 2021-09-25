@@ -21,6 +21,8 @@ You give the program your Anilist profile. It looks at your current "*WATCHING*"
 
 
 * _torrent_url_ ,where your qbittorrent server is set up at, usually gonna be "http://localhost:8080/"
+
+* _email_ and _emailPassword_, both obtained from firebase (details on how to sign up shall be implemented later!)
   
 *  _username_ and _password_
   
@@ -31,6 +33,3 @@ You give the program your Anilist profile. It looks at your current "*WATCHING*"
 * _root_dir_, where you want your downloads to be stored.
 
 5. Run `ts-node main.ts` (P.S you might need VPN)
-
-
-NOTE: This is still a work in-progress. The code is messy and unoptimized. Also, this will probably brick if you want to download old anime such as Naruto, so maybe keep it to new anime
