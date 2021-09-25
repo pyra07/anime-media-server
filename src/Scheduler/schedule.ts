@@ -30,7 +30,7 @@ class Scheduler {
   }
 
   /**
-   * Runs the scheduler periodically every 30 minutes
+   * Runs the scheduler periodically every x minutes
    */
   public async run(cronTime: string): Promise<void> {
     const CronJob = cron.CronJob;
@@ -112,6 +112,7 @@ class Scheduler {
       const fireDBAnime = fireDBData.find(
         (item) => item.mediaId === anime.mediaId
       );
+
       // Should find fail, just skip.
       if (!fireDBAnime) continue;
 
@@ -123,11 +124,16 @@ class Scheduler {
         ? anime.media.nextAiringEpisode.episode - 1
         : anime.media.episodes;
 
-      // If progress is up to date, then skip
-      if (startEpisode === endEpisode) continue;
-
       // Firestore downloaded episodes
       const fsDownloadedEpisodes = fireDBAnime.downloadedEpisodes || [];
+
+      // If progress is up to date, then skip
+      // Or if the user has downloaded all episodes, then skip
+      if (
+        startEpisode === endEpisode ||
+        fsDownloadedEpisodes.length === endEpisode - startEpisode
+      )
+        continue;
 
       const torrents = await Nyaa.getTorrents(
         anime,
@@ -135,7 +141,7 @@ class Scheduler {
         endEpisode,
         fsDownloadedEpisodes
       );
-      if (torrents === null) return;
+      if (torrents === null) continue;
       if (Array.isArray(torrents))
         await this.downloadTorrents(anime, false, ...torrents);
       else await this.downloadTorrents(anime, true, torrents);
