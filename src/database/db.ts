@@ -1,13 +1,20 @@
 import fb from "firebase";
 import { firebaseConfig } from "./creds.json";
-import { id } from "../../profile.json";
+import { id, aniUserName, email, emailPassword } from "../../profile.json";
 import { nextAiringEpisode, status } from "../utils/types";
 import firebase from "firebase";
 
 class DB {
-  myProject: fb.app.App;
+  private myProject: fb.app.App;
+  private static user: fb.auth.UserCredential;
   constructor() {
     this.myProject = fb.initializeApp(firebaseConfig);
+  }
+
+  public async logIn() {
+    DB.user = await this.myProject
+      .auth()
+      .signInWithEmailAndPassword(email, emailPassword);
   }
 
   /**
@@ -20,7 +27,7 @@ class DB {
       await this.myProject
         .firestore()
         .collection("animelists")
-        .doc(id.toString())
+        .doc(DB.user.user?.uid)
         .collection("anime")
         .doc(data[i]["mediaId"].toString())
         .set(data[i]);
@@ -42,16 +49,16 @@ class DB {
     await this.myProject
       .firestore()
       .collection("animelists")
-      .doc(id.toString())
+      .doc(DB.user.user?.uid)
       .collection("anime")
       .doc(mediaId)
-      .update(        
-          {
-          "media.nextAiringEpisode": nextAiringEpisode,
-          "media.status": status,
-          "downloadedEpisodes" : firebase.firestore.FieldValue.arrayUnion(...downloadedEpisodes)
-        }
-      );
+      .update({
+        "media.nextAiringEpisode": nextAiringEpisode,
+        "media.status": status,
+        downloadedEpisodes: firebase.firestore.FieldValue.arrayUnion(
+          ...downloadedEpisodes
+        ),
+      });
   }
 
   /**
@@ -65,9 +72,21 @@ class DB {
     return await this.myProject
       .firestore()
       .collection("animelists")
-      .doc(id.toString())
+      .doc(DB.user.user?.uid)
       .collection("anime")
       .get();
+  }
+
+  public async createUserDB() {
+    await this.myProject
+      .firestore()
+      .collection("animelists")
+      .doc(DB.user.user?.uid)
+      .set({
+        Username: aniUserName,
+        "Anilist ID": id,
+        "Date Created": firebase.firestore.FieldValue.serverTimestamp(),
+      });
   }
 }
 export default new DB();
