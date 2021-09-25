@@ -187,27 +187,24 @@ class Nyaa {
     // Check if the title contains mentions of both the query and resolution
     for (const item of rss.items) {
       let title: string = item.title;
-      let subGroup = title.match(/^(.*?)\]/);
-      title = title.replace(/^(.*?)\]/, "").trim();
+      let subGroup = title.match(/\[(.*?)\]/);
 
       if (isBatch) {
-        let animeTitle = title.match(/[^\(]*/);
-        title.replace(/[^\(]*/, "").trim();
+        let animeTitle = title.match(/\[.*\] (.+?) \(/);
         // If animetitle is found, check similarity and if it's above the threshold, return
         if (animeTitle) {
-          const similarity = this.similarity(searchQuery, animeTitle[0]);
+          const similarity = this.similarity(searchQuery, animeTitle[1]);
           if (similarity > 0.75) return item as AnimeTorrent;
         }
       } else {
-        let animeTitle = title.match(/.*(?=\-)/);
-        title = title.replace(/.*-/, "").trim();
-        let episode = title.match(/[0-9]{2}/);
-        title = title.replace(/[0-9]{2}/, "").trim();
-        let res = title.match(/[\[\(][0-9]*?p[\]\)]/);
+        let animeTitle = title.match(/\[.*\] (.+?) - \d{2}/);
+        let episode = title.match(/\d{2}/);
 
-        if (subGroup && animeTitle && episode && res && episodeNumber) {
-          const titleSim = this.similarity(animeTitle[0].trim(), searchQuery);
+        if (animeTitle && episode && episodeNumber) {
+          const titleSim = this.similarity(animeTitle[1].trim(), searchQuery);
           const episodeSim = this.similarity(episode[0].trim(), episodeNumber);
+
+          console.log(titleSim, episodeSim);
 
           // If the title and episode are similar, and the resolution is similar, return
           if (
