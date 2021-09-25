@@ -18,6 +18,7 @@ import db from "./src/database/db";
       } else throw new Error(`${key} is not defined in profile.json`);
     }
   });
+
   await db.logIn();
   // Run the scheduler every 20 minutes
   await Scheduler.run("*/20 * * * *");
