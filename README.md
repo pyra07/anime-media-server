@@ -14,6 +14,8 @@ You give the program your Anilist profile. It looks at your current "*WATCHING*"
 
 ## How do I set this up?
 
+NOTE : This is currently closed 
+
 1. `npm install`
 2. Download qbittorrent
 3. Enable Web UI 
