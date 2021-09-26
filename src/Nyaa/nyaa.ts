@@ -204,8 +204,6 @@ class Nyaa {
           const titleSim = this.similarity(animeTitle[1].trim(), searchQuery);
           const episodeSim = this.similarity(episode[0].trim(), episodeNumber);
 
-          console.log(titleSim, episodeSim);
-
           // If the title and episode are similar, and the resolution is similar, return
           if (
             titleSim > 0.8 &&
