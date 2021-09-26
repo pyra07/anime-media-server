@@ -76,7 +76,7 @@ class Scheduler {
           isBatch
             ? `Currently downloading batch.`
             : downloadedEpisodes.length === 1
-            ? `Currently downloading episodes ${downloadedEpisodes[0]}`
+            ? `Currently downloading episode ${downloadedEpisodes[0]}`
             : `Currently downloading episodes ${downloadedEpisodes[0]}-${
                 downloadedEpisodes[downloadedEpisodes.length - 1]
               }`
