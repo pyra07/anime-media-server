@@ -14,7 +14,8 @@ You give the program your Anilist profile. It looks at your current "*WATCHING*"
 
 ## How do I set this up?
 
-NOTE : This is currently closed 
+NOTE : Firebase server that's used to store your animelists is currently private.
+You could make your own, however. 
 
 1. `npm install`
 2. Download qbittorrent
