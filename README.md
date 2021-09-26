@@ -14,21 +14,24 @@ You give the program your Anilist profile. It looks at your current "*WATCHING*"
 
 ## How do I set this up?
 
+NOTE : Firebase server that's used to store your animelists is currently private.
+You could make your own, however. 
+
 1. `npm install`
 2. Download qbittorrent
 3. Enable Web UI 
-4. Fill in `profile.json` with the following details:
+4. Create, then fill in `profile.json` with the following details:
 
 
-* _torrent_url_ ,where your qbittorrent server is set up at, usually gonna be "http://localhost:8080/"
+* _torrent_url_ ,where your qbittorrent webUI server is set up at, usually gonna be "http://localhost:8080/"
+
+*  _username_ and _password_ of your qbittorrent webUI server
 
 * _email_ and _emailPassword_, both obtained from firebase (details on how to sign up shall be implemented later!)
   
-*  _username_ and _password_
-  
-* Get your Anilist _username_ 
+* Get your Anilist username and fill it in _aniUserName_
 
-* Choose which _resolution_ to download anime. "480","720" or "1080" accepted
+* Choose which _resolution_ to download anime. "480","720" or "1080" accepted (1080 recommended because it's been tested extensively)
 
 * _root_dir_, where you want your downloads to be stored.
 
