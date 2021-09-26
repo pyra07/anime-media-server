@@ -216,7 +216,7 @@ class Nyaa {
         }
       }
     }
-    console.log(searchQuery, "not found");
+    console.log(searchQuery, "-", episodeNumber, "not found");
     return null;
   }
 }
