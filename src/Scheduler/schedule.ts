@@ -58,7 +58,7 @@ class Scheduler {
       console.log(`Downloading ${torrent.title} @ ${torrent.link}`);
 
       // Download torrent
-      var isAdded: boolean = await qbit.addTorrent(torrent.link, torrent.title);
+      var isAdded: boolean = await qbit.addTorrent(torrent.link, anime.media.title.romaji);
       if (isAdded)
         isBatch
           ? downloadedEpisodes.push(
