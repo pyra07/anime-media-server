@@ -36,3 +36,6 @@ You could make your own, however.
 * _root_dir_, where you want your downloads to be stored.
 
 5. Run `ts-node main.ts` (P.S you might need VPN)
+
+## Current Development Status
+App is working fine!
