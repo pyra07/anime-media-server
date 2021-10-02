@@ -1,4 +1,5 @@
 import { QBittorrent } from "@ctrl/qbittorrent";
+import path from "path/posix";
 import { torrent_url, password, username, rootDir } from "../../profile.json";
 
 class QbitTorrent {
@@ -15,7 +16,7 @@ class QbitTorrent {
   public async addTorrent(link: string, title: string): Promise<boolean> {
     await this.client.login();
     const isAdded = await this.client.addMagnet(link, {
-      savepath: `${rootDir}/${title}/`,
+      savepath: path.join(rootDir, title),
     });
     return isAdded;
   }
