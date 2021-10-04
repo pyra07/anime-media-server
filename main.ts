@@ -20,8 +20,9 @@ import discordBot from "./src/DiscordBot/main";
     }
   });
 
-  await discordBot.start(profile.token)
-  // await db.logIn();
+  await db.logIn();
+  discordBot.start(profile.token);
+  //await Scheduler.check();
   // // Run the scheduler every 20 minutes
-  // await Scheduler.run("*/20 * * * *");
+  await Scheduler.run("*/20 * * * *");
 })();
