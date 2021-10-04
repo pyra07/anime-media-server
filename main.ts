@@ -3,6 +3,7 @@ import profile from "./profile.json";
 import anilist from "./src/Anilist/anilist";
 import fs from "fs";
 import db from "./src/database/db";
+import discordBot from "./src/DiscordBot/main";
 
 (async () => {
   // Check if every key in profile is not null or empty
@@ -19,7 +20,8 @@ import db from "./src/database/db";
     }
   });
 
-  await db.logIn();
-  // Run the scheduler every 20 minutes
-  await Scheduler.run("*/20 * * * *");
+  await discordBot.start(profile.token)
+  // await db.logIn();
+  // // Run the scheduler every 20 minutes
+  // await Scheduler.run("*/20 * * * *");
 })();
