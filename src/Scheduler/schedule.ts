@@ -47,6 +47,13 @@ class Scheduler {
     );
   }
 
+  /**
+   * Downloads the torrents, and updates the database
+   * @param  {AniQuery} anime
+   * @param  {boolean} isBatch
+   * @param  {AnimeTorrent[]} ...animeTorrent
+   * @returns Promise
+   */
   private async downloadTorrents(
     anime: AniQuery,
     isBatch: boolean,
@@ -55,10 +62,15 @@ class Scheduler {
     const downloadedEpisodes = new Array<number>();
     for (const torrent of animeTorrent) {
       await new Promise((resolve) => setTimeout(resolve, 500));
-      console.log(`Downloading ${torrent.title} @ ${torrent.link}`);
+      console.log(
+        `Downloading ${torrent.title} - EPISODE ${torrent.episode} @ ${torrent.link}`
+      );
 
       // Download torrent
-      var isAdded: boolean = await qbit.addTorrent(torrent.link, anime.media.title.romaji);
+      var isAdded: boolean = await qbit.addTorrent(
+        torrent.link,
+        anime.media.title.romaji
+      );
       if (isAdded)
         isBatch
           ? downloadedEpisodes.push(
@@ -84,12 +96,13 @@ class Scheduler {
         .setImage(anime.media.coverImage.extraLarge)
     );
 
-    await DB.updateProgress(
-      anime.mediaId.toString(),
-      anime.media.nextAiringEpisode,
-      anime.media.status,
-      downloadedEpisodes
-    );
+    await DB.modifyAnimeEntry(anime.mediaId.toString(), {
+      "media.nextAiringEpisode": anime.media.nextAiringEpisode,
+      "media.status": anime.media.status,
+      downloadedEpisodes: firebase.firestore.FieldValue.arrayUnion(
+        ...downloadedEpisodes
+      ),
+    });
   }
 
   private async handleAnime(
@@ -113,15 +126,27 @@ class Scheduler {
         (item) => item.mediaId === anime.mediaId
       );
 
-      // Should find fail, just skip.
       if (!fireDBAnime) continue;
 
+      /* This is manually defined in the db by the user.
+        Some animes usually have a 2nd season, but instead of starting from episode 1, they start from
+        where they left off in season 1., e.g episode 13 */
+      const startingEpisode = fireDBAnime.media.startingEpisode
+        ? fireDBAnime.media.startingEpisode
+        : 0;
+
+      /* Sometimes the title found in nyaa.si is the shortform of the title.
+         manually defined in the db by the user. */
+      anime.media.title.romaji = fireDBAnime.media.alternativeTitle
+        ? fireDBAnime.media.alternativeTitle
+        : anime.media.title.romaji;
+
       // Users progress
-      const startEpisode = anime.progress;
+      const startEpisode = anime.progress + startingEpisode;
 
       // NextAiringEpisode can be null if the anime is finished. So check for that
       const endEpisode = anime.media.nextAiringEpisode
-        ? anime.media.nextAiringEpisode.episode - 1
+        ? anime.media.nextAiringEpisode.episode - 1 + startingEpisode
         : anime.media.episodes;
 
       // Firestore downloaded episodes

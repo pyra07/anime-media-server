@@ -33,13 +33,35 @@ module.exports = {
     const starting_episode = options.find(
       (option) => option.name === "starting_episode"
     );
-    await db.modifyAnimeEntry(animeid!.value as string, {
+    await interaction.deferReply({ ephemeral: true });
+
+    const isAdded = await db.modifyAnimeEntry(animeid!.value as string, {
       "media.alternativeTitle": animealt!.value as string,
       "media.startingEpisode": starting_episode
-        ? (starting_episode.value as number)
+        ? parseInt(starting_episode.value as string)
         : 0,
     });
-
-    await interaction.reply("Successfully modified!");
+    
+    if (isAdded) {
+      await interaction.editReply({
+        embeds: [
+          {
+            title: "Success",
+            description: `Anime entry ${animeid!.value} has been modified`,
+            color: 0x00ff00,
+          },
+        ],
+      });
+    } else {
+      await interaction.editReply({
+        embeds: [
+          {
+            title: "Error",
+            description: `Anime entry ${animeid!.value} could not be modified`,
+            color: 0xff0000,
+          },
+        ],
+      });
+    }
   },
 };

@@ -35,41 +35,31 @@ class DB {
   }
 
   public async modifyAnimeEntry(mediaId: string, data: Object) {
-    await this.myProject  
-      .firestore()
-      .collection("animelists")
-      .doc(DB.user.user?.uid)
-      .collection("anime")
-      .doc(mediaId)
-      .update(data);
+    try {
+      await this.myProject
+        .firestore()
+        .collection("animelists")
+        .doc(DB.user.user?.uid)
+        .collection("anime")
+        .doc(mediaId)
+        .update(data);
+      return true;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
   }
 
-  /**
-   * Updates your anime progression
-   * @param  {string} mediaId
-   * @param  {number} progress
-   * @returns {Promise}
-   */
-  public async updateProgress(
-    mediaId: string,
-    nextAiringEpisode: nextAiringEpisode | null,
-    status: status,
-    downloadedEpisodes: number[]
-  ): Promise<void> {
-    await this.myProject
+  public async getByMediaId(mediaId: string) {
+    return await this.myProject
       .firestore()
       .collection("animelists")
       .doc(DB.user.user?.uid)
       .collection("anime")
       .doc(mediaId)
-      .update({
-        "media.nextAiringEpisode": nextAiringEpisode,
-        "media.status": status,
-        downloadedEpisodes: firebase.firestore.FieldValue.arrayUnion(
-          ...downloadedEpisodes
-        ),
-      });
+      .get();
   }
+  
 
   /**
    * Gets the users animelist
