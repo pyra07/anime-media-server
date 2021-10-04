@@ -15,7 +15,7 @@ You give the program your Anilist profile. It looks at your current "*WATCHING*"
 ## How do I set this up?
 
 NOTE : Firebase server that's used to store your animelists is currently private.
-You could make your own, however. 
+You could make your own, however. These instructions are for future me.
 
 1. `npm install`
 2. Download qbittorrent
@@ -35,7 +35,9 @@ You could make your own, however.
 
 * _root_dir_, where you want your downloads to be stored.
 
+* _token_, _guildId_, _clientId_, all taken from a Discord Bot
+
 5. Run `ts-node main.ts` (P.S you might need VPN)
 
 ## Current Development Status
-App is working fine!
+App is working fine! LOL
