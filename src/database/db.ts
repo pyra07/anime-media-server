@@ -34,6 +34,16 @@ class DB {
     }
   }
 
+  public async modifyAnimeEntry(mediaId: string, data: Object) {
+    await this.myProject  
+      .firestore()
+      .collection("animelists")
+      .doc(DB.user.user?.uid)
+      .collection("anime")
+      .doc(mediaId)
+      .update(data);
+  }
+
   /**
    * Updates your anime progression
    * @param  {string} mediaId
