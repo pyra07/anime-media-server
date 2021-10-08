@@ -54,7 +54,7 @@ class ui {
     this.addCommands("Run the Anime Scheduler", this.runScheduler);
     this.addCommands(
       "Run the Anime Scheduler AND Discord Bot (need creds)",
-      this.runSchedulerDiscord
+      async () => await this.runSchedulerDiscord()
     );
     this.addCommands("Exit", () => process.exit());
 
