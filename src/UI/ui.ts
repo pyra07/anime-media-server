@@ -43,7 +43,9 @@ class ui {
   }
 
   private async runSchedulerDiscord() {
-    await this.runScheduler();
+    console.log("Running the scheduler...");
+    await db.logIn();
+    await schedule.run(`*/${interval} * * * *`);
     discordBot.start(token);
   }
 
