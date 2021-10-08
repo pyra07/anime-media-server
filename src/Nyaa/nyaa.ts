@@ -190,7 +190,7 @@ class Nyaa {
       let subGroup = title.match(/\[(.*?)\]/);
 
       if (isBatch) {
-        let animeTitle = title.match(/\[.*\] (.+?) \(/);
+        let animeTitle = title.match(/\[.*\] (.+?) [\(\[]/);
         // If animetitle is found, check similarity and if it's above the threshold, return
         if (animeTitle) {
           const similarity = this.similarity(searchQuery, animeTitle[1]);
