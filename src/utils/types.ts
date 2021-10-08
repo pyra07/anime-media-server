@@ -26,17 +26,16 @@ export interface AniTitle {
   native: string;
 }
 
-
 export interface AniMedia {
   episodes: number;
   status: status;
-  endDate : {
+  endDate: {
     year: number | null;
     month: number | null;
     day: number | null;
-  }
+  };
   nextAiringEpisode: nextAiringEpisode | null;
-  title: AniTitle
+  title: AniTitle;
   coverImage: AniCoverImage;
 }
 export interface AniCoverImage {
@@ -49,4 +48,9 @@ export interface AniQuery {
   progress: number;
   mediaId: number;
   media: AniMedia;
+}
+
+export interface Command {
+  msg: string;
+  cmd: Function;
 }

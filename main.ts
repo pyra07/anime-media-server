@@ -1,9 +1,7 @@
-import Scheduler from "./src/Scheduler/schedule";
 import profile from "./profile.json";
 import anilist from "./src/Anilist/anilist";
 import fs from "fs";
-import db from "./src/database/db";
-import discordBot from "./src/DiscordBot/main";
+import ui from "./src/UI/ui";
 
 (async () => {
   // Check if every key in profile is not null or empty
@@ -20,9 +18,5 @@ import discordBot from "./src/DiscordBot/main";
     }
   });
 
-  await db.logIn();
-  discordBot.start(profile.token);
-  //await Scheduler.check();
-  // // Run the scheduler every 20 minutes
-  await Scheduler.run("*/20 * * * *");
+  ui.init();
 })();
