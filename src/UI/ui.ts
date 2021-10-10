@@ -46,10 +46,22 @@ class ui {
     console.log("Running the scheduler...");
     await db.logIn();
     await schedule.run(`*/${interval} * * * *`);
-    discordBot.start(token);
+    // discordBot.start(token);
   }
 
-  public async init() {
+  private async selectChoice(arg: number) {
+    const cmd = this.commands[arg - 1];
+    if (cmd) {
+      cmd.cmd();
+      this.cl.close();
+    } else {
+      console.log("Invalid command!");
+      this.cl.close();
+      process.exit();
+    }
+  }
+
+  public async init(arg?: string) {
     this.addCommands("Run the Anime Scheduler (once)", this.runSchedulerOnce);
     this.addCommands("Run the Anime Scheduler", this.runScheduler);
     this.addCommands(
@@ -58,20 +70,14 @@ class ui {
     );
     this.addCommands("Exit", () => process.exit());
 
-    this.cl.question(
-      `Welcome to Animu!\n${this.printCommands()}\nPlease enter your command: `,
-      (answer) => {
-        const cmd = this.commands[parseInt(answer) - 1];
-        if (cmd) {
-          cmd.cmd();
-          this.cl.close();
-        } else {
-          console.log("Invalid command!");
-          this.cl.close();
-          process.exit();
-        }
-      }
-    );
+    if (arg) {
+      this.selectChoice(parseInt(arg));
+    } else {
+      this.cl.question(
+        `Welcome to Animu!\n${this.printCommands()}\nPlease enter your command: `,
+        (answer) => this.selectChoice(parseInt(answer))
+      );
+    }
   }
 }
 
