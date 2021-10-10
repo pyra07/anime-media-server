@@ -82,17 +82,11 @@ class Scheduler {
     await this.hook.send(
       new MessageBuilder()
         .setTimestamp()
-        .setTitle(`**${anime.media.title.romaji}**`)
+        .setTitle(`**${anime.media.title.romaji}** is downloading!`)
         .setColor(0x0997e3)
-        .setDescription(
-          isBatch
-            ? `Currently downloading batch.`
-            : downloadedEpisodes.length === 1
-            ? `Currently downloading episode ${downloadedEpisodes[0]}`
-            : `Currently downloading episodes ${downloadedEpisodes[0]}-${
-                downloadedEpisodes[downloadedEpisodes.length - 1]
-              }`
-        )
+        .addField("Episode(s)", this.joinArr(downloadedEpisodes), true)
+        .addField("Seeders", animeTorrent[0]["nyaa:seeders"], true)
+        .addField("Title", animeTorrent[0].title, true)
         .setImage(anime.media.coverImage.extraLarge)
     );
 
@@ -103,6 +97,13 @@ class Scheduler {
         ...downloadedEpisodes
       ),
     });
+  }
+
+  private joinArr(array: any[]) {
+    if (array.length === 1) {
+      return array[0];
+    }
+    return `${array[0]} - ${array[array.length - 1]}`;
   }
 
   private async handleAnime(
@@ -151,10 +152,6 @@ class Scheduler {
 
       // Firestore downloaded episodes
       const fsDownloadedEpisodes: any[] = fireDBAnime.downloadedEpisodes || [];
-
-      // console.log(
-      //   `${anime.media.title.romaji} - ${startEpisode} - ${endEpisode} - [${fsDownloadedEpisodes.join(",")}]`
-      // );
 
       // If progress is up to date, then skip
       // Or if the user has downloaded all episodes, then skip
