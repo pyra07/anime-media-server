@@ -150,15 +150,21 @@ class Scheduler {
         : anime.media.episodes;
 
       // Firestore downloaded episodes
-      const fsDownloadedEpisodes = fireDBAnime.downloadedEpisodes || [];
+      const fsDownloadedEpisodes: any[] = fireDBAnime.downloadedEpisodes || [];
+
+      // console.log(
+      //   `${anime.media.title.romaji} - ${startEpisode} - ${endEpisode} - [${fsDownloadedEpisodes.join(",")}]`
+      // );
 
       // If progress is up to date, then skip
       // Or if the user has downloaded all episodes, then skip
-      if (
+      const isUpToDate =
         startEpisode === endEpisode ||
-        fsDownloadedEpisodes.length === endEpisode - startEpisode
-      )
-        continue;
+        anime.progress >= endEpisode ||
+        anime.progress === anime.media.episodes ||
+        fsDownloadedEpisodes.length === anime.media.episodes;
+
+      if (isUpToDate) continue;
 
       const torrents = await Nyaa.getTorrents(
         anime,
