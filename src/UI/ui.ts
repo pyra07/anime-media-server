@@ -46,7 +46,7 @@ class ui {
     console.log("Running the scheduler...");
     await db.logIn();
     await schedule.run(`*/${interval} * * * *`);
-    // discordBot.start(token);
+     discordBot.start(token);
   }
 
   private async selectChoice(arg: number) {
