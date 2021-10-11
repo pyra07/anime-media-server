@@ -67,7 +67,7 @@ class DB {
    * @returns {Promise}
    */
   public async getFromDb(): Promise<
-    fb.firestore.QuerySnapshot<fb.firestore.DocumentData > | undefined
+    fb.firestore.QuerySnapshot<fb.firestore.DocumentData> | undefined
   > {
     try {
       return await this.myProject
@@ -82,8 +82,6 @@ class DB {
     }
       
     }
-    
-  }
 
   public async createUserDB() {
     await this.myProject
