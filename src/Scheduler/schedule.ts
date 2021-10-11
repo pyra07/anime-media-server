@@ -183,11 +183,9 @@ class Scheduler {
 
     if (animeDb.length === 0) return;
 
-    if (fireDB.docs.length === 0) {
-      console.log("No firebase data found. Creating new one");
-      await DB.createUserDB();
-      await DB.addToDb(animeDb);
-      await this.handleAnime(animeDb);
+    if (fireDB === undefined) {
+      console.log("No firebase data found. Logging in? Maybe that would fix");
+      await DB.logIn();
     } else {
       const fireDBData = fireDB.docs.map((doc) => doc.data()); // convert to array
       await this.handleAnime(animeDb, fireDBData);
