@@ -22,7 +22,7 @@ class QbitTorrent {
     const isAdded = await this.client.addMagnet(link, {
       savepath: path.join(rootDir, title),
       sequentialDownload: "true",
-      rename: episodeStr ? `${title} - ${episodeStr}` : undefined,
+      rename: episodeStr ? `${title} - ${episodeStr}` : title,
     });
     return isAdded;
   }
