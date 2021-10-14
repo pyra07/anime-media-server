@@ -12,7 +12,7 @@ export interface AnimeTorrent {
   contentSnipet: string;
   guid: string;
   isoDate: string;
-  episode: string;
+  episode?: string;
 }
 
 export interface nextAiringEpisode {

@@ -69,10 +69,11 @@ class Scheduler {
       // Download torrent
       var isAdded: boolean = await qbit.addTorrent(
         torrent.link,
-        anime.media.title.romaji
+        anime.media.title.romaji,
+        torrent.episode
       );
       if (isAdded)
-        isBatch
+        isBatch || !torrent.episode
           ? downloadedEpisodes.push(
               ...Array.from({ length: anime.media.episodes }, (_, i) => i + 1)
             )

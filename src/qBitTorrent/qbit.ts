@@ -13,10 +13,16 @@ class QbitTorrent {
     });
   }
 
-  public async addTorrent(link: string, title: string): Promise<boolean> {
+  public async addTorrent(
+    link: string,
+    title: string,
+    episodeStr?: string
+  ): Promise<boolean> {
     await this.client.login();
     const isAdded = await this.client.addMagnet(link, {
       savepath: path.join(rootDir, title),
+      sequentialDownload: "true",
+      rename: episodeStr ? `${title} - S${episodeStr}` : undefined,
     });
     return isAdded;
   }
