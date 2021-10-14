@@ -67,15 +67,21 @@ class DB {
    * @returns {Promise}
    */
   public async getFromDb(): Promise<
-    fb.firestore.QuerySnapshot<fb.firestore.DocumentData>
+    fb.firestore.QuerySnapshot<fb.firestore.DocumentData> | undefined
   > {
-    return await this.myProject
+    try {
+      return await this.myProject
       .firestore()
       .collection("animelists")
       .doc(DB.user.user?.uid)
       .collection("anime")
       .get();
-  }
+    } catch (error) {
+      console.error(error);
+      return undefined;
+    }
+      
+    }
 
   public async createUserDB() {
     await this.myProject
