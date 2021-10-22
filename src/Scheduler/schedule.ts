@@ -187,10 +187,7 @@ class Scheduler {
     if (fireDb === undefined) {
       console.log("No fb data maybe log in?");
       DB.logIn();
-    } else {
-      const fireDBData = fireDb.docs.map((doc) => doc.data()); // firebase data converted to array
-      await this.handleAnime(animeDb, fireDBData);
-    }
+    } else await this.handleAnime(animeDb, fireDb);
   }
 }
 

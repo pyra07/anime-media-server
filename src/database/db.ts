@@ -61,13 +61,30 @@ class DB {
   }
 
   public async getAnimeEntries(...mediaId: string[]) {
-    return await this.myProject
-      .firestore()
-      .collection("animelists")
-      .doc(DB.user.user?.uid)
-      .collection("anime")
-      .where(firebase.firestore.FieldPath.documentId(), "in", mediaId)
-      .get();
+    /* If the length of the mediaId array is greater than 10, we need to split it up into chunks of 10
+      and then call the getAnimeEntries function on each chunk. 
+      This is because firebase is gay*/
+
+    let chunks: string[][] = [];
+    let animeEntries: fb.firestore.DocumentData[] = [];
+
+    if (mediaId.length > 10) {
+      for (let i = 0; i < mediaId.length; i += 10) {
+        chunks.push(mediaId.slice(i, i + 10));
+      }
+    }
+
+    for (const chunk of chunks) {
+      const entries = await this.myProject
+        .firestore()
+        .collection("animelists")
+        .doc(DB.user.user?.uid)
+        .collection("anime")
+        .where(firebase.firestore.FieldPath.documentId(), "in", chunk)
+        .get();
+      animeEntries.push(...entries.docs.map((doc) => doc.data()));
+    }
+    return animeEntries;
   }
 
   /**
