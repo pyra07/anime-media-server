@@ -59,7 +59,16 @@ class DB {
       .doc(mediaId)
       .get();
   }
-  
+
+  public async getAnimeEntries(...mediaId: string[]) {
+    return await this.myProject
+      .firestore()
+      .collection("animelists")
+      .doc(DB.user.user?.uid)
+      .collection("anime")
+      .where(firebase.firestore.FieldPath.documentId(), "in", mediaId)
+      .get();
+  }
 
   /**
    * Gets the users animelist
@@ -71,17 +80,16 @@ class DB {
   > {
     try {
       return await this.myProject
-      .firestore()
-      .collection("animelists")
-      .doc(DB.user.user?.uid)
-      .collection("anime")
-      .get();
+        .firestore()
+        .collection("animelists")
+        .doc(DB.user.user?.uid)
+        .collection("anime")
+        .get();
     } catch (error) {
       console.error(error);
       return undefined;
     }
-      
-    }
+  }
 
   public async createUserDB() {
     await this.myProject
@@ -93,16 +101,6 @@ class DB {
         "Anilist ID": id,
         "Date Created": firebase.firestore.FieldValue.serverTimestamp(),
       });
-  }
-
-  public async getAnimeEntry(mediaId: string) {
-    return await this.myProject
-      .firestore()
-      .collection("animelists")
-      .doc(DB.user.user?.uid)
-      .collection("anime")
-      .doc(mediaId)
-      .get();
   }
 }
 export default new DB();

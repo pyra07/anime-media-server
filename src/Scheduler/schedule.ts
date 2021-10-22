@@ -107,18 +107,27 @@ class Scheduler {
     return `${array[0]} - ${array[array.length - 1]}`;
   }
 
-  private async handleAnime(animeDb: AniQuery[]) {
-    // Go thru each anime
+  private async handleAnime(
+    animeDb: AniQuery[],
+    fireDBData: firebase.firestore.DocumentData[]
+  ) {
+    // Check if fireDBData is empty
+    if (fireDBData === undefined) {
+      fireDBData = animeDb as firebase.firestore.DocumentData[];
+    }
+
+    // Check if user has added new anime. If so, add it to firebase
+    const listDifferences = this.getDifferences(animeDb, fireDBData);
+    if (listDifferences.length > 0) await DB.addToDb(listDifferences);
+    fireDBData.push(...listDifferences);
+    // Go thru each anime in animeDb
     for (let index = 0; index < animeDb.length; index++) {
       const anime = animeDb[index];
-      let fireDBAnime = (
-        await DB.getAnimeEntry(anime.mediaId.toString())
-      ).data();
+      const fireDBAnime = fireDBData.find(
+        (item) => item.mediaId === anime.mediaId
+      );
 
-      if (!fireDBAnime) {
-        DB.addToDb(anime);
-        fireDBAnime = anime;
-      }
+      if (!fireDBAnime) continue;
 
       /* This is manually defined in the db by the user.
         Some animes usually have a 2nd season, but instead of starting from episode 1, they start from
@@ -169,11 +178,19 @@ class Scheduler {
 
   public async check() {
     const animeDb: AniQuery[] = await Anilist.getAnimeUserList();
+    const fireDb = await DB.getAnimeEntries(
+      ...animeDb.map((anime) => anime.mediaId.toString())
+    );
     // check if animeDb is empty
 
     if (animeDb.length === 0) return;
-
-    await this.handleAnime(animeDb);
+    if (fireDb === undefined) {
+      console.log("No fb data maybe log in?");
+      DB.logIn();
+    } else {
+      const fireDBData = fireDb.docs.map((doc) => doc.data()); // firebase data converted to array
+      await this.handleAnime(animeDb, fireDBData);
+    }
   }
 }
 
