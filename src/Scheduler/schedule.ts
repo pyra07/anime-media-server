@@ -7,6 +7,7 @@ import qbit from "../qBitTorrent/qbit";
 import { AnimeTorrent, AniQuery, AniTitle } from "../utils/types";
 import { MessageBuilder, Webhook } from "discord-webhook-node";
 import { webhook } from "../../profile.json";
+import { log } from "console";
 
 class Scheduler {
   private hook: Webhook;
@@ -38,7 +39,7 @@ class Scheduler {
       cronTime,
       async () => {
         // log with current time
-        console.log("Checking", new Date().toLocaleTimeString());
+        log("Checking", new Date().toLocaleTimeString());
         await this.check();
       },
       null,
@@ -62,7 +63,7 @@ class Scheduler {
     const downloadedEpisodes = new Array<number>();
     for (const torrent of animeTorrent) {
       await new Promise((resolve) => setTimeout(resolve, 500));
-      console.log(
+      log(
         `Downloading ${torrent.title} - EPISODE ${torrent.episode} @ ${torrent.link}`
       );
 
@@ -118,8 +119,12 @@ class Scheduler {
 
     // Check if user has added new anime. If so, add it to firebase
     const listDifferences = this.getDifferences(animeDb, fireDBData);
-    if (listDifferences.length > 0) await DB.addToDb(listDifferences);
-    fireDBData.push(...listDifferences);
+
+    if (listDifferences.length > 0) {
+      DB.addToDb(...listDifferences);
+      fireDBData.push(...listDifferences);
+    }
+
     // Go thru each anime in animeDb
     for (let index = 0; index < animeDb.length; index++) {
       const anime = animeDb[index];
@@ -185,7 +190,7 @@ class Scheduler {
 
     if (animeDb.length === 0) return;
     if (fireDb === undefined) {
-      console.log("No fb data maybe log in?");
+      log("No fb data maybe log in?");
       DB.logIn();
     } else await this.handleAnime(animeDb, fireDb);
   }

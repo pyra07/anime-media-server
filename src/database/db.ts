@@ -68,10 +68,8 @@ class DB {
     let chunks: string[][] = [];
     let animeEntries: fb.firestore.DocumentData[] = [];
 
-    if (mediaId.length > 10) {
-      for (let i = 0; i < mediaId.length; i += 10) {
-        chunks.push(mediaId.slice(i, i + 10));
-      }
+    for (let i = 0; i < mediaId.length; i += 10) {
+      chunks.push(mediaId.slice(i, i + 10));
     }
 
     for (const chunk of chunks) {
