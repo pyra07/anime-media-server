@@ -22,7 +22,7 @@ class DB {
    * @param  {any[]} data
    * @returns Promise
    */
-  public async addToDb(data: any[]): Promise<void> {
+  public async addToDb(...data: any[]): Promise<void> {
     for (let i = 0; i < data.length; i++) {
       await this.myProject
         .firestore()
@@ -93,6 +93,16 @@ class DB {
         "Anilist ID": id,
         "Date Created": firebase.firestore.FieldValue.serverTimestamp(),
       });
+  }
+
+  public async getAnimeEntry(mediaId: string) {
+    return await this.myProject
+      .firestore()
+      .collection("animelists")
+      .doc(DB.user.user?.uid)
+      .collection("anime")
+      .doc(mediaId)
+      .get();
   }
 }
 export default new DB();
