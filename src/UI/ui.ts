@@ -43,7 +43,7 @@ class ui {
   }
 
   private async runSchedulerDiscord() {
-     runScheduler();
+     this.runScheduler();
      discordBot.start(token);
   }
 
