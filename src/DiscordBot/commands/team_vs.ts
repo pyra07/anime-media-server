@@ -100,7 +100,6 @@ module.exports = {
       const game_2 = gameData_2.find((g) => g.beatmap_id === game.beatmap_id);
       if (game_2 !== undefined) {
         // Get scores for both teams, add them an
-        console.log(game.scores, game_2.scores);
 
         const gameScore_1 = game.scores.reduce(
           (acc, cur) =>
@@ -112,7 +111,6 @@ module.exports = {
             cur.team === team_color_2 ? acc + parseInt(cur.score) : acc,
           0
         );
-        console.log(gameScore_1, gameScore_2);
 
         if (gameScore_1 > gameScore_2) team_1_score += 1;
         else team_2_score += 1;
