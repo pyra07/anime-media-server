@@ -99,17 +99,20 @@ module.exports = {
     gameData_1.forEach((game) => {
       const game_2 = gameData_2.find((g) => g.beatmap_id === game.beatmap_id);
       if (game_2 !== undefined) {
-        
+        // Get scores for both teams, add them an
+        console.log(game.scores, game_2.scores);
+
         const gameScore_1 = game.scores.reduce(
           (acc, cur) =>
-            cur.team === team_color_1 ? acc + parseInt(cur.score) : 0,
+            cur.team === team_color_1 ? acc + parseInt(cur.score) : acc,
           0
         );
         const gameScore_2 = game_2.scores.reduce(
           (acc, cur) =>
-            cur.team === team_color_2 ? acc + parseInt(cur.score) : 0,
+            cur.team === team_color_2 ? acc + parseInt(cur.score) : acc,
           0
         );
+        console.log(gameScore_1, gameScore_2);
 
         if (gameScore_1 > gameScore_2) team_1_score += 1;
         else team_2_score += 1;
