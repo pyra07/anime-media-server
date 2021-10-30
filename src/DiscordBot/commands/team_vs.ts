@@ -108,11 +108,12 @@ module.exports = {
           (acc, cur) => acc + parseInt(cur.score),
           0
         );
+        console.log(gameScore_1, gameScore_2);
+        
         if (gameScore_1 > gameScore_2) team_1_score += 1;
         else team_2_score += 1;
       }
     });
-    log(team_1_score, team_2_score);
     await interaction.editReply({
         embeds: [
             {
