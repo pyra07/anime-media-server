@@ -120,7 +120,7 @@ module.exports = {
       embeds: [
         {
           title: "Team VS",
-          description: `Team 1: ${team_1_score} - Team 2: ${team_2_score}`,
+          description: `Team 1: ${team_1_score}\nTeam 2: ${team_2_score}`,
           color: 0x00ff00,
         },
       ],
