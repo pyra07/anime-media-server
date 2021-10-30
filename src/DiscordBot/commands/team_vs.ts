@@ -21,8 +21,8 @@ module.exports = {
         .setRequired(true)
         .setDescription("The first team color. Can be either red or blue")
         .addChoices([
-          ["Red", "1"],
-          ["Blue", "2"],
+          ["Red", "2"],
+          ["Blue", "1"],
         ])
     )
     .addStringOption((option) =>
@@ -37,8 +37,8 @@ module.exports = {
         .setRequired(true)
         .setDescription("The second team color. Can be either red or blue")
         .addChoices([
-          ["Red", "1"],
-          ["Blue", "2"],
+          ["Red", "2"],
+          ["Blue", "1"],
         ])
     ),
   async execute(interaction: CommandInteraction) {
@@ -99,31 +99,30 @@ module.exports = {
     gameData_1.forEach((game) => {
       const game_2 = gameData_2.find((g) => g.beatmap_id === game.beatmap_id);
       if (game_2 !== undefined) {
-        // Get scores for both teams, add them an
-        console.log(game.scores, game_2.scores);
         
         const gameScore_1 = game.scores.reduce(
-          (acc, cur) => acc + parseInt(cur.score),
+          (acc, cur) =>
+            cur.team === team_color_1 ? acc + parseInt(cur.score) : 0,
           0
         );
         const gameScore_2 = game_2.scores.reduce(
-          (acc, cur) => acc + parseInt(cur.score),
+          (acc, cur) =>
+            cur.team === team_color_2 ? acc + parseInt(cur.score) : 0,
           0
         );
-        console.log(gameScore_1, gameScore_2);
-        
+
         if (gameScore_1 > gameScore_2) team_1_score += 1;
         else team_2_score += 1;
       }
     });
     await interaction.editReply({
-        embeds: [
-            {
-                title: "Team VS",
-                description: `Team 1: ${team_1_score} - Team 2: ${team_2_score}`,
-                color: 0x00ff00,
-            },
-        ],
+      embeds: [
+        {
+          title: "Team VS",
+          description: `Team 1: ${team_1_score} - Team 2: ${team_2_score}`,
+          color: 0x00ff00,
+        },
+      ],
     });
   },
 };
