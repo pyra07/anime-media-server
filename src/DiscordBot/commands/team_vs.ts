@@ -91,20 +91,34 @@ module.exports = {
       return;
     }
 
+    let team_1_score = 0;
+    let team_2_score = 0;
+
     // Merge the two game data, which contain the same beatmap_id
-    const mergedGameData = gameData_1.map((game) => {
-      const game_2 = gameData_2.find(
-        (game_2) => game_2.beatmap_id === game.beatmap_id
-      );
-      return {
-        ...game,
-        ...game_2,
-      };
+    gameData_1.forEach((game) => {
+      const game_2 = gameData_2.find((g) => g.beatmap_id === game.beatmap_id);
+      if (game_2 !== undefined) {
+        // Get scores for both teams, add them an
+        const gameScore_1 = game.scores.reduce(
+          (acc, cur) => acc + parseInt(cur.score),
+          0
+        );
+        const gameScore_2 = game_2.scores.reduce(
+          (acc, cur) => acc + parseInt(cur.score),
+          0
+        );
+        if (gameScore_1 > gameScore_2) team_1_score += 1;
+        else if (gameScore_1 < gameScore_2) team_2_score += 1;
+      }
     });
-
-    console.log(mergedGameData);
-    
-
-    
+    await interaction.editReply({
+        embeds: [
+            {
+                title: "Team VS",
+                description: `Team 1: ${team_1_score} - Team 2: ${team_2_score}`,
+                color: 0x00ff00,
+            },
+        ],
+    });
   },
 };
