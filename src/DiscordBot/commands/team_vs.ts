@@ -1,5 +1,6 @@
 // Sends users current anime list
 import { SlashCommandBuilder } from "@discordjs/builders";
+import { log } from "console";
 import { CommandInteraction } from "discord.js";
 import anilist from "../../Anilist/anilist";
 import osu from "../osu/osu";
@@ -108,9 +109,10 @@ module.exports = {
           0
         );
         if (gameScore_1 > gameScore_2) team_1_score += 1;
-        else if (gameScore_1 < gameScore_2) team_2_score += 1;
+        else team_2_score += 1;
       }
     });
+    log(team_1_score, team_2_score);
     await interaction.editReply({
         embeds: [
             {
