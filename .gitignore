@@ -137,6 +137,3 @@ dist
 src/data/data.json
 profile.json
 test.ts
-src/DiscordBot/commands/mc.ts
-src/DiscordBot/osu/osu.ts
-src/DiscordBot/osu/util/types.ts
