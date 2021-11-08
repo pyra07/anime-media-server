@@ -112,11 +112,6 @@ class Scheduler {
     animeDb: AniQuery[],
     fireDBData: firebase.firestore.DocumentData[]
   ) {
-    // Check if fireDBData is empty
-    if (fireDBData === undefined) {
-      fireDBData = animeDb as firebase.firestore.DocumentData[];
-    }
-
     // Check if user has added new anime. If so, add it to firebase
     const listDifferences = this.getDifferences(animeDb, fireDBData);
 
@@ -189,7 +184,7 @@ class Scheduler {
     // check if animeDb is empty
 
     if (animeDb.length === 0) return;
-    if (fireDb === undefined) {
+    if (fireDb.length === 0) {
       log("No fb data maybe log in?");
       DB.logIn();
     } else await this.handleAnime(animeDb, fireDb);
