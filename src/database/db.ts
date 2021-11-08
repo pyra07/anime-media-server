@@ -1,7 +1,7 @@
 import fb from "firebase";
 import { firebaseConfig } from "./creds.json";
 import { id, aniUserName, email, emailPassword } from "../../profile.json";
-import { nextAiringEpisode, status } from "../utils/types";
+import { AniQuery, nextAiringEpisode, status } from "../utils/types";
 import firebase from "firebase";
 
 class DB {
@@ -22,15 +22,16 @@ class DB {
    * @param  {any[]} data
    * @returns Promise
    */
-  public async addToDb(...data: any[]): Promise<void> {
+  public async addToDb(...data: AniQuery[]): Promise<void> {
     for (let i = 0; i < data.length; i++) {
+      const dataToAdd = data[i];
       await this.myProject
         .firestore()
         .collection("animelists")
         .doc(DB.user.user?.uid)
         .collection("anime")
-        .doc(data[i]["mediaId"].toString())
-        .set(data[i]);
+        .doc(dataToAdd["mediaId"].toString())
+        .update(dataToAdd);
     }
   }
 
