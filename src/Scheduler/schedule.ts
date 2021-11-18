@@ -81,7 +81,7 @@ class Scheduler {
           : downloadedEpisodes.push(parseInt(torrent.episode));
     }
 
-    await this.hook.send(
+    this.hook.send(
       new MessageBuilder()
         .setTimestamp()
         .setTitle(`**${anime.media.title.romaji}** is downloading!`)
@@ -114,9 +114,10 @@ class Scheduler {
   ) {
     // Check if user has added new anime. If so, add it to firebase
     const listDifferences = this.getDifferences(animeDb, fireDBData);
+    log(`${listDifferences.length} new anime added`);
 
     if (listDifferences.length > 0) {
-      DB.addToDb(...listDifferences);
+      await DB.addToDb(...listDifferences);
       fireDBData.push(...listDifferences);
     }
 
@@ -184,10 +185,8 @@ class Scheduler {
     // check if animeDb is empty
 
     if (animeDb.length === 0) return;
-    if (fireDb.length === 0) {
-      log("No fb data maybe log in?");
-      DB.logIn();
-    } else await this.handleAnime(animeDb, fireDb);
+    if (fireDb.length === 0) log("No fb data maybe log in?");
+    else await this.handleAnime(animeDb, fireDb);
   }
 }
 
