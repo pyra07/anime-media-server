@@ -31,7 +31,7 @@ class DB {
         .doc(DB.user.user?.uid)
         .collection("anime")
         .doc(dataToAdd["mediaId"].toString())
-        .update(dataToAdd);
+        .set(dataToAdd);
     }
   }
 
