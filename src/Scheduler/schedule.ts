@@ -114,9 +114,9 @@ class Scheduler {
   ) {
     // Check if user has added new anime. If so, add it to firebase
     const listDifferences = this.getDifferences(animeDb, fireDBData);
-    log(`${listDifferences.length} new anime added`);
 
     if (listDifferences.length > 0) {
+      log(`${listDifferences.length} new anime added`);
       await DB.addToDb(...listDifferences);
       fireDBData.push(...listDifferences);
     }
