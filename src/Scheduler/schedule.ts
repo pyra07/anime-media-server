@@ -184,8 +184,7 @@ class Scheduler {
     );
     // check if animeDb is empty
 
-    if (animeDb.length === 0) return;
-    if (fireDb.length === 0) return;
+    if (animeDb.length === 0 || fireDb.length === 0) return;
     else await this.handleAnime(animeDb, fireDb);
   }
 }
