@@ -73,16 +73,21 @@ class DB {
       chunks.push(mediaId.slice(i, i + 10));
     }
 
-    for (const chunk of chunks) {
-      const entries = await this.myProject
-        .firestore()
-        .collection("animelists")
-        .doc(DB.user.user?.uid)
-        .collection("anime")
-        .where(firebase.firestore.FieldPath.documentId(), "in", chunk)
-        .get();
-      animeEntries.push(...entries.docs.map((doc) => doc.data()));
+    try {
+      for (const chunk of chunks) {
+        const entries = await this.myProject
+          .firestore()
+          .collection("animelists")
+          .doc(DB.user.user?.uid)
+          .collection("anime")
+          .where(firebase.firestore.FieldPath.documentId(), "in", chunk)
+          .get();
+        animeEntries.push(...entries.docs.map((doc) => doc.data()));
+      }
+    } catch (error) {
+      return [];
     }
+
     return animeEntries;
   }
 
