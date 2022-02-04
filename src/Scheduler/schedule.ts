@@ -116,7 +116,18 @@ class Scheduler {
     const listDifferences = this.getDifferences(animeDb, fireDBData);
 
     if (listDifferences.length > 0) {
-      log(`${listDifferences.length} new anime added`);
+      // log(`${listDifferences.length} new anime added`);
+      this.hook.send(
+        new MessageBuilder()
+          .setTimestamp()
+          .setTitle(`**${listDifferences.length} new anime added!**`)
+          .setColor(0x0997e3)
+          .setDescription(
+            `${listDifferences
+              .map((anime) => anime.media.title.romaji)
+              .join(", ")}`
+          )
+      );
       await DB.addToDb(...listDifferences);
       fireDBData.push(...listDifferences);
     }
