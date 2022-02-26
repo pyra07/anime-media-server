@@ -86,8 +86,8 @@ class DB {
           .get();
         animeEntries.push(...entries.docs.map((doc) => doc.data()));
       } catch (error) {
-        console.log("Error with the chunk function");
-        console.log("Log of the animeEntries array: ");
+        console.log("Error with the chunk function. Details below:");
+        console.error(error);
         console.log(animeEntries);
         return [];
       }
