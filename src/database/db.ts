@@ -73,8 +73,10 @@ class DB {
       chunks.push(mediaId.slice(i, i + 10));
     }
 
-    try {
-      for (const chunk of chunks) {
+    for (let chunk = 0; chunk < chunks.length; chunk++) {
+      const element = chunks[chunk];
+
+      try {
         const entries = await this.myProject
           .firestore()
           .collection("animelists")
@@ -83,9 +85,12 @@ class DB {
           .where(firebase.firestore.FieldPath.documentId(), "in", chunk)
           .get();
         animeEntries.push(...entries.docs.map((doc) => doc.data()));
+      } catch (error) {
+        console.log("Error with the chunk function");
+        console.log("Log of the animeEntries array: ");
+        console.log(animeEntries);
+        return [];
       }
-    } catch (error) {
-      return [];
     }
 
     return animeEntries;
