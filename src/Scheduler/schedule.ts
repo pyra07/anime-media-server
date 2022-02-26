@@ -117,7 +117,6 @@ class Scheduler {
 
     if (listDifferences.length > 0) {
       // log(`${listDifferences.length} new anime added`);
-log(fireDBData)
       this.hook.send(
         new MessageBuilder()
           .setTimestamp()
