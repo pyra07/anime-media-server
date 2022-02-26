@@ -82,7 +82,7 @@ class DB {
           .collection("animelists")
           .doc(DB.user.user?.uid)
           .collection("anime")
-          .where(firebase.firestore.FieldPath.documentId(), "in", chunk)
+          .where(firebase.firestore.FieldPath.documentId(), "in", element)
           .get();
         animeEntries.push(...entries.docs.map((doc) => doc.data()));
       } catch (error) {
