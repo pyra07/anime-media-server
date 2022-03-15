@@ -31,7 +31,7 @@ class DB {
         .doc(DB.user.user?.uid)
         .collection("anime")
         .doc(dataToAdd["mediaId"].toString())
-        .set(dataToAdd, {merge : false});
+        .set(dataToAdd, { merge: false });
     }
   }
 
@@ -62,6 +62,18 @@ class DB {
   }
 
   public async getAnimeEntries(...mediaId: string[]) {
+    let animeEntries = [];
+    for (let i = 0; i < mediaId.length; i++) {
+      const data = await this.getByMediaId(mediaId[i]);
+      const dataToAdd = data.data();
+
+      // Check if the data is undefined
+      if (dataToAdd) animeEntries.push(dataToAdd);
+    }
+    return animeEntries;
+  }
+
+  public async getAnimeEntries_Old(...mediaId: string[]) {
     /* If the length of the mediaId array is greater than 10, we need to split it up into chunks of 10
       and then call the getAnimeEntries function on each chunk. 
       This is because firebase is gay*/
