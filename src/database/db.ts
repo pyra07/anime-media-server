@@ -70,9 +70,12 @@ class DB {
     let animeEntries = [];
     for (let i = 0; i < mediaId.length; i++) {
       const data = await this.getByMediaId(mediaId[i]);
-
-      if (data?.data()) animeEntries.push(data.data());
-      else return [];
+      // Make sure the data is not undefined
+      if (data) {
+        const entry = data.data();
+        if (entry) animeEntries.push(entry);
+        else return [];
+      }
     }
     return animeEntries;
   }
