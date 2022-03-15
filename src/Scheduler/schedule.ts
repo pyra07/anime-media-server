@@ -40,7 +40,7 @@ class Scheduler {
       async () => {
         // log with current time
         log(
-          `Running scheduler at ${new Date().toLocaleString()}}`
+          `Running scheduler at ${new Date().toLocaleString()}`
         );
         await this.check();
       },
