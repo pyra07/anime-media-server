@@ -39,9 +39,7 @@ class Scheduler {
       cronTime,
       async () => {
         // log with current time
-        log(
-          `Running scheduler at ${new Date().toLocaleString()}`
-        );
+        log(`Running scheduler at ${new Date().toLocaleString()}`);
         await this.check();
       },
       null,
@@ -110,48 +108,33 @@ class Scheduler {
     return `${array[0]} - ${array[array.length - 1]}`;
   }
 
-  private async handleAnime(
-    animeDb: AniQuery[],
-    fireDBData: firebase.firestore.DocumentData[]
-  ) {
-    // Check if user has added new anime. If so, add it to firebase
-    const listDifferences = this.getDifferences(animeDb, fireDBData);
-
-    if (listDifferences.length > 0) {
-      // log(`${listDifferences.length} new anime added`);
-      this.hook.send(
-        new MessageBuilder()
-          .setTimestamp()
-          .setTitle(`**${listDifferences.length} new anime added!**`)
-          .setColor(0x0997e3)
-          .setDescription(
-            `${listDifferences
-              .map((anime) => anime.media.title.romaji)
-              .join(", ")}`
-          )
-      );
-      await DB.addToDb(...listDifferences);
-      fireDBData.push(...listDifferences);
-    }
-
-    // Go thru each anime in animeDb
+  private async handleAnime(animeDb: AniQuery[]) {
+    let fireDBAnime;
     for (let index = 0; index < animeDb.length; index++) {
       const anime = animeDb[index];
-      const fireDBAnime = fireDBData.find(
-        (item) => item.mediaId === anime.mediaId
-      );
+      
+      try {
+        const fireDBEntry = await DB.getByMediaId(anime.mediaId.toString());
+
+        if (!fireDBEntry.exists) {
+          DB.addToDb(anime);
+          fireDBAnime = anime;
+        } else fireDBAnime = fireDBEntry.data();
+      } catch (error) {
+        continue;
+      }
 
       if (!fireDBAnime) continue;
 
       /* This is manually defined in the db by the user.
-        Some animes usually have a 2nd season, but instead of starting from episode 1, they start from
-        where they left off in season 1., e.g episode 13 */
+          Some animes usually have a 2nd season, but instead of starting from episode 1, they start from
+          where they left off in season 1., e.g episode 13 */
       const startingEpisode = fireDBAnime.media.startingEpisode
         ? fireDBAnime.media.startingEpisode
         : 0;
 
       /* Sometimes the title found in nyaa.si is the shortform of the title.
-         manually defined in the db by the user. */
+           manually defined in the db by the user. */
       anime.media.title.romaji = fireDBAnime.media.alternativeTitle
         ? fireDBAnime.media.alternativeTitle
         : anime.media.title.romaji;
@@ -192,13 +175,11 @@ class Scheduler {
 
   public async check() {
     const animeDb: AniQuery[] = await Anilist.getAnimeUserList();
-    const fireDb = await DB.getAnimeEntries(
-      ...animeDb.map((anime) => anime.mediaId.toString())
-    );
+
     // check if animeDb is empty
 
-    if (animeDb.length === 0 || fireDb.length === 0) return;
-    else await this.handleAnime(animeDb, fireDb);
+    if (animeDb.length === 0) return;
+    else await this.handleAnime(animeDb);
   }
 }
 
