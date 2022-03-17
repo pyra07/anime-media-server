@@ -12,7 +12,6 @@ class DB {
   }
 
   public async logIn() {
-    await this.myProject.firestore().enablePersistence();
     DB.user = await this.myProject
       .auth()
       .signInWithEmailAndPassword(email, emailPassword);
