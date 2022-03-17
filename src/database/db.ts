@@ -52,23 +52,30 @@ class DB {
   }
 
   public async getByMediaId(mediaId: string) {
-    return await this.myProject
-      .firestore()
-      .collection("animelists")
-      .doc(DB.user.user?.uid)
-      .collection("anime")
-      .doc(mediaId)
-      .get();
+    try {
+      return await this.myProject
+        .firestore()
+        .collection("animelists")
+        .doc(DB.user.user?.uid)
+        .collection("anime")
+        .doc(mediaId)
+        .get();
+    } catch (error) {
+      console.error(error);
+      return undefined;
+    }
   }
 
   public async getAnimeEntries(...mediaId: string[]) {
     let animeEntries = [];
     for (let i = 0; i < mediaId.length; i++) {
       const data = await this.getByMediaId(mediaId[i]);
-      const dataToAdd = data.data();
-
-      // Check if the data is undefined
-      if (dataToAdd) animeEntries.push(dataToAdd);
+      // Make sure the data is not undefined
+      if (data) {
+        const entry = data.data();
+        if (entry) animeEntries.push(entry);
+        else return [];
+      }
     }
     return animeEntries;
   }

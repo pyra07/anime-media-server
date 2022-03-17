@@ -39,7 +39,9 @@ class Scheduler {
       cronTime,
       async () => {
         // log with current time
-        log("Checking", new Date().toLocaleTimeString());
+        log(
+          `Running scheduler at ${new Date().toLocaleString()}`
+        );
         await this.check();
       },
       null,
