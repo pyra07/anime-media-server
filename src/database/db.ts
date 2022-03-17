@@ -12,6 +12,7 @@ class DB {
   }
 
   public async logIn() {
+    // offline persistence
     DB.user = await this.myProject
       .auth()
       .signInWithEmailAndPassword(email, emailPassword);
@@ -52,29 +53,25 @@ class DB {
   }
 
   public async getByMediaId(mediaId: string) {
-    try {
-      return await this.myProject
-        .firestore()
-        .collection("animelists")
-        .doc(DB.user.user?.uid)
-        .collection("anime")
-        .doc(mediaId)
-        .get();
-    } catch (error) {
-      console.error(error);
-      return undefined;
-    }
+    return await this.myProject
+      .firestore()
+      .collection("animelists")
+      .doc(DB.user.user?.uid)
+      .collection("anime")
+      .doc(mediaId)
+      .get({ source: "server" });
   }
 
   public async getAnimeEntries(...mediaId: string[]) {
     let animeEntries = [];
     for (let i = 0; i < mediaId.length; i++) {
       const data = await this.getByMediaId(mediaId[i]);
+
       // Make sure the data is not undefined
       if (data) {
         const entry = data.data();
         if (entry) animeEntries.push(entry);
-        else return [];
+        // else return [];
       }
     }
     return animeEntries;
