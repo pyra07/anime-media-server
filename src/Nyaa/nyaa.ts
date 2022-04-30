@@ -131,7 +131,14 @@ class Nyaa {
     // Search for episodes individually
     for (let j = 0; j < episodeList.length; j++) {
       const episode = episodeList[j];
-      const episodeString = episode < 10 ? "0" + episode : episode.toString();
+      const episodeString =
+        episodeList.length >= 100
+          ? episode >= 10 && episode <= 99
+            ? "0" + episode
+            : "00" + episode
+          : episode < 10
+          ? "0" + episode
+          : episode.toString();
 
       const animeRSS = await this.getTorrent(
         anime.media.title.romaji,
@@ -161,8 +168,8 @@ class Nyaa {
     episodeNumber?: string
   ): Promise<AnimeTorrent | null> {
     const finalQuery = isBatch
-      ? searchQuery + " Batch"
-      : searchQuery + " - " + episodeNumber;
+      ? `${searchQuery} Batch`
+      : `${searchQuery} - ${episodeNumber}`;
 
     this.rssLink.searchParams.set("page", "rss");
     this.rssLink.searchParams.set("q", finalQuery);
@@ -197,20 +204,45 @@ class Nyaa {
           if (similarity > 0.75) return item as AnimeTorrent;
         }
       } else {
-        let animeTitle = title.match(/\[.*\] (.+?) - \d{2}/);
-        let episode = title.match(/\d{2}/);
+        const epRegexLength = episodeNumber ? episodeNumber.length : 2;
 
+        let animeTitle = title.match(
+          new RegExp("\\[.*\\] (.+?) - \\d{" + epRegexLength + "}")
+        );
+        let altAnimeTitle = title.match(
+          new RegExp("\\[.*\\]_(.+?)_\\d{" + epRegexLength + "}")
+        );
+
+        let episode = title.match(new RegExp("- \\d{" + epRegexLength + "}"));
+        let altEpisode = title.match(
+          new RegExp("_\\d{" + epRegexLength + "}_")
+        );
+        
         if (animeTitle && episode && episodeNumber) {
           const titleSim = this.similarity(animeTitle[1].trim(), searchQuery);
-          const episodeSim = this.similarity(episode[0].trim(), episodeNumber);
+          const altTitleSim = altAnimeTitle
+            ? this.similarity(altAnimeTitle[1], searchQuery)
+            : 0;
+          // Check if episode[0] contains the episode number
+          const isEpisode = episode[0].trim().includes(episodeNumber);
 
           // If the title and episode are similar, and the resolution is similar, return
           if (
-            titleSim > 0.8 &&
-            episodeSim > 0.8 &&
+            (titleSim > 0.8 || altTitleSim > 0.7) &&
+            isEpisode &&
             title.includes(resolution)
           ) {
             item.episode = episode[0].trim();
+            return item as AnimeTorrent;
+          }
+        } else if (altAnimeTitle && altEpisode && episodeNumber) {
+          const titleSim = this.similarity(altAnimeTitle[1], searchQuery);
+          // Check if episode[0] contains the episode number
+          const isEpisode = altEpisode[0].trim().includes(episodeNumber);
+
+          // If the title and episode are similar, and the resolution is similar, return
+          if (titleSim > 0.8 && isEpisode && title.includes(resolution)) {
+            item.episode = altEpisode[0].trim();
             return item as AnimeTorrent;
           }
         }
