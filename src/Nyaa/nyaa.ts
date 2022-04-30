@@ -227,7 +227,7 @@ class Nyaa {
             : 0;
           // Check if episode[0] contains the episode number
           const isEpisode =
-            episode[0].replace(/[-_]/, "").trim() === episodeNumber;
+            episode[0].replace(/[-_]/g, "").trim() === episodeNumber;
 
           // If the title and episode are similar, and the resolution is similar, return
           if (
@@ -242,7 +242,7 @@ class Nyaa {
           const titleSim = this.similarity(altAnimeTitle[1], searchQuery);
           // Check if episode[0] contains the episode number
           const isEpisode =
-            altEpisode[0].replace(/[-_]/, "").trim() === episodeNumber;
+            altEpisode[0].replace(/[-_]/g, "").trim() === episodeNumber;
 
           // If the title and episode are similar, and the resolution is similar, return
           if (titleSim > 0.8 && isEpisode && title.includes(resolution)) {
