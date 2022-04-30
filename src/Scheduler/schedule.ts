@@ -62,11 +62,9 @@ class Scheduler {
   ): Promise<void> {
     const downloadedEpisodes = new Array<number>();
     for (const torrent of animeTorrent) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
       log(
         `Downloading ${torrent.title} - EPISODE ${torrent.episode} @ ${torrent.link}`
       );
-
       // Download torrent
       var isAdded: boolean = await qbit.addTorrent(
         torrent.link,
