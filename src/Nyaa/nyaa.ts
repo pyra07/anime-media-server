@@ -135,6 +135,8 @@ class Nyaa {
         episodeList.length >= 100
           ? episode >= 10 && episode <= 99
             ? "0" + episode
+            : episode >= 100
+            ? episode.toString()
             : "00" + episode
           : episode < 10
           ? "0" + episode
@@ -217,7 +219,7 @@ class Nyaa {
         let altEpisode = title.match(
           new RegExp("_\\d{" + epRegexLength + "}_")
         );
-        
+
         if (animeTitle && episode && episodeNumber) {
           const titleSim = this.similarity(animeTitle[1].trim(), searchQuery);
           const altTitleSim = altAnimeTitle
@@ -232,7 +234,7 @@ class Nyaa {
             isEpisode &&
             title.includes(resolution)
           ) {
-            item.episode = episode[0].trim();
+            item.episode = episodeNumber;
             return item as AnimeTorrent;
           }
         } else if (altAnimeTitle && altEpisode && episodeNumber) {
@@ -242,7 +244,7 @@ class Nyaa {
 
           // If the title and episode are similar, and the resolution is similar, return
           if (titleSim > 0.8 && isEpisode && title.includes(resolution)) {
-            item.episode = altEpisode[0].trim();
+            item.episode = episodeNumber;
             return item as AnimeTorrent;
           }
         }
