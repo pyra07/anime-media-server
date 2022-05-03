@@ -194,8 +194,8 @@ class Nyaa {
           title.match(new RegExp("\\[.*\\]_(.+?)_\\d{" + epRegexLength + "}"));
 
         let episode =
-          title.match(new RegExp("- \\d{" + epRegexLength + "}")) ??
-          title.match(new RegExp("_\\d{" + epRegexLength + "}_"));
+          title.match(new RegExp("(?<=- )\\d{" + epRegexLength + "}")) ??
+          title.match(new RegExp("(?<=_)\\d{" + epRegexLength + "}(?=_)"));
 
         if (animeTitle && episode && episodeNumber) {
           const isSimilar = this.verifyQuery(
@@ -225,10 +225,10 @@ class Nyaa {
   ) {
     const animeTitle = animeTitleRegex[1].trim();
 
-    // If animeTitle has a title in brackets, extract it. If found, extract the title out of the brackets
-    const subAnimeTitle = animeTitleRegex[0].match(/\[(.*?)\]/);
-    const subAnimeTitleString = subAnimeTitle ? subAnimeTitle[1] : "";
-    const mainAnimeTitle = animeTitle.replace(subAnimeTitleString, "");
+    // If animeTitle has a title in round brackets, extract it. If found, extract the title out of the brackets
+    const subAnimeTitle = animeTitle.match(/(?<=\().+?(?=\))/);
+    const subAnimeTitleString = subAnimeTitle ? subAnimeTitle[0] : "";
+    const mainAnimeTitle = animeTitle.replace(/\(.+?\)/, "").trim();
 
     const animeBestMatch = findBestMatch(searchQuery, [
       animeTitle,
@@ -237,9 +237,7 @@ class Nyaa {
     ]);
 
     const isEpisode =
-      episodeRegex && episode
-        ? episodeRegex[0].replace(/[-_]/g, "").trim() === episode
-        : true;
+      episodeRegex && episode ? episodeRegex[0] === episode : true;
 
     return animeBestMatch.bestMatch.rating > 0.7 && isEpisode;
   }
