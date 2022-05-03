@@ -203,52 +203,34 @@ class Nyaa {
         // If animetitle is found, check similarity and if it's above the threshold, return
         if (animeTitle) {
           const similarity = this.similarity(searchQuery, animeTitle[1]);
-          if (similarity > 0.75) return item as AnimeTorrent;
+          if (similarity > 0.7) return item as AnimeTorrent;
         }
       } else {
         const epRegexLength = episodeNumber ? episodeNumber.length : 2;
 
-        let animeTitle = title.match(
-          new RegExp("\\[.*\\] (.+?) - \\d{" + epRegexLength + "}")
-        );
-        let altAnimeTitle = title.match(
-          new RegExp("\\[.*\\]_(.+?)_\\d{" + epRegexLength + "}")
-        );
+        let animeTitle =
+          title.match(
+            new RegExp("\\[.*\\] (.+?) - \\d{" + epRegexLength + "}")
+          ) ??
+          title.match(new RegExp("\\[.*\\]_(.+?)_\\d{" + epRegexLength + "}"));
 
-        let episode = title.match(new RegExp("- \\d{" + epRegexLength + "}"));
-        let altEpisode = title.match(
-          new RegExp("_\\d{" + epRegexLength + "}_")
-        );
+        let episode =
+          title.match(new RegExp("- \\d{" + epRegexLength + "}")) ??
+          title.match(new RegExp("_\\d{" + epRegexLength + "}_"));
 
         if (animeTitle && episode && episodeNumber) {
           const titleSim = this.similarity(animeTitle[1].trim(), searchQuery);
-          const altTitleSim = altAnimeTitle
-            ? this.similarity(altAnimeTitle[1], searchQuery)
-            : 0;
+
           // Check if episode[0] contains the episode number
           const isEpisode =
             episode[0].replace(/[-_]/g, "").trim() === episodeNumber;
 
           // If the title and episode are similar, and the resolution is similar, return
-          if (
-            (titleSim > 0.8 || altTitleSim > 0.7) &&
-            isEpisode &&
-            title.includes(resolution)
-          ) {
+          if (titleSim > 0.7 && isEpisode && title.includes(resolution)) {
             item.episode = episodeNumber;
             return item as AnimeTorrent;
           }
-        } else if (altAnimeTitle && altEpisode && episodeNumber) {
-          const titleSim = this.similarity(altAnimeTitle[1], searchQuery);
-          // Check if episode[0] contains the episode number
-          const isEpisode =
-            altEpisode[0].replace(/[-_]/g, "").trim() === episodeNumber;
-
-          // If the title and episode are similar, and the resolution is similar, return
-          if (titleSim > 0.8 && isEpisode && title.includes(resolution)) {
-            item.episode = episodeNumber;
-            return item as AnimeTorrent;
-          }
+          // Flow for Pokemon
         }
       }
     }
