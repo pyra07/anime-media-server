@@ -4,6 +4,7 @@
 import Parser from "rss-parser";
 import { AnimeTorrent, AniQuery, Resolution } from "../utils/types";
 import { resolution } from "../../profile.json";
+import { findBestMatch } from "string-similarity";
 
 class Nyaa {
   rssLink: URL;
@@ -39,28 +40,6 @@ class Nyaa {
       if (i > 0) costs[s2.length] = lastValue;
     }
     return costs[s2.length];
-  }
-
-  /**
-   * Returns how closely similar two strings are to each other.
-   * @param  {string} s1
-   * @param  {string} s2
-   */
-  private similarity(s1: string, s2: string) {
-    var longer = s1.toLowerCase();
-    var shorter = s2.toLowerCase();
-    if (s1.length < s2.length) {
-      longer = s2;
-      shorter = s1;
-    }
-    var longerLength = longer.length;
-    if (longerLength == 0) {
-      return 1.0;
-    }
-    return (
-      (longerLength - this.editDistance(longer, shorter)) /
-      parseFloat(longerLength.toString())
-    );
   }
 
   /**
@@ -202,8 +181,8 @@ class Nyaa {
         let animeTitle = title.match(/\[.*\] (.+?) [\(\[]/);
         // If animetitle is found, check similarity and if it's above the threshold, return
         if (animeTitle) {
-          const similarity = this.similarity(searchQuery, animeTitle[1]);
-          if (similarity > 0.7) return item as AnimeTorrent;
+          const isSimilar = this.verifyQuery(searchQuery, animeTitle);
+          if (isSimilar) return item as AnimeTorrent;
         }
       } else {
         const epRegexLength = episodeNumber ? episodeNumber.length : 2;
@@ -219,23 +198,50 @@ class Nyaa {
           title.match(new RegExp("_\\d{" + epRegexLength + "}_"));
 
         if (animeTitle && episode && episodeNumber) {
-          const titleSim = this.similarity(animeTitle[1].trim(), searchQuery);
-
-          // Check if episode[0] contains the episode number
-          const isEpisode =
-            episode[0].replace(/[-_]/g, "").trim() === episodeNumber;
+          const isSimilar = this.verifyQuery(
+            searchQuery,
+            animeTitle,
+            episodeNumber,
+            episode
+          );
 
           // If the title and episode are similar, and the resolution is similar, return
-          if (titleSim > 0.7 && isEpisode && title.includes(resolution)) {
+          if (isSimilar) {
             item.episode = episodeNumber;
             return item as AnimeTorrent;
           }
-          // Flow for Pokemon
         }
       }
     }
     console.log(searchQuery, "-", episodeNumber, "not found");
     return null;
+  }
+
+  private verifyQuery(
+    searchQuery: string,
+    animeTitleRegex: RegExpMatchArray,
+    episode?: string,
+    episodeRegex?: RegExpMatchArray
+  ) {
+    const animeTitle = animeTitleRegex[1].trim();
+
+    // If animeTitle has a title in brackets, extract it. If found, extract the title out of the brackets
+    const subAnimeTitle = animeTitleRegex[0].match(/\[(.*?)\]/);
+    const subAnimeTitleString = subAnimeTitle ? subAnimeTitle[1] : "";
+    const mainAnimeTitle = animeTitle.replace(subAnimeTitleString, "");
+
+    const animeBestMatch = findBestMatch(searchQuery, [
+      animeTitle,
+      mainAnimeTitle,
+      subAnimeTitleString,
+    ]);
+
+    const isEpisode =
+      episodeRegex && episode
+        ? episodeRegex[0].replace(/[-_]/g, "").trim() === episode
+        : true;
+
+    return animeBestMatch.bestMatch.rating > 0.7 && isEpisode;
   }
 }
 
