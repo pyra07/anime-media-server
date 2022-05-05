@@ -75,28 +75,36 @@ class Nyaa {
   ): Promise<AnimeTorrent[] | AnimeTorrent | null> {
     /* Here we check whether the anime has recently finished airing.
        Usually batches aren't produced until like 1-2 week(s) after finishing */
-    const todayDate = new Date();
-    const endDate = new Date(
-      `${anime.media.endDate.month}/${anime.media.endDate.day}/${anime.media.endDate.year}`
-    );
-    const daysLeft = Math.floor(
-      (todayDate.getTime() - endDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
+    // const todayDate = new Date();
+    // const endDate = new Date(
+    //   `${anime.media.endDate.month}/${anime.media.endDate.day}/${anime.media.endDate.year}`
+    // );
+    // const daysLeft = Math.floor(
+    //   (todayDate.getTime() - endDate.getTime()) / (1000 * 60 * 60 * 24)
+    // );
 
+    // Find movie
+    if (anime.media.format === "MOVIE") {
+      const animeRSS = await this.getTorrent(
+        anime.media.title.romaji,
+        resolution as Resolution,
+        false
+      );
+      if (animeRSS) return animeRSS;
+    }
     /* Find batch of episodes to download if the
        Anime has already finished airing */
     if (
       anime.media.status === "FINISHED" &&
       startEpisode === 0 &&
-      fsDownloadedEpisodes.length === 0 &&
-      daysLeft > 10
+      fsDownloadedEpisodes.length === 0
     ) {
       const animeRSS = await this.getTorrent(
         anime.media.title.romaji,
         resolution as Resolution,
         true
       );
-      return animeRSS;
+      if (animeRSS) return animeRSS;
     }
 
     const animeTorrentList: AnimeTorrent[] = new Array();
@@ -150,7 +158,9 @@ class Nyaa {
   ): Promise<AnimeTorrent | null> {
     const finalQuery = isBatch
       ? `${searchQuery} Batch`
-      : `${searchQuery} - ${episodeNumber}`;
+      : episodeNumber
+      ? `${searchQuery} - ${episodeNumber}`
+      : searchQuery;
 
     this.rssLink.searchParams.set("page", "rss");
     this.rssLink.searchParams.set("q", finalQuery);
@@ -176,9 +186,10 @@ class Nyaa {
     for (const item of rss.items) {
       let title: string = item.title;
       let subGroup = title.match(/\[(.*?)\]/);
+      console.log(`Analysing ${title}`);
+      if (isBatch || (!isBatch && episodeNumber == undefined)) {
+        let animeTitle = title.match(/(?<=\[.*\])(.+?) (?=[\(\[])/);
 
-      if (isBatch) {
-        let animeTitle = title.match(/\[.*\] (.+?) [\(\[]/);
         // If animetitle is found, check similarity and if it's above the threshold, return
         if (animeTitle) {
           const isSimilar = this.verifyQuery(searchQuery, animeTitle);
@@ -213,7 +224,12 @@ class Nyaa {
         }
       }
     }
-    console.log(searchQuery, "-", episodeNumber, "not found");
+    console.log(
+      searchQuery,
+      "-",
+      episodeNumber ? episodeNumber : "Batch",
+      "not found"
+    );
     return null;
   }
 

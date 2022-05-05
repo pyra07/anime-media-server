@@ -49,41 +49,42 @@ class Anilist {
   public async getAnimeUserList(): Promise<AniQuery[]> {
     // I love loooong lines
     var query = `
-    query ($userName: String) {
-        MediaListCollection(userName: $userName, type: ANIME, status_in: CURRENT) {
-          lists {
-            name
-            entries {
-              progress
-              mediaId
-              media {
-                coverImage {
-                  extraLarge
-                  large
-                  medium
-                  color
-                }
-                episodes
-                status
-                endDate {
-                  year
-                  month
-                  day
-                }
-                nextAiringEpisode {
-                  id
-                  episode
-                }
-                title {
-                  romaji
-                  english
-                  native
-                }
+    query ($userName :String) {
+      MediaListCollection(userName: $userName, type: ANIME, status_in: CURRENT) {
+        lists {
+          name
+          entries {
+            progress
+            mediaId
+            media {
+              coverImage {
+                extraLarge
+                large
+                medium
+                color
+              }
+              format
+              episodes
+              status
+              endDate {
+                year
+                month
+                day
+              }
+              nextAiringEpisode {
+                id
+                episode
+              }
+              title {
+                romaji
+                english
+                native
               }
             }
           }
         }
       }
+    }
     `;
 
     var variables = {

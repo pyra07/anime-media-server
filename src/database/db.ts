@@ -77,40 +77,40 @@ class DB {
     return animeEntries;
   }
 
-  public async getAnimeEntries_Old(...mediaId: string[]) {
-    /* If the length of the mediaId array is greater than 10, we need to split it up into chunks of 10
-      and then call the getAnimeEntries function on each chunk. 
-      This is because firebase is gay*/
+  // public async getAnimeEntries_Old(...mediaId: string[]) {
+  //   /* If the length of the mediaId array is greater than 10, we need to split it up into chunks of 10
+  //     and then call the getAnimeEntries function on each chunk. 
+  //     This is because firebase is gay*/
 
-    let chunks: string[][] = [];
-    let animeEntries: fb.firestore.DocumentData[] = [];
+  //   let chunks: string[][] = [];
+  //   let animeEntries: fb.firestore.DocumentData[] = [];
 
-    for (let i = 0; i < mediaId.length; i += 10) {
-      chunks.push(mediaId.slice(i, i + 10));
-    }
+  //   for (let i = 0; i < mediaId.length; i += 10) {
+  //     chunks.push(mediaId.slice(i, i + 10));
+  //   }
 
-    for (let chunk = 0; chunk < chunks.length; chunk++) {
-      const element = chunks[chunk];
+  //   for (let chunk = 0; chunk < chunks.length; chunk++) {
+  //     const element = chunks[chunk];
 
-      try {
-        const entries = await this.myProject
-          .firestore()
-          .collection("animelists")
-          .doc(DB.user.user?.uid)
-          .collection("anime")
-          .where(firebase.firestore.FieldPath.documentId(), "in", element)
-          .get();
-        animeEntries.push(...entries.docs.map((doc) => doc.data()));
-      } catch (error) {
-        console.log("Error with the chunk function. Details below:");
-        console.error(error);
-        console.log(animeEntries);
-        return [];
-      }
-    }
+  //     try {
+  //       const entries = await this.myProject
+  //         .firestore()
+  //         .collection("animelists")
+  //         .doc(DB.user.user?.uid)
+  //         .collection("anime")
+  //         .where(firebase.firestore.FieldPath.documentId(), "in", element)
+  //         .get();
+  //       animeEntries.push(...entries.docs.map((doc) => doc.data()));
+  //     } catch (error) {
+  //       console.log("Error with the chunk function. Details below:");
+  //       console.error(error);
+  //       console.log(animeEntries);
+  //       return [];
+  //     }
+  //   }
 
-    return animeEntries;
-  }
+  //   return animeEntries;
+  // }
 
   /**
    * Gets the users animelist
