@@ -186,7 +186,6 @@ class Nyaa {
     for (const item of rss.items) {
       let title: string = item.title;
       let subGroup = title.match(/\[(.*?)\]/);
-      console.log(`Analysing ${title}`);
       if (isBatch || (!isBatch && episodeNumber == undefined)) {
         let animeTitle = title.match(/(?<=\[.*\])(.+?) (?=[\(\[])/);
 
