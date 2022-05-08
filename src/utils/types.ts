@@ -37,7 +37,6 @@ export enum AnimeFormat {
   MANGA = "MANGA",
   NOVEL = "NOVEL",
   ONE_SHOT = "ONE_SHOT",
-
 }
 
 export interface AniMedia {
@@ -51,6 +50,7 @@ export interface AniMedia {
   };
   nextAiringEpisode: nextAiringEpisode | null;
   title: AniTitle;
+  synonyms: string[];
   coverImage: AniCoverImage;
 }
 export interface AniCoverImage {

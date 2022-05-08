@@ -75,6 +75,7 @@ class Anilist {
                 id
                 episode
               }
+              synonyms
               title {
                 romaji
                 english
