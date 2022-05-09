@@ -212,7 +212,8 @@ class Nyaa {
             searchQuery,
             animeTitle,
             episodeNumber,
-            episode
+            episode,
+            resolution
           );
 
           // If the title and episode are similar, and the resolution is similar, return
@@ -236,7 +237,8 @@ class Nyaa {
     searchQuery: string,
     animeTitleRegex: RegExpMatchArray,
     episode?: string,
-    episodeRegex?: RegExpMatchArray
+    episodeRegex?: RegExpMatchArray,
+    resolution?: Resolution
   ) {
     const animeTitle = animeTitleRegex[1].trim();
 
@@ -254,7 +256,9 @@ class Nyaa {
     const isEpisode =
       episodeRegex && episode ? episodeRegex[0] === episode : true;
 
-    return animeBestMatch.bestMatch.rating > 0.7 && isEpisode;
+    const isResolution = resolution ? searchQuery.includes(resolution) : true;
+
+    return animeBestMatch.bestMatch.rating > 0.7 && isEpisode && isResolution;
   }
 }
 
