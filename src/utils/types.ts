@@ -2,7 +2,12 @@ export type Resolution = "480" | "720" | "1080";
 export type status = "FINISHED" | "RELEASING" | "NOT_YET_RELEASED";
 
 /*************************************************************************************** */
+/**
+ * @description This contains interfaces and enums used in this application.
+ */
+/*************************************************************************************** */
 
+// This interface is used to store the torrent information from an anime retrieved in Nyaa.
 export interface AnimeTorrent {
   title: string;
   link: string;
@@ -15,17 +20,20 @@ export interface AnimeTorrent {
   episode?: string;
 }
 
+// Helper interface for Media. It is used to store the next episode number, and the its ID.
 export interface nextAiringEpisode {
   episode: number;
   id: number;
 }
 
+// Helper interface for Media. It is used to define the title of the anime. This can be in 3 different forms.
 export interface AniTitle {
   romaji: string;
   english: string;
   native: string;
 }
 
+// Helper enum for Media. It is used to define the format of anime.
 export enum AnimeFormat {
   TV = "TV",
   TV_SHORT = "TV_SHORT",
@@ -39,6 +47,31 @@ export enum AnimeFormat {
   ONE_SHOT = "ONE_SHOT",
 }
 
+// Enum which stores which format of anime is being searched for.
+export enum SearchMode {
+  EPISODE = "EPISODE",
+  OVA = "OVA",
+  ONA = "ONA",
+  MOVIE = "MOVIE",
+  BATCH = "BATCH",
+}
+
+// Helper interface for Media. It is used to define the anime's cover art size.
+export interface AniCoverImage {
+  extraLarge: string;
+  large: string;
+  medium: string;
+  color: string;
+}
+
+// The parent of AniMedia. This is what is retrieved from AniList. It contains user progress, and info about the anime itself.
+export interface AniQuery {
+  progress: number;
+  mediaId: number;
+  media: AniMedia;
+}
+
+// Main interface for the application. It is used to store the entire infromation about the anime.
 export interface AniMedia {
   episodes: number;
   format: AnimeFormat;
@@ -53,18 +86,8 @@ export interface AniMedia {
   synonyms: string[];
   coverImage: AniCoverImage;
 }
-export interface AniCoverImage {
-  extraLarge: string;
-  large: string;
-  medium: string;
-  color: string;
-}
-export interface AniQuery {
-  progress: number;
-  mediaId: number;
-  media: AniMedia;
-}
 
+// For Discord Bot.
 export interface Command {
   msg: string;
   cmd: Function;

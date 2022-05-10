@@ -1,10 +1,11 @@
-// This retrieves something from nyaa.si rss
-// and returns it as a json object
+/* This retrieves something from nyaa.si rss, does some verification
+ and returns it as a json object */
 
 import Parser from "rss-parser";
-import { AnimeTorrent, AniQuery, Resolution } from "../utils/types";
+import { AnimeTorrent, AniQuery, Resolution, SearchMode } from "../utils/types";
 import { resolution } from "../../profile.json";
-import { findBestMatch } from "string-similarity";
+import { compareTwoStrings, findBestMatch } from "string-similarity";
+import anitomy from "anitomy-js";
 
 class Nyaa {
   rssLink: URL;
@@ -73,28 +74,17 @@ class Nyaa {
     endEpisode: number,
     fsDownloadedEpisodes: number[]
   ): Promise<AnimeTorrent[] | AnimeTorrent | null> {
-    /* Here we check whether the anime has recently finished airing.
-       Usually batches aren't produced until like 1-2 week(s) after finishing */
-    // const todayDate = new Date();
-    // const endDate = new Date(
-    //   `${anime.media.endDate.month}/${anime.media.endDate.day}/${anime.media.endDate.year}`
-    // );
-    // const daysLeft = Math.floor(
-    //   (todayDate.getTime() - endDate.getTime()) / (1000 * 60 * 60 * 24)
-    // );
-
     // Find movie
     if (anime.media.format === "MOVIE") {
       const animeRSS = await this.getTorrent(
         anime.media.title.romaji,
         resolution as Resolution,
-        false
+        SearchMode.MOVIE
       );
       if (animeRSS) return animeRSS;
-    }
-    /* Find batch of episodes to download if the
+    } else if (
+      /* Find batch of episodes to download if the
        Anime has already finished airing */
-    if (
       anime.media.status === "FINISHED" &&
       startEpisode === 0 &&
       fsDownloadedEpisodes.length === 0
@@ -102,65 +92,67 @@ class Nyaa {
       const animeRSS = await this.getTorrent(
         anime.media.title.romaji,
         resolution as Resolution,
-        true
+        SearchMode.BATCH
       );
       if (animeRSS) return animeRSS;
-    }
+    } else if (anime.media.format === "TV") {
+      const animeTorrentList: AnimeTorrent[] = new Array();
 
-    const animeTorrentList: AnimeTorrent[] = new Array();
-
-    // Generate a list of episodes to download
-    const episodeList = this.getNumbers(
-      startEpisode,
-      fsDownloadedEpisodes,
-      endEpisode
-    );
-    // Search for episodes individually
-    for (let j = 0; j < episodeList.length; j++) {
-      const episode = episodeList[j];
-      const episodeString =
-        episodeList.length >= 100
-          ? episode >= 10 && episode <= 99
-            ? "0" + episode
-            : episode >= 100
-            ? episode.toString()
-            : "00" + episode
-          : episode < 10
-          ? "0" + episode
-          : episode.toString();
-
-      const animeRSS = await this.getTorrent(
-        anime.media.title.romaji,
-        resolution as Resolution,
-        false,
-        episodeString
+      // Generate a list of episodes to download
+      const episodeList = this.getNumbers(
+        startEpisode,
+        fsDownloadedEpisodes,
+        endEpisode
       );
-      // Check if animeRSS is not null
-      if (animeRSS !== null) animeTorrentList.push(animeRSS);
+      // Search for episodes individually
+      for (let j = 0; j < episodeList.length; j++) {
+        const episode = episodeList[j];
+        const episodeString =
+          episodeList.length >= 100
+            ? episode >= 10 && episode <= 99
+              ? "0" + episode
+              : episode >= 100
+              ? episode.toString()
+              : "00" + episode
+            : episode < 10
+            ? "0" + episode
+            : episode.toString();
+
+        const animeRSS = await this.getTorrent(
+          anime.media.title.romaji,
+          resolution as Resolution,
+          SearchMode.EPISODE,
+          episodeString
+        );
+        // Check if animeRSS is not null
+        if (animeRSS !== null) animeTorrentList.push(animeRSS);
+      }
+      if (animeTorrentList.length === 0) return null;
+      return animeTorrentList;
     }
-    if (animeTorrentList.length === 0) return null;
-    return animeTorrentList;
+    return null;
   }
 
   /**
    * Gets the torrent info for a specific anime and episode
-   * @param  {string} searchQuery
-   * @param  {Resolution} resolution
-   * @param  {boolean} isBatch
-   * @param  {string} episodeNumber
-   * @returns {Promise<AnimeTorrent>}
+   * @param {string} searchQuery The title of the anime to look for
+   * @param {Resolution} resolution The resolution to search for
+   * @param {SearchMode} searchMode What format we expect to search
+   * @param {string} episodeNumber The episode number to search for, if applicable
+   * @returns {Promise<AnimeTorrent>} The anime torrent object. Used to load and download the torrent
    */
   private async getTorrent(
     searchQuery: string,
     resolution: Resolution,
-    isBatch: boolean,
+    searchMode: SearchMode,
     episodeNumber?: string
   ): Promise<AnimeTorrent | null> {
-    const finalQuery = isBatch
-      ? `${searchQuery} Batch`
-      : episodeNumber
-      ? `${searchQuery} - ${episodeNumber}`
-      : searchQuery;
+    const finalQuery =
+      searchMode === SearchMode.BATCH
+        ? `${searchQuery} Batch`
+        : episodeNumber
+        ? `${searchQuery} - ${episodeNumber}`
+        : searchQuery;
 
     this.rssLink.searchParams.set("page", "rss");
     this.rssLink.searchParams.set("q", finalQuery);
@@ -176,6 +168,9 @@ class Nyaa {
       return null;
     }
 
+    // Guard against empty rss
+    if (rss.items.length === 0) return null;
+
     // Sort rss.items by nyaa:seeders
     rss.items.sort((a: { [x: string]: string }, b: { [x: string]: string }) => {
       return parseInt(b["nyaa:seeders"], 10) - parseInt(a["nyaa:seeders"], 10);
@@ -185,42 +180,20 @@ class Nyaa {
     // Check if the title contains mentions of both the query and resolution
     for (const item of rss.items) {
       let title: string = item.title;
-      let subGroup = title.match(/\[(.*?)\]/);
-      if (isBatch || (!isBatch && episodeNumber == undefined)) {
-        let animeTitle = title.match(/(?<=\[.*\])(.+?) (?=[\(\[])/);
+      const animeParsedData = anitomy.parseSync(title);
 
-        // If animetitle is found, check similarity and if it's above the threshold, return
-        if (animeTitle) {
-          const isSimilar = this.verifyQuery(searchQuery, animeTitle);
-          if (isSimilar) return item as AnimeTorrent;
-        }
-      } else {
-        const epRegexLength = episodeNumber ? episodeNumber.length : 2;
+      const isSimilar = this.verifyQuery(
+        searchQuery,
+        animeParsedData,
+        resolution,
+        searchMode,
+        episodeNumber
+      );
 
-        let animeTitle =
-          title.match(
-            new RegExp("\\[.*\\] (.+?) - \\d{" + epRegexLength + "}")
-          ) ??
-          title.match(new RegExp("\\[.*\\]_(.+?)_\\d{" + epRegexLength + "}"));
-
-        let episode =
-          title.match(new RegExp("(?<=- )\\d{" + epRegexLength + "}")) ??
-          title.match(new RegExp("(?<=_)\\d{" + epRegexLength + "}(?=_)"));
-
-        if (animeTitle && episode && episodeNumber) {
-          const isSimilar = this.verifyQuery(
-            searchQuery,
-            animeTitle,
-            episodeNumber,
-            episode
-          );
-
-          // If the title and episode are similar, and the resolution is similar, return
-          if (isSimilar && title.includes(resolution)) {
-            item.episode = episodeNumber;
-            return item as AnimeTorrent;
-          }
-        }
+      // If the title and episode are similar, and the resolution is similar, return
+      if (isSimilar) {
+        item.episode = episodeNumber;
+        return item as AnimeTorrent;
       }
     }
     console.log(
@@ -231,30 +204,47 @@ class Nyaa {
     );
     return null;
   }
-
+  /**
+   * Verifies if the query has some degree of similarity to the media to look for, based on the input given.
+   * @param  {string} searchQuery The title of the anime to originally verify
+   * @param  {anitomy.AnitomyResult} animeParsedData The parsed data of the RSS item title
+   * @param  {Resolution} resolution The resolution to verify
+   * @param  {SearchMode} searchMode What to expect from the query. This can be in multiple forms
+   * @param  {string} episode? The episode number to verify, if applicable
+   */
   private verifyQuery(
     searchQuery: string,
-    animeTitleRegex: RegExpMatchArray,
-    episode?: string,
-    episodeRegex?: RegExpMatchArray
+    animeParsedData: anitomy.AnitomyResult,
+    resolution: Resolution,
+    searchMode: SearchMode,
+    episode?: string
   ) {
-    const animeTitle = animeTitleRegex[1].trim();
+    switch (searchMode) {
+      case SearchMode.EPISODE:
+        const parsedTitle = animeParsedData.anime_title;
+        const parsedEpisode = animeParsedData.episode_number;
+        const parsedResolution = animeParsedData.video_resolution;
 
-    // If animeTitle has a title in round brackets, extract it. If found, extract the title out of the brackets
-    const subAnimeTitle = animeTitle.match(/(?<=\().+?(?=\))/);
-    const subAnimeTitleString = subAnimeTitle ? subAnimeTitle[0] : "";
-    const mainAnimeTitle = animeTitle.replace(/\(.+?\)/, "").trim();
+        // Guard against undefined values
+        if (!parsedTitle || !parsedEpisode || !parsedResolution) return false;
 
-    const animeBestMatch = findBestMatch(searchQuery, [
-      animeTitle,
-      mainAnimeTitle,
-      subAnimeTitleString,
-    ]);
+        // Check if info is similar
+        const titleMatch = compareTwoStrings(searchQuery, parsedTitle);
+        const episodeMatch = parseInt(episode!) === parseInt(parsedEpisode);
+        const resolutionMatch = parsedResolution.includes(resolution);
 
-    const isEpisode =
-      episodeRegex && episode ? episodeRegex[0] === episode : true;
+        // If so, we have a match
+        return titleMatch > 0.7 && episodeMatch && resolutionMatch;
 
-    return animeBestMatch.bestMatch.rating > 0.7 && isEpisode;
+      case SearchMode.BATCH:
+        // TODO
+        break;
+      case SearchMode.MOVIE:
+        // TODO
+        break;
+      default:
+        return false;
+    }
   }
 }
 
