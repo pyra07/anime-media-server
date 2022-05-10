@@ -29,7 +29,6 @@
     "firebase": "^8.9.1",
     "firebase-admin": "^9.11.1",
     "firebase-auth": "^0.1.2",
-    "n": "^8.0.0",
     "qbittorrent-api-v2": "^1.2.2",
     "rss-parser": "^3.12.0",
     "webtorrent": "^1.4.0"
