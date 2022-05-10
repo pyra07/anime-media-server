@@ -154,30 +154,31 @@ class Nyaa {
         ? `${searchQuery} - ${episodeNumber}`
         : searchQuery;
 
+    // Set some filters, and then the search query
     this.rssLink.searchParams.set("page", "rss");
     this.rssLink.searchParams.set("q", finalQuery);
     this.rssLink.searchParams.set("c", "1_2");
     this.rssLink.searchParams.set("f", "0");
 
-    let rss;
-
     try {
-      rss = await this.parser.parseURL(this.rssLink.href);
+      var rss = await this.parser.parseURL(this.rssLink.href);
     } catch (error) {
-      console.log(error);
+      console.log(
+        "An error has occured while trying to retreive the RSS feed from Nyaa:\n",
+        error
+      );
       return null;
     }
 
-    // Guard against empty rss
-    if (rss.items.length === 0) return null;
+    if (rss.items.length === 0) return null; // Guard against empty rss
 
     // Sort rss.items by nyaa:seeders
     rss.items.sort((a: { [x: string]: string }, b: { [x: string]: string }) => {
       return parseInt(b["nyaa:seeders"], 10) - parseInt(a["nyaa:seeders"], 10);
     });
 
-    // Iterate through rss.items
-    // Check if the title contains mentions of both the query and resolution
+    /* Iterate through rss.items
+    Check if the title contains mentions of both the query and resolution */
     for (const item of rss.items) {
       let title: string = item.title;
       const animeParsedData = anitomy.parseSync(title);
@@ -196,12 +197,7 @@ class Nyaa {
         return item as AnimeTorrent;
       }
     }
-    console.log(
-      searchQuery,
-      "-",
-      episodeNumber ? episodeNumber : "Batch",
-      "not found"
-    );
+    console.log(searchQuery, "-", episodeNumber ?? "", "not found");
     return null;
   }
   /**
@@ -219,29 +215,45 @@ class Nyaa {
     searchMode: SearchMode,
     episode?: string
   ) {
+    const parsedTitle = animeParsedData.anime_title;
+    const parsedResolution = animeParsedData.video_resolution;
+
+    if (!parsedTitle || !parsedResolution) return false; // Guard against empty parsed data
+
+    // Check if info is similar
+    const titleMatch = compareTwoStrings(searchQuery, parsedTitle);
+    const resolutionMatch = parsedResolution.includes(resolution);
+
+    if (titleMatch < 0.7 && !resolutionMatch) return false; // If title is not similar, and resolution is not similar, return false
+
     switch (searchMode) {
       case SearchMode.EPISODE:
-        const parsedTitle = animeParsedData.anime_title;
         const parsedEpisode = animeParsedData.episode_number;
-        const parsedResolution = animeParsedData.video_resolution;
 
-        // Guard against undefined values
-        if (!parsedTitle || !parsedEpisode || !parsedResolution) return false;
+        if (!parsedEpisode) return false; // Guard against empty episode
 
-        // Check if info is similar
-        const titleMatch = compareTwoStrings(searchQuery, parsedTitle);
-        const episodeMatch = parseInt(episode!) === parseInt(parsedEpisode);
-        const resolutionMatch = parsedResolution.includes(resolution);
+        const episodeMatch = parseInt(episode!) === parseInt(parsedEpisode); // Check if episode is similar
 
-        // If so, we have a match
-        return titleMatch > 0.7 && episodeMatch && resolutionMatch;
+        return episodeMatch; // Return if all conditions are met
 
       case SearchMode.BATCH:
-        // TODO
-        break;
+        const parsedReleaseInfo = animeParsedData.release_information;
+
+        if (!parsedReleaseInfo) return false; // Guard against empty release info
+
+        const batchMatch = parsedReleaseInfo.includes("Batch"); // Check if it is a batch
+
+        return batchMatch; // Return if all conditions are met
+
       case SearchMode.MOVIE:
-        // TODO
-        break;
+        const parsedAnimeType = animeParsedData.anime_type;
+
+        if (!parsedAnimeType) return false; // Guard against empty anime type
+
+        const movieMatch = parsedAnimeType.includes("Movie"); // Check if it is a movie
+
+        return movieMatch; // Return if all conditions are met
+
       default:
         return false;
     }
