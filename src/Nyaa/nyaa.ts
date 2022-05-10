@@ -256,7 +256,7 @@ class Nyaa {
     const isEpisode =
       episodeRegex && episode ? episodeRegex[0] === episode : true;
 
-    const isResolution = resolution ? searchQuery.includes(resolution) : true;
+    const isResolution = resolution ? searchQuery.includes(resolution.toString()) : true;
 
     return animeBestMatch.bestMatch.rating > 0.7 && isEpisode && isResolution;
   }
