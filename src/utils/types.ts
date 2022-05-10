@@ -26,8 +26,22 @@ export interface AniTitle {
   native: string;
 }
 
+export enum AnimeFormat {
+  TV = "TV",
+  TV_SHORT = "TV_SHORT",
+  OVA = "OVA",
+  ONA = "ONA",
+  MOVIE = "MOVIE",
+  SPECIAL = "SPECIAL",
+  MUSIC = "MUSIC",
+  MANGA = "MANGA",
+  NOVEL = "NOVEL",
+  ONE_SHOT = "ONE_SHOT",
+}
+
 export interface AniMedia {
   episodes: number;
+  format: AnimeFormat;
   status: status;
   endDate: {
     year: number | null;
@@ -36,6 +50,7 @@ export interface AniMedia {
   };
   nextAiringEpisode: nextAiringEpisode | null;
   title: AniTitle;
+  synonyms: string[];
   coverImage: AniCoverImage;
 }
 export interface AniCoverImage {

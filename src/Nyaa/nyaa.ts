@@ -4,6 +4,7 @@
 import Parser from "rss-parser";
 import { AnimeTorrent, AniQuery, Resolution } from "../utils/types";
 import { resolution } from "../../profile.json";
+import { findBestMatch } from "string-similarity";
 
 class Nyaa {
   rssLink: URL;
@@ -42,28 +43,6 @@ class Nyaa {
   }
 
   /**
-   * Returns how closely similar two strings are to each other.
-   * @param  {string} s1
-   * @param  {string} s2
-   */
-  private similarity(s1: string, s2: string) {
-    var longer = s1.toLowerCase();
-    var shorter = s2.toLowerCase();
-    if (s1.length < s2.length) {
-      longer = s2;
-      shorter = s1;
-    }
-    var longerLength = longer.length;
-    if (longerLength == 0) {
-      return 1.0;
-    }
-    return (
-      (longerLength - this.editDistance(longer, shorter)) /
-      parseFloat(longerLength.toString())
-    );
-  }
-
-  /**
    * Gets the numbers between start and end
    * @param  {number} start
    * @param  {number} end
@@ -96,28 +75,36 @@ class Nyaa {
   ): Promise<AnimeTorrent[] | AnimeTorrent | null> {
     /* Here we check whether the anime has recently finished airing.
        Usually batches aren't produced until like 1-2 week(s) after finishing */
-    const todayDate = new Date();
-    const endDate = new Date(
-      `${anime.media.endDate.month}/${anime.media.endDate.day}/${anime.media.endDate.year}`
-    );
-    const daysLeft = Math.floor(
-      (todayDate.getTime() - endDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
+    // const todayDate = new Date();
+    // const endDate = new Date(
+    //   `${anime.media.endDate.month}/${anime.media.endDate.day}/${anime.media.endDate.year}`
+    // );
+    // const daysLeft = Math.floor(
+    //   (todayDate.getTime() - endDate.getTime()) / (1000 * 60 * 60 * 24)
+    // );
 
+    // Find movie
+    if (anime.media.format === "MOVIE") {
+      const animeRSS = await this.getTorrent(
+        anime.media.title.romaji,
+        resolution as Resolution,
+        false
+      );
+      if (animeRSS) return animeRSS;
+    }
     /* Find batch of episodes to download if the
        Anime has already finished airing */
     if (
       anime.media.status === "FINISHED" &&
       startEpisode === 0 &&
-      fsDownloadedEpisodes.length === 0 &&
-      daysLeft > 10
+      fsDownloadedEpisodes.length === 0
     ) {
       const animeRSS = await this.getTorrent(
         anime.media.title.romaji,
         resolution as Resolution,
         true
       );
-      return animeRSS;
+      if (animeRSS) return animeRSS;
     }
 
     const animeTorrentList: AnimeTorrent[] = new Array();
@@ -131,7 +118,16 @@ class Nyaa {
     // Search for episodes individually
     for (let j = 0; j < episodeList.length; j++) {
       const episode = episodeList[j];
-      const episodeString = episode < 10 ? "0" + episode : episode.toString();
+      const episodeString =
+        episodeList.length >= 100
+          ? episode >= 10 && episode <= 99
+            ? "0" + episode
+            : episode >= 100
+            ? episode.toString()
+            : "00" + episode
+          : episode < 10
+          ? "0" + episode
+          : episode.toString();
 
       const animeRSS = await this.getTorrent(
         anime.media.title.romaji,
@@ -161,8 +157,10 @@ class Nyaa {
     episodeNumber?: string
   ): Promise<AnimeTorrent | null> {
     const finalQuery = isBatch
-      ? searchQuery + " Batch"
-      : searchQuery + " - " + episodeNumber;
+      ? `${searchQuery} Batch`
+      : episodeNumber
+      ? `${searchQuery} - ${episodeNumber}`
+      : searchQuery;
 
     this.rssLink.searchParams.set("page", "rss");
     this.rssLink.searchParams.set("q", finalQuery);
@@ -188,36 +186,75 @@ class Nyaa {
     for (const item of rss.items) {
       let title: string = item.title;
       let subGroup = title.match(/\[(.*?)\]/);
+      if (isBatch || (!isBatch && episodeNumber == undefined)) {
+        let animeTitle = title.match(/(?<=\[.*\])(.+?) (?=[\(\[])/);
 
-      if (isBatch) {
-        let animeTitle = title.match(/\[.*\] (.+?) [\(\[]/);
         // If animetitle is found, check similarity and if it's above the threshold, return
         if (animeTitle) {
-          const similarity = this.similarity(searchQuery, animeTitle[1]);
-          if (similarity > 0.75) return item as AnimeTorrent;
+          const isSimilar = this.verifyQuery(searchQuery, animeTitle);
+          if (isSimilar) return item as AnimeTorrent;
         }
       } else {
-        let animeTitle = title.match(/\[.*\] (.+?) - \d{2}/);
-        let episode = title.match(/\d{2}/);
+        const epRegexLength = episodeNumber ? episodeNumber.length : 2;
+
+        let animeTitle =
+          title.match(
+            new RegExp("\\[.*\\] (.+?) - \\d{" + epRegexLength + "}")
+          ) ??
+          title.match(new RegExp("\\[.*\\]_(.+?)_\\d{" + epRegexLength + "}"));
+
+        let episode =
+          title.match(new RegExp("(?<=- )\\d{" + epRegexLength + "}")) ??
+          title.match(new RegExp("(?<=_)\\d{" + epRegexLength + "}(?=_)"));
 
         if (animeTitle && episode && episodeNumber) {
-          const titleSim = this.similarity(animeTitle[1].trim(), searchQuery);
-          const episodeSim = this.similarity(episode[0].trim(), episodeNumber);
+          const isSimilar = this.verifyQuery(
+            searchQuery,
+            animeTitle,
+            episodeNumber,
+            episode
+          );
 
           // If the title and episode are similar, and the resolution is similar, return
-          if (
-            titleSim > 0.8 &&
-            episodeSim > 0.8 &&
-            title.includes(resolution)
-          ) {
-            item.episode = episode[0].trim();
+          if (isSimilar && title.includes(resolution)) {
+            item.episode = episodeNumber;
             return item as AnimeTorrent;
           }
         }
       }
     }
-    console.log(searchQuery, "-", episodeNumber, "not found");
+    console.log(
+      searchQuery,
+      "-",
+      episodeNumber ? episodeNumber : "Batch",
+      "not found"
+    );
     return null;
+  }
+
+  private verifyQuery(
+    searchQuery: string,
+    animeTitleRegex: RegExpMatchArray,
+    episode?: string,
+    episodeRegex?: RegExpMatchArray
+  ) {
+    const animeTitle = animeTitleRegex[1].trim();
+
+    // If animeTitle has a title in round brackets, extract it. If found, extract the title out of the brackets
+    const subAnimeTitle = animeTitle.match(/(?<=\().+?(?=\))/);
+    const subAnimeTitleString = subAnimeTitle ? subAnimeTitle[0] : "";
+    const mainAnimeTitle = animeTitle.replace(/\(.+?\)/, "").trim();
+
+    const animeBestMatch = findBestMatch(searchQuery, [
+      animeTitle,
+      mainAnimeTitle,
+      subAnimeTitleString,
+    ]);
+
+    const isEpisode =
+      episodeRegex && episode ? episodeRegex[0] === episode : true;
+
+    return animeBestMatch.bestMatch.rating > 0.7 && isEpisode;
   }
 }
 

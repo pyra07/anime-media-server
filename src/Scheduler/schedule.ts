@@ -62,11 +62,9 @@ class Scheduler {
   ): Promise<void> {
     const downloadedEpisodes = new Array<number>();
     for (const torrent of animeTorrent) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
       log(
         `Downloading ${torrent.title} - EPISODE ${torrent.episode} @ ${torrent.link}`
       );
-
       // Download torrent
       var isAdded: boolean = await qbit.addTorrent(
         torrent.link,
@@ -112,7 +110,7 @@ class Scheduler {
     let fireDBAnime;
     for (let index = 0; index < animeDb.length; index++) {
       const anime = animeDb[index];
-      
+
       try {
         const fireDBEntry = await DB.getByMediaId(anime.mediaId.toString());
 
@@ -135,9 +133,8 @@ class Scheduler {
 
       /* Sometimes the title found in nyaa.si is the shortform of the title.
            manually defined in the db by the user. */
-      anime.media.title.romaji = fireDBAnime.media.alternativeTitle
-        ? fireDBAnime.media.alternativeTitle
-        : anime.media.title.romaji;
+      anime.media.title.romaji =
+        fireDBAnime.media.alternativeTitle ?? anime.media.title.romaji;
 
       // Users progress
       const startEpisode = anime.progress + startingEpisode;
@@ -158,19 +155,65 @@ class Scheduler {
         anime.progress === anime.media.episodes ||
         fsDownloadedEpisodes.length === anime.media.episodes;
 
-      if (isUpToDate) continue;
+      if (isUpToDate) continue; // Skip
 
-      const torrents = await Nyaa.getTorrents(
+      // First, find the anime with base settings.
+      const isSuccessful = await this.getTorrents(
         anime,
         startEpisode,
         endEpisode,
         fsDownloadedEpisodes
       );
-      if (torrents === null) continue;
-      if (Array.isArray(torrents))
-        await this.downloadTorrents(anime, false, ...torrents);
-      else await this.downloadTorrents(anime, true, torrents);
+      if (isSuccessful) continue;
+
+      // This is probably a new anime, so first we determine which altTitle to use
+      if (
+        !fireDBAnime.media.alternativeTitle &&
+        fsDownloadedEpisodes.length === 0
+      ) {
+        // Loop over synonyms and find the one that matches a nyaa hit
+        const synonyms = anime.media.synonyms;
+        for (const synonym of synonyms) {
+          // If synonym is not in English, skip
+          // TODO
+          anime.media.title.romaji = synonym;
+          const isValidTitle = await this.getTorrents(
+            anime,
+            startEpisode,
+            endEpisode,
+            fsDownloadedEpisodes
+          );
+          if (isValidTitle) {
+            DB.modifyAnimeEntry(anime.mediaId.toString(), {
+              "media.alternativeTitle": synonym,
+            });
+            break;
+          }
+
+          // If we found a valid title, then we can stop looping.
+          // Add the title to firebase
+        }
+      }
     }
+  }
+
+  private async getTorrents(
+    anime: AniQuery,
+    start: number,
+    end: number,
+    fsDownloadedEpisodes: any[]
+  ): Promise<boolean> {
+    const torrents = await Nyaa.getTorrents(
+      anime,
+      start,
+      end,
+      fsDownloadedEpisodes
+    );
+    if (torrents === null) return false;
+    if (Array.isArray(torrents))
+      await this.downloadTorrents(anime, false, ...torrents);
+    else await this.downloadTorrents(anime, true, torrents);
+    return true;
   }
 
   public async check() {
