@@ -92,6 +92,7 @@ class Scheduler {
     }
     return `${array[0]} - ${array[array.length - 1]}`;
   }
+
   /**
    * Handles the anime, and downloads the necessary torrents
    * @param  {AniQuery} anime
@@ -99,17 +100,20 @@ class Scheduler {
    */
   private async handleAnime(anime: AniQuery): Promise<void> {
     log(`Handling ${anime.media.title.romaji}`);
+    let fireDBAnime;
     try {
       const fireDBEntry = await DB.getByMediaId(`${anime.mediaId}`);
 
       if (!fireDBEntry.exists) {
         DB.addToDb(anime);
-        var fireDBAnime: any = anime;
-      } else var fireDBAnime: any = fireDBEntry.data();
+        fireDBAnime = anime;
+      } else fireDBAnime = fireDBEntry.data();
     } catch (error) {
       console.log(error);
       return;
     }
+
+    if (!fireDBAnime) return;
 
     /* This is manually defined in the db by the user.
           Some animes usually have a 2nd season, but instead of starting from episode 1, they start from
