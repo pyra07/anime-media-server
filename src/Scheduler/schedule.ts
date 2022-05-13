@@ -148,6 +148,8 @@ class Scheduler {
 
     if (isUpToDate) return; // Skip
 
+    log(startEpisode, endEpisode, fsDownloadedEpisodes);
+
     // First, find the anime with base settings.
     const isSuccessful = await this.getTorrents(
       anime,
