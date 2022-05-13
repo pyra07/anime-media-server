@@ -10,24 +10,11 @@ import { webhook } from "../../profile.json";
 import { log } from "console";
 
 class Scheduler {
-  private hook: Webhook;
+  private hook: Webhook; // Store discord webhook info
+  private offlineEpisodeStorage: { [key: string]: Array<number> } = {}; // Store information of offline episodes.
   constructor() {
     this.hook = new Webhook(webhook);
-  }
-
-  private getDifferences(animeList: AniQuery[], fireDBList: any[]) {
-    // Go through both lists. If key mediaId does not exist in firedblist, add it to animeList
-    // If key mediaId does exist in firedblist, check if the value is different. If it is different, add it to animeList
-    const differences: AniQuery[] = [];
-    animeList.forEach((anime) => {
-      const fireDBAnime = fireDBList.find(
-        (item) => item.mediaId === anime.mediaId
-      );
-      if (!fireDBAnime) {
-        differences.push(anime);
-      }
-    });
-    return differences;
+    this.offlineEpisodeStorage = {};
   }
 
   /**
@@ -105,93 +92,92 @@ class Scheduler {
     }
     return `${array[0]} - ${array[array.length - 1]}`;
   }
+  /**
+   * Handles the anime, and downloads the necessary torrents
+   * @param  {AniQuery} anime
+   * @returns Promise
+   */
+  private async handleAnime(anime: AniQuery): Promise<void> {
+    log(`Handling ${anime.media.title.romaji}`);
+    try {
+      const fireDBEntry = await DB.getByMediaId(`${anime.mediaId}`);
 
-  private async handleAnime(animeDb: AniQuery[]) {
-    let fireDBAnime;
-    for (let index = 0; index < animeDb.length; index++) {
-      const anime = animeDb[index];
+      if (!fireDBEntry.exists) {
+        DB.addToDb(anime);
+        var fireDBAnime: any = anime;
+      } else var fireDBAnime: any = fireDBEntry.data();
+    } catch (error) {
+      console.log(error);
+      return;
+    }
 
-      try {
-        const fireDBEntry = await DB.getByMediaId(anime.mediaId.toString());
-
-        if (!fireDBEntry.exists) {
-          DB.addToDb(anime);
-          fireDBAnime = anime;
-        } else fireDBAnime = fireDBEntry.data();
-      } catch (error) {
-        continue;
-      }
-
-      if (!fireDBAnime) continue;
-
-      /* This is manually defined in the db by the user.
+    /* This is manually defined in the db by the user.
           Some animes usually have a 2nd season, but instead of starting from episode 1, they start from
           where they left off in season 1., e.g episode 13 */
-      const startingEpisode = fireDBAnime.media.startingEpisode
-        ? fireDBAnime.media.startingEpisode
-        : 0;
+    const startingEpisode = fireDBAnime.media.startingEpisode
+      ? fireDBAnime.media.startingEpisode
+      : 0;
 
-      /* Sometimes the title found in nyaa.si is the shortform of the title.
+    /* Sometimes the title found in nyaa.si is the shortform of the title.
            manually defined in the db by the user. */
-      anime.media.title.romaji =
-        fireDBAnime.media.alternativeTitle ?? anime.media.title.romaji;
+    anime.media.title.romaji =
+      fireDBAnime.media.alternativeTitle ?? anime.media.title.romaji;
 
-      // Users progress
-      const startEpisode = anime.progress + startingEpisode;
+    // Users progress
+    const startEpisode = anime.progress + startingEpisode;
 
-      // NextAiringEpisode can be null if the anime is finished. So check for that
-      const endEpisode = anime.media.nextAiringEpisode
-        ? anime.media.nextAiringEpisode.episode - 1 + startingEpisode
-        : anime.media.episodes;
+    // NextAiringEpisode can be null if the anime is finished. So check for that
+    const endEpisode = anime.media.nextAiringEpisode
+      ? anime.media.nextAiringEpisode.episode - 1 + startingEpisode
+      : anime.media.episodes;
 
-      // Firestore downloaded episodes
-      const fsDownloadedEpisodes: any[] = fireDBAnime.downloadedEpisodes || [];
+    // Firestore downloaded episodes
+    const fsDownloadedEpisodes: any[] = fireDBAnime.downloadedEpisodes || [];
 
-      // If progress is up to date, then skip
-      // Or if the user has downloaded all episodes, then skip
-      const isUpToDate =
-        startEpisode === endEpisode ||
-        anime.progress >= endEpisode ||
-        anime.progress === anime.media.episodes ||
-        fsDownloadedEpisodes.length === anime.media.episodes;
+    // If progress is up to date, then skip
+    // Or if the user has downloaded all episodes, then skip
+    const isUpToDate =
+      startEpisode === endEpisode ||
+      anime.progress >= endEpisode ||
+      anime.progress === anime.media.episodes ||
+      fsDownloadedEpisodes.length === anime.media.episodes;
 
-      if (isUpToDate) continue; // Skip
+    if (isUpToDate) return; // Skip
 
-      // First, find the anime with base settings.
-      const isSuccessful = await this.getTorrents(
-        anime,
-        startEpisode,
-        endEpisode,
-        fsDownloadedEpisodes
-      );
-      if (isSuccessful) continue;
+    // First, find the anime with base settings.
+    const isSuccessful = await this.getTorrents(
+      anime,
+      startEpisode,
+      endEpisode,
+      fsDownloadedEpisodes
+    );
 
-      // This is probably a new anime, so first we determine which altTitle to use
-      if (
-        !fireDBAnime.media.alternativeTitle &&
-        fsDownloadedEpisodes.length === 0
-      ) {
-        // Loop over synonyms and find the one that matches a nyaa hit
-        const synonyms = anime.media.synonyms;
-        for (const synonym of synonyms) {
-          // If synonym is not in English, skip
-          // TODO
-          anime.media.title.romaji = synonym;
-          const isValidTitle = await this.getTorrents(
-            anime,
-            startEpisode,
-            endEpisode,
-            fsDownloadedEpisodes
-          );
-          if (isValidTitle) {
-            DB.modifyAnimeEntry(anime.mediaId.toString(), {
-              "media.alternativeTitle": synonym,
-            });
-            break;
-          }
+    if (isSuccessful) return; // Finish the function if successful
 
-          // If we found a valid title, then we can stop looping.
-          // Add the title to firebase
+    // This is probably a new anime, so first we determine which altTitle to use
+    if (
+      !fireDBAnime.media.alternativeTitle &&
+      fsDownloadedEpisodes.length === 0
+    ) {
+      // Loop over synonyms and find the one that matches a nyaa hit
+      const synonyms = anime.media.synonyms;
+      for (const synonym of synonyms) {
+        // If synonym is not in English, skip
+        // TODO
+        anime.media.title.romaji = synonym;
+        const isValidTitle = await this.getTorrents(
+          anime,
+          startEpisode,
+          endEpisode,
+          fsDownloadedEpisodes
+        );
+        /* If we found a valid title, then we can stop looping.
+           Add the title to firebase */
+        if (isValidTitle) {
+          DB.modifyAnimeEntry(anime.mediaId.toString(), {
+            "media.alternativeTitle": synonym,
+          });
+          break;
         }
       }
     }
@@ -216,13 +202,34 @@ class Scheduler {
     return true;
   }
 
+  private assertEpisodesDownloaded(
+    epList: Array<number>,
+    endEpisode: number
+  ): boolean {
+    for (const ep of epList) {
+      if (ep > endEpisode) return false;
+    }
+    return true;
+  }
+
   public async check() {
     const animeDb: AniQuery[] = await Anilist.getAnimeUserList();
 
-    // check if animeDb is empty
+    if (animeDb.length === 0) return; // check if animeDb is empty
 
-    if (animeDb.length === 0) return;
-    else await this.handleAnime(animeDb);
+    /* Check if any new episodes need downloading, according to the offline db
+     If it is, then download the torrents */
+    for (const anime of animeDb) {
+      const offlineEpisodeList: Array<number> =
+        this.offlineEpisodeStorage[anime.mediaId.toString()] || [];
+      const nextAiringEpisode =
+        anime.media.nextAiringEpisode?.episode || anime.media.episodes;
+      if (
+        offlineEpisodeList.length === 0 ||
+        this.assertEpisodesDownloaded(offlineEpisodeList, nextAiringEpisode)
+      )
+        this.handleAnime(anime);
+    }
   }
 }
 
