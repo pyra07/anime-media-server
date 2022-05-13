@@ -146,7 +146,10 @@ class Scheduler {
       anime.progress === anime.media.episodes ||
       fsDownloadedEpisodes.length === anime.media.episodes;
 
-    if (isUpToDate) return; // Skip
+    if (isUpToDate) {
+      log(`${anime.media.title.romaji} is up to date`);
+      return;
+    } // Skip
 
     log(
       anime.media.title.romaji,
