@@ -104,29 +104,52 @@ class Nyaa {
         fsDownloadedEpisodes,
         endEpisode
       );
-      // Search for episodes individually
-      for (let j = 0; j < episodeList.length; j++) {
-        const episode = episodeList[j];
-        const episodeString =
-          episodeList.length >= 100
-            ? episode >= 10 && episode <= 99
+      await Promise.all(
+        episodeList.map(async (episode) => {
+          const episodeString =
+            episodeList.length >= 100
+              ? episode >= 10 && episode <= 99
+                ? "0" + episode
+                : episode >= 100
+                ? episode.toString()
+                : "00" + episode
+              : episode < 10
               ? "0" + episode
-              : episode >= 100
-              ? episode.toString()
-              : "00" + episode
-            : episode < 10
-            ? "0" + episode
-            : episode.toString();
+              : episode.toString();
 
-        const animeRSS = await this.getTorrent(
-          anime.media.title.romaji,
-          resolution as Resolution,
-          SearchMode.EPISODE,
-          episodeString
-        );
-        // Check if animeRSS is not null
-        if (animeRSS !== null) animeTorrentList.push(animeRSS);
-      }
+          const animeRSS = await this.getTorrent(
+            anime.media.title.romaji,
+            resolution as Resolution,
+            SearchMode.EPISODE,
+            episodeString
+          );
+          // Check if animeRSS is not null
+          if (animeRSS !== null) animeTorrentList.push(animeRSS);
+        })
+      );
+      // Search for episodes individually
+      // for (let j = 0; j < episodeList.length; j++) {
+      //   const episode = episodeList[j];
+      //   const episodeString =
+      //     episodeList.length >= 100
+      //       ? episode >= 10 && episode <= 99
+      //         ? "0" + episode
+      //         : episode >= 100
+      //         ? episode.toString()
+      //         : "00" + episode
+      //       : episode < 10
+      //       ? "0" + episode
+      //       : episode.toString();
+
+      //   const animeRSS = await this.getTorrent(
+      //     anime.media.title.romaji,
+      //     resolution as Resolution,
+      //     SearchMode.EPISODE,
+      //     episodeString
+      //   );
+      //   // Check if animeRSS is not null
+      //   if (animeRSS !== null) animeTorrentList.push(animeRSS);
+      // }
       if (animeTorrentList.length === 0) return null;
       return animeTorrentList;
     }
