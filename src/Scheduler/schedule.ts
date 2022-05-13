@@ -219,7 +219,8 @@ class Scheduler {
 
     /* Check if any new episodes need downloading, according to the offline db
      If it is, then download the torrents */
-    for (const anime of animeDb) {
+    for (let i = 0; i < animeDb.length; i++) {
+      const anime = animeDb[i];
       const offlineEpisodeList: Array<number> =
         this.offlineEpisodeStorage[anime.mediaId.toString()] || [];
       const nextAiringEpisode =
