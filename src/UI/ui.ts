@@ -33,6 +33,7 @@ class ui {
     await db.logIn();
     await schedule.check();
     console.log("Done! Exiting now...");
+    process.exit();
   }
 
   private async runScheduler() {
