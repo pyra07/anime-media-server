@@ -233,20 +233,19 @@ class Scheduler {
 
     /* Check if any new episodes need downloading, according to the offline db
      If it is, then download the torrents */
-    // const promises = animeDb.map(this.handleAnime);
-    // await Promise.all(promises);
-    for (let i = 0; i < animeDb.length; i++) {
-      const anime = animeDb[i];
-      const offlineEpisodeList: Array<number> =
-        this.offlineEpisodeStorage[anime.mediaId.toString()] || [];
-      const nextAiringEpisode =
-        anime.media.nextAiringEpisode?.episode || anime.media.episodes;
-      if (
-        offlineEpisodeList.length === 0 ||
-        this.assertEpisodesDownloaded(offlineEpisodeList, nextAiringEpisode)
-      )
-        await this.handleAnime(anime);
-    }
+    this.handleAnime(animeDb[0]);
+    // for (let i = 0; i < animeDb.length; i++) {
+    //   const anime = animeDb[i];
+    //   const offlineEpisodeList: Array<number> =
+    //     this.offlineEpisodeStorage[anime.mediaId.toString()] || [];
+    //   const nextAiringEpisode =
+    //     anime.media.nextAiringEpisode?.episode || anime.media.episodes;
+    //   if (
+    //     offlineEpisodeList.length === 0 ||
+    //     this.assertEpisodesDownloaded(offlineEpisodeList, nextAiringEpisode)
+    //   )
+    //     await this.handleAnime(anime);
+    // }
   }
 }
 
