@@ -143,7 +143,11 @@ class Scheduler {
       anime.progress >= endEpisode ||
       anime.progress === anime.media.episodes ||
       fsDownloadedEpisodes.length === anime.media.episodes;
-    if (isUpToDate) return;
+    if (isUpToDate) {
+      log(`${anime.media.title.romaji} is up to date`);
+      log(`${anime.media.title.romaji} is ${anime.progress}/${anime.media.episodes}`);
+      return;
+    }
 
     // Attempt to find the anime.
     const isSuccessful = await this.getTorrents(
