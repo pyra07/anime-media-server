@@ -139,16 +139,15 @@ class Scheduler {
     /* If progress is up to date, then skip
     Or if the user has downloaded all episodes, then skip */
     const isUpToDate =
-      startEpisode === endEpisode ||
-      anime.progress >= endEpisode ||
-      anime.progress === anime.media.episodes ||
-      fsDownloadedEpisodes.length === anime.media.episodes;
-    if (isUpToDate) {
-      log(`${anime.media.title.romaji} is up to date`);
-      log(`${anime.media.title.romaji} is ${anime.progress}/${endEpisode}`);
-      return;
-    }
-    
+      startEpisode === endEpisode || // You are up to date
+      anime.progress >= endEpisode || // You are also up to date
+      anime.progress === anime.media.episodes || // You have watched all episodes
+      fsDownloadedEpisodes.length === anime.progress || // The downloaded episodes are up to date
+      fsDownloadedEpisodes.length === endEpisode - startingEpisode; // you are up to date (but not all episodes need to be downloaded)
+    fsDownloadedEpisodes.length === anime.media.episodes; // You have downloaded all episodes
+
+    if (isUpToDate) return;
+
     log(`Finding ${anime.media.title.romaji}`);
 
     // Attempt to find the anime.
