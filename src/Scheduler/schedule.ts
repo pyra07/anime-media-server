@@ -100,7 +100,7 @@ class Scheduler {
   private async handleAnime(anime: AniQuery): Promise<void> {
     log(`Handling ${anime.media.title.romaji}`);
     try {
-      const fireDBEntry = await DB.getByMediaId(`${123}`);
+      const fireDBEntry = await DB.getByMediaId(`${anime.mediaId}`);
 
       if (!fireDBEntry.exists) {
         DB.addToDb(anime);
