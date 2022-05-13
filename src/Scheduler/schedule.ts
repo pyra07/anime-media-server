@@ -142,40 +142,9 @@ class Scheduler {
       startEpisode === endEpisode || // You are up to date
       anime.progress >= endEpisode || // You are also up to date
       anime.progress === anime.media.episodes || // You have watched all episodes
-      fsDownloadedEpisodes.length === anime.progress || // The downloaded episodes are up to date
       fsDownloadedEpisodes.length === endEpisode || // The downloaded episodes are up to date
       fsDownloadedEpisodes.length === endEpisode - startEpisode || // you are up to date (but not all episodes need to be downloaded)
       fsDownloadedEpisodes.length === anime.media.episodes; // You have downloaded all episodes
-
-    log(`${anime.media.title.romaji} is up to date`);
-    log(`${startEpisode === endEpisode} -- startEpisode === endEpisode`);
-    log(`${anime.progress >= endEpisode} -- anime.progress >= endEpisode`);
-    log(
-      `${
-        anime.progress === anime.media.episodes
-      } -- anime.progress === anime.media.episodes`
-    );
-    log(
-      `${
-        fsDownloadedEpisodes.length === anime.progress
-      } -- fsDownloadedEpisodes.length === anime.progress`
-    );
-    log(
-      `${
-        fsDownloadedEpisodes.length === endEpisode
-      } -- fsDownloadedEpisodes.length === endEpisode`
-    );
-    log(
-      `${
-        fsDownloadedEpisodes.length === endEpisode - startEpisode
-      } -- fsDownloadedEpisodes.length === endEpisode - startEpisode`
-    );
-    log(
-      `${
-        fsDownloadedEpisodes.length === anime.media.episodes
-      } -- fsDownloadedEpisodes.length === anime.media.episodes`
-    );
-    log();
 
     if (isUpToDate) return;
 
