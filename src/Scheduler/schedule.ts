@@ -146,17 +146,8 @@ class Scheduler {
       anime.progress === anime.media.episodes ||
       fsDownloadedEpisodes.length === anime.media.episodes;
 
-    if (isUpToDate) {
-      log(`${anime.media.title.romaji} is up to date`);
-      return;
-    } // Skip
-
-    log(
-      anime.media.title.romaji,
-      startEpisode,
-      endEpisode,
-      fsDownloadedEpisodes
-    );
+    if (isUpToDate) return;
+    // Skip
 
     // First, find the anime with base settings.
     const isSuccessful = await this.getTorrents(
@@ -211,6 +202,7 @@ class Scheduler {
     );
     if (torrents === null) return false;
     if (Array.isArray(torrents))
+    // Proceed to download them using qbit
       await this.downloadTorrents(anime, false, ...torrents);
     else await this.downloadTorrents(anime, true, torrents);
     return true;
