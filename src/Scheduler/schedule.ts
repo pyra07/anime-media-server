@@ -11,10 +11,8 @@ import { log } from "console";
 
 class Scheduler {
   private hook: Webhook; // Store discord webhook info
-  private offlineEpisodeStorage: { [key: string]: Array<number> } = {}; // Store information of offline episodes.
   constructor() {
     this.hook = new Webhook(webhook);
-    this.offlineEpisodeStorage = {};
   }
 
   /**
@@ -66,24 +64,24 @@ class Scheduler {
           : downloadedEpisodes.push(parseInt(torrent.episode));
     }
 
-    // this.hook.send(
-    //   new MessageBuilder()
-    //     .setTimestamp()
-    //     .setTitle(`**${anime.media.title.romaji}** is downloading!`)
-    //     .setColor(0x0997e3)
-    //     .addField("Episode(s)", this.joinArr(downloadedEpisodes), true)
-    //     .addField("Seeders", animeTorrent[0]["nyaa:seeders"], true)
-    //     .addField("Title", animeTorrent[0].title, true)
-    //     .setImage(anime.media.coverImage.extraLarge)
-    // );
+    this.hook.send(
+      new MessageBuilder()
+        .setTimestamp()
+        .setTitle(`**${anime.media.title.romaji}** is downloading!`)
+        .setColor(0x0997e3)
+        .addField("Episode(s)", this.joinArr(downloadedEpisodes), true)
+        .addField("Seeders", animeTorrent[0]["nyaa:seeders"], true)
+        .addField("Title", animeTorrent[0].title, true)
+        .setImage(anime.media.coverImage.extraLarge)
+    );
 
-    // await DB.modifyAnimeEntry(anime.mediaId.toString(), {
-    //   "media.nextAiringEpisode": anime.media.nextAiringEpisode,
-    //   "media.status": anime.media.status,
-    //   downloadedEpisodes: firebase.firestore.FieldValue.arrayUnion(
-    //     ...downloadedEpisodes
-    //   ),
-    // });
+    await DB.modifyAnimeEntry(anime.mediaId.toString(), {
+      "media.nextAiringEpisode": anime.media.nextAiringEpisode,
+      "media.status": anime.media.status,
+      downloadedEpisodes: firebase.firestore.FieldValue.arrayUnion(
+        ...downloadedEpisodes
+      ),
+    });
   }
 
   private joinArr(array: any[]) {
@@ -99,8 +97,8 @@ class Scheduler {
    * @returns Promise
    */
   private async handleAnime(anime: AniQuery): Promise<void> {
-    log(`Handling ${anime.media.title.romaji}`);
     let fireDBAnime;
+
     try {
       const fireDBEntry = await DB.getByMediaId(`${anime.mediaId}`);
 
@@ -109,47 +107,45 @@ class Scheduler {
         fireDBAnime = anime;
       } else fireDBAnime = fireDBEntry.data();
     } catch (error) {
-      console.log(error);
+      console.error(error);
       return;
     }
 
-    if (!fireDBAnime) return;
+    if (!fireDBAnime) return; // Guard against null fireDBAnime (in case of error)
 
     /* This is manually defined in the db by the user.
-          Some animes usually have a 2nd season, but instead of starting from episode 1, they start from
-          where they left off in season 1., e.g episode 13 */
+    Some animes usually have a 2nd season, but instead of starting from episode 1, they start from
+    where they left off in season 1., e.g episode 13 
+    Apparently, there is a workaround for this... */
     const startingEpisode = fireDBAnime.media.startingEpisode
       ? fireDBAnime.media.startingEpisode
       : 0;
 
-    /* Sometimes the title found in nyaa.si is the shortform of the title.
-           manually defined in the db by the user. */
+    /* Sometimes the title found in nyaa.si is different.
+    Therefore, we manually define an alt title if applicable. */
     anime.media.title.romaji =
       fireDBAnime.media.alternativeTitle ?? anime.media.title.romaji;
 
-    // Users progress
-    const startEpisode = anime.progress + startingEpisode;
+    const startEpisode = anime.progress + startingEpisode; // Users progress
 
     // NextAiringEpisode can be null if the anime is finished. So check for that
     const endEpisode = anime.media.nextAiringEpisode
       ? anime.media.nextAiringEpisode.episode - 1 + startingEpisode
       : anime.media.episodes;
 
-    // Firestore downloaded episodes
+    // firestore (fs) downloaded episodes.
     const fsDownloadedEpisodes: any[] = fireDBAnime.downloadedEpisodes || [];
 
-    // If progress is up to date, then skip
-    // Or if the user has downloaded all episodes, then skip
+    /* If progress is up to date, then skip
+    Or if the user has downloaded all episodes, then skip */
     const isUpToDate =
       startEpisode === endEpisode ||
       anime.progress >= endEpisode ||
       anime.progress === anime.media.episodes ||
       fsDownloadedEpisodes.length === anime.media.episodes;
-
     if (isUpToDate) return;
-    // Skip
 
-    // First, find the anime with base settings.
+    // Attempt to find the anime.
     const isSuccessful = await this.getTorrents(
       anime,
       startEpisode,
@@ -159,7 +155,7 @@ class Scheduler {
 
     if (isSuccessful) return; // Finish the function if successful
 
-    // This is probably a new anime, so first we determine which altTitle to use
+    // For new entries, sometimes you need to use a different title.
     if (
       !fireDBAnime.media.alternativeTitle &&
       fsDownloadedEpisodes.length === 0
@@ -200,21 +196,13 @@ class Scheduler {
       end,
       fsDownloadedEpisodes
     );
-    if (torrents === null) return false;
+
+    if (torrents === null) return false; // Guard against null torrents (in case of error)
+
     if (Array.isArray(torrents))
-    // Proceed to download them using qbit
+      // Proceed to download them using qbit
       await this.downloadTorrents(anime, false, ...torrents);
     else await this.downloadTorrents(anime, true, torrents);
-    return true;
-  }
-
-  private assertEpisodesDownloaded(
-    epList: Array<number>,
-    endEpisode: number
-  ): boolean {
-    for (const ep of epList) {
-      if (ep > endEpisode) return false;
-    }
     return true;
   }
 
@@ -223,27 +211,7 @@ class Scheduler {
 
     if (animeDb.length === 0) return; // check if animeDb is empty
 
-    const startTime = Date.now();
-
-    /* Check if any new episodes need downloading, according to the offline db
-     If it is, then download the torrents */
     await Promise.all(animeDb.map((anime) => this.handleAnime(anime)));
-
-    const endTime = Date.now();
-
-    log(`Finished checking in ${(endTime - startTime) / 1000} seconds`);
-    // for (let i = 0; i < animeDb.length; i++) {
-    //   const anime = animeDb[i];
-    //   const offlineEpisodeList: Array<number> =
-    //     this.offlineEpisodeStorage[anime.mediaId.toString()] || [];
-    //   const nextAiringEpisode =
-    //     anime.media.nextAiringEpisode?.episode || anime.media.episodes;
-    //   if (
-    //     offlineEpisodeList.length === 0 ||
-    //     this.assertEpisodesDownloaded(offlineEpisodeList, nextAiringEpisode)
-    //   )
-    //     await this.handleAnime(anime);
-    // }
   }
 }
 

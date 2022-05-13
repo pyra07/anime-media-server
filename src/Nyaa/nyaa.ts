@@ -19,30 +19,6 @@ class Nyaa {
     });
   }
 
-  private editDistance(s1: string, s2: string) {
-    s1 = s1.toLowerCase();
-    s2 = s2.toLowerCase();
-
-    var costs = new Array();
-    for (var i = 0; i <= s1.length; i++) {
-      var lastValue = i;
-      for (var j = 0; j <= s2.length; j++) {
-        if (i == 0) costs[j] = j;
-        else {
-          if (j > 0) {
-            var newValue = costs[j - 1];
-            if (s1.charAt(i - 1) != s2.charAt(j - 1))
-              newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
-            costs[j - 1] = lastValue;
-            lastValue = newValue;
-          }
-        }
-      }
-      if (i > 0) costs[s2.length] = lastValue;
-    }
-    return costs[s2.length];
-  }
-
   /**
    * Gets the numbers between start and end
    * @param  {number} start
@@ -104,54 +80,32 @@ class Nyaa {
         fsDownloadedEpisodes,
         endEpisode
       );
-      await Promise.all(
-        episodeList.map(async (episode) => {
-          const episodeString =
-            episodeList.length >= 100
-              ? episode >= 10 && episode <= 99
-                ? "0" + episode
-                : episode >= 100
-                ? episode.toString()
-                : "00" + episode
-              : episode < 10
-              ? "0" + episode
-              : episode.toString();
 
-          const animeRSS = await this.getTorrent(
-            anime.media.title.romaji,
-            resolution as Resolution,
-            SearchMode.EPISODE,
-            episodeString
-          );
-          // Check if animeRSS is not null
-          if (animeRSS !== null) animeTorrentList.push(animeRSS);
-        })
-      );
       // Search for episodes individually
-      // for (let j = 0; j < episodeList.length; j++) {
-      //   const episode = episodeList[j];
-      //   const episodeString =
-      //     episodeList.length >= 100
-      //       ? episode >= 10 && episode <= 99
-      //         ? "0" + episode
-      //         : episode >= 100
-      //         ? episode.toString()
-      //         : "00" + episode
-      //       : episode < 10
-      //       ? "0" + episode
-      //       : episode.toString();
+      for (let j = 0; j < episodeList.length; j++) {
+        const episode = episodeList[j];
+        const episodeString =
+          episodeList.length >= 100
+            ? episode >= 10 && episode <= 99
+              ? "0" + episode
+              : episode >= 100
+              ? episode.toString()
+              : "00" + episode
+            : episode < 10
+            ? "0" + episode
+            : episode.toString();
 
-      //   const animeRSS = await this.getTorrent(
-      //     anime.media.title.romaji,
-      //     resolution as Resolution,
-      //     SearchMode.EPISODE,
-      //     episodeString
-      //   );
-      //   // Check if animeRSS is not null
-      //   if (animeRSS !== null) animeTorrentList.push(animeRSS);
-      // }
-      if (animeTorrentList.length === 0) return null;
-      return animeTorrentList;
+        const animeRSS = await this.getTorrent(
+          anime.media.title.romaji,
+          resolution as Resolution,
+          SearchMode.EPISODE,
+          episodeString
+        );
+
+        if (animeRSS !== null) animeTorrentList.push(animeRSS); // Check if animeRSS is not null
+      }
+
+      return animeTorrentList.length ? animeTorrentList : null;
     }
     return null;
   }
