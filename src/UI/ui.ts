@@ -43,8 +43,8 @@ class ui {
   }
 
   private async runSchedulerDiscord() {
-    this.runScheduler();
     discordBot.start(token);
+    this.runScheduler();
   }
 
   private async selectChoice(arg: number) {
