@@ -33,13 +33,12 @@ class ui {
     await db.logIn();
     await schedule.check();
     console.log("Done! Exiting now...");
-    process.exit();
   }
 
   private async runScheduler() {
     console.log("Running the scheduler...");
     await db.logIn();
-    await schedule.run(`*/${interval} * * * *`);
+    await schedule.run(`*/20 * * * * *`);
   }
 
   private async runSchedulerDiscord() {
