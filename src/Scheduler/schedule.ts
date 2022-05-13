@@ -147,12 +147,35 @@ class Scheduler {
       fsDownloadedEpisodes.length === endEpisode - startEpisode || // you are up to date (but not all episodes need to be downloaded)
       fsDownloadedEpisodes.length === anime.media.episodes; // You have downloaded all episodes
 
-    if (isUpToDate) return;
+    log(`${startEpisode === endEpisode} -- startEpisode === endEpisode`);
+    log(`${anime.progress >= endEpisode} -- anime.progress >= endEpisode`);
+    log(
+      `${
+        anime.progress === anime.media.episodes
+      } -- anime.progress === anime.media.episodes`
+    );
+    log(
+      `${
+        fsDownloadedEpisodes.length === anime.progress
+      } -- fsDownloadedEpisodes.length === anime.progress`
+    );
+    log(
+      `${
+        fsDownloadedEpisodes.length === endEpisode
+      } -- fsDownloadedEpisodes.length === endEpisode`
+    );
+    log(
+      `${
+        fsDownloadedEpisodes.length === endEpisode - startEpisode
+      } -- fsDownloadedEpisodes.length === endEpisode - startEpisode`
+    );
+    log(
+      `${
+        fsDownloadedEpisodes.length === anime.media.episodes
+      } -- fsDownloadedEpisodes.length === anime.media.episodes`
+    );
 
-    log(`Finding ${anime.media.title.romaji}`);
-    log(`Starting episode: ${startEpisode}`);
-    log(`Ending episode: ${endEpisode}`);
-    log(`Progress: ${fsDownloadedEpisodes}`);
+    if (isUpToDate) return;
 
     // Attempt to find the anime.
     const isSuccessful = await this.getTorrents(
