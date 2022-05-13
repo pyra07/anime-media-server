@@ -39,12 +39,12 @@ class ui {
   private async runScheduler() {
     console.log("Running the scheduler...");
     await db.logIn();
-    await schedule.run(`*/20 * * * * *`);
+    await schedule.run(`*/${interval} * * * *`);
   }
 
   private async runSchedulerDiscord() {
-     this.runScheduler();
-     discordBot.start(token);
+    this.runScheduler();
+    discordBot.start(token);
   }
 
   private async selectChoice(arg: number) {
