@@ -147,6 +147,7 @@ class Scheduler {
       fsDownloadedEpisodes.length === endEpisode - startEpisode || // you are up to date (but not all episodes need to be downloaded)
       fsDownloadedEpisodes.length === anime.media.episodes; // You have downloaded all episodes
 
+    log(`${anime.media.title.romaji} is up to date`);
     log(`${startEpisode === endEpisode} -- startEpisode === endEpisode`);
     log(`${anime.progress >= endEpisode} -- anime.progress >= endEpisode`);
     log(
@@ -174,6 +175,7 @@ class Scheduler {
         fsDownloadedEpisodes.length === anime.media.episodes
       } -- fsDownloadedEpisodes.length === anime.media.episodes`
     );
+    log();
 
     if (isUpToDate) return;
 
