@@ -233,7 +233,7 @@ class Scheduler {
 
     /* Check if any new episodes need downloading, according to the offline db
      If it is, then download the torrents */
-    this.handleAnime(animeDb[0]);
+    await Promise.all(animeDb.map((anime) => this.handleAnime(anime)));
     // for (let i = 0; i < animeDb.length; i++) {
     //   const anime = animeDb[i];
     //   const offlineEpisodeList: Array<number> =
