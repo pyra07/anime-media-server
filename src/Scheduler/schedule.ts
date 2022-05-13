@@ -66,24 +66,24 @@ class Scheduler {
           : downloadedEpisodes.push(parseInt(torrent.episode));
     }
 
-    this.hook.send(
-      new MessageBuilder()
-        .setTimestamp()
-        .setTitle(`**${anime.media.title.romaji}** is downloading!`)
-        .setColor(0x0997e3)
-        .addField("Episode(s)", this.joinArr(downloadedEpisodes), true)
-        .addField("Seeders", animeTorrent[0]["nyaa:seeders"], true)
-        .addField("Title", animeTorrent[0].title, true)
-        .setImage(anime.media.coverImage.extraLarge)
-    );
+    // this.hook.send(
+    //   new MessageBuilder()
+    //     .setTimestamp()
+    //     .setTitle(`**${anime.media.title.romaji}** is downloading!`)
+    //     .setColor(0x0997e3)
+    //     .addField("Episode(s)", this.joinArr(downloadedEpisodes), true)
+    //     .addField("Seeders", animeTorrent[0]["nyaa:seeders"], true)
+    //     .addField("Title", animeTorrent[0].title, true)
+    //     .setImage(anime.media.coverImage.extraLarge)
+    // );
 
-    await DB.modifyAnimeEntry(anime.mediaId.toString(), {
-      "media.nextAiringEpisode": anime.media.nextAiringEpisode,
-      "media.status": anime.media.status,
-      downloadedEpisodes: firebase.firestore.FieldValue.arrayUnion(
-        ...downloadedEpisodes
-      ),
-    });
+    // await DB.modifyAnimeEntry(anime.mediaId.toString(), {
+    //   "media.nextAiringEpisode": anime.media.nextAiringEpisode,
+    //   "media.status": anime.media.status,
+    //   downloadedEpisodes: firebase.firestore.FieldValue.arrayUnion(
+    //     ...downloadedEpisodes
+    //   ),
+    // });
   }
 
   private joinArr(array: any[]) {
@@ -231,9 +231,15 @@ class Scheduler {
 
     if (animeDb.length === 0) return; // check if animeDb is empty
 
+    const startTime = Date.now();
+
     /* Check if any new episodes need downloading, according to the offline db
      If it is, then download the torrents */
     await Promise.all(animeDb.map((anime) => this.handleAnime(anime)));
+
+    const endTime = Date.now();
+
+    log(`Finished checking in ${(endTime - startTime) / 1000} seconds`);
     // for (let i = 0; i < animeDb.length; i++) {
     //   const anime = animeDb[i];
     //   const offlineEpisodeList: Array<number> =
