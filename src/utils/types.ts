@@ -1,4 +1,4 @@
-export type Resolution = "480" | "720" | "1080";
+export type Resolution = "480" | "540" | "720" | "1080";
 export type status = "FINISHED" | "RELEASING" | "NOT_YET_RELEASED";
 
 /*************************************************************************************** */

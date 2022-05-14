@@ -4,7 +4,7 @@
 import Parser from "rss-parser";
 import { AnimeTorrent, AniQuery, Resolution, SearchMode } from "../utils/types";
 import { resolution } from "../../profile.json";
-import { compareTwoStrings, findBestMatch } from "string-similarity";
+import { compareTwoStrings } from "string-similarity";
 import anitomy from "anitomy-js";
 
 class Nyaa {
