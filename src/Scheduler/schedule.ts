@@ -4,7 +4,7 @@ import DB from "../database/db";
 import Nyaa from "../Nyaa/nyaa";
 import firebase from "firebase";
 import qbit from "../qBitTorrent/qbit";
-import { AnimeTorrent, AniQuery, AniTitle } from "../utils/types";
+import { AnimeTorrent, AniQuery } from "../utils/types";
 import { MessageBuilder, Webhook } from "discord-webhook-node";
 import { webhook } from "../../profile.json";
 import { log } from "console";
@@ -144,37 +144,7 @@ class Scheduler {
       anime.progress === anime.media.episodes || // You have watched all episodes
       fsDownloadedEpisodes.length === endEpisode || // The downloaded episodes are up to date
       fsDownloadedEpisodes.length === endEpisode - startEpisode || // you are up to date (but not all episodes need to be downloaded)
-      fsDownloadedEpisodes.length === anime.media.episodes; // You have downloaded all episodes
-
-    log(`${anime.media.title.romaji} is up to date`);
-    log(`${startEpisode === endEpisode} -- startEpisode === endEpisode`);
-    log(`${anime.progress >= endEpisode} -- anime.progress >= endEpisode`);
-    log(
-      `${
-        anime.progress === anime.media.episodes
-      } -- anime.progress === anime.media.episodes`
-    );
-    log(
-      `${
-        fsDownloadedEpisodes.length === anime.progress
-      } -- fsDownloadedEpisodes.length === anime.progress`
-    );
-    log(
-      `${
-        fsDownloadedEpisodes.length === endEpisode
-      } -- fsDownloadedEpisodes.length === endEpisode`
-    );
-    log(
-      `${
-        fsDownloadedEpisodes.length === endEpisode - startEpisode
-      } -- fsDownloadedEpisodes.length === endEpisode - startEpisode`
-    );
-    log(
-      `${
-        fsDownloadedEpisodes.length === anime.media.episodes
-      } -- fsDownloadedEpisodes.length === anime.media.episodes`
-    );
-    log();
+      fsDownloadedEpisodes.length === anime.media.episodes; // You have downloaded all episodes\
 
     if (isUpToDate) return;
 
