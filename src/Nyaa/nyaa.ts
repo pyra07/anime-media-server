@@ -231,6 +231,16 @@ class Nyaa {
 
         return movieMatch; // Return if all conditions are met
 
+      case SearchMode.ONA || SearchMode.OVA:
+        const parsedAnimeType2 = animeParsedData.anime_type;
+
+        if (!parsedAnimeType2) return false; // Guard against empty anime type
+
+        const onaMatch =
+          parsedAnimeType2.includes("ONA") || parsedAnimeType2.includes("OVA"); // Check if it is an ONA or OVA
+
+        return onaMatch; // Return if all conditions are met
+
       default:
         return false;
     }
