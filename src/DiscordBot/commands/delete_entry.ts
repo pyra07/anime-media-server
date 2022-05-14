@@ -16,7 +16,9 @@ module.exports = {
     const options = interaction.options.data;
     const animeid = options.find((option) => option.name === "anime_id");
     await interaction.deferReply({ ephemeral: true });
-    await db.deleteAnimeEntry(animeid!.value as string);
+    await db.modifyAnimeEntry(animeid!.value as string, {
+      downloadedEpisodes: [],
+    });
     await interaction.editReply({
       embeds: [
         {
