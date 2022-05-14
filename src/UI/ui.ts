@@ -68,13 +68,13 @@ class ui {
     );
     this.addCommands("Exit", () => process.exit());
 
-    if (arg) {
-      this.selectChoice(parseInt(arg));
-    } else {
-      this.cl.question(
-        `Welcome to Animu!\n${this.printCommands()}\nPlease enter your command: `,
-        (answer) => this.selectChoice(parseInt(answer))
-      );
+    // Check if arg is a number
+    if (arg && !isNaN(Number(arg))) this.selectChoice(Number(arg));
+    else {
+      console.log(this.printCommands());
+      this.cl.question("Enter your choice: ", (answer) => {
+        this.selectChoice(Number(answer));
+      });
     }
   }
 }
