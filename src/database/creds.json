@@ -1,7 +1,4 @@
 {
-  "url": "https://jhqsgmojvrztozzivgee.supabase.co",
-  "key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTYyODg1MzMwMiwiZXhwIjoxOTQ0NDI5MzAyfQ.dnHMxNbCpi1Q9UC2wcmNTKWwtXnmvWrxd8RmAXCfCeU",
-  "apiKey": "AIzaSyDMlsbhXZRq2c5jqi1Cg6Yg1oNcmBugJY8",
   "firebaseConfig": {
     "apiKey": "AIzaSyDMlsbhXZRq2c5jqi1Cg6Yg1oNcmBugJY8",
     "authDomain": "anime-media-server.firebaseapp.com",
