@@ -23,8 +23,7 @@ class Scheduler {
     const job = new CronJob(
       cronTime,
       async () => {
-        // log with current time
-        log(`Running scheduler at ${new Date().toLocaleString()}`);
+        log(`Running scheduler at ${new Date().toLocaleString()}`); // log with current time
         await this.check();
       },
       null,
