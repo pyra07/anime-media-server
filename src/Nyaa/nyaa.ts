@@ -39,10 +39,12 @@ class Nyaa {
   }
 
   /**
-   * Determines which animes need to be downloaded or something.
-   * Pass in your anime list entries and see the magic happen.
-   * @param {object} animeList
-   * @returns {Promise<any>}
+   * Determines which mode to use for the search
+   * @param  {AniQuery} anime
+   * @param  {number} startEpisode
+   * @param  {number} endEpisode
+   * @param  {number[]} fsDownloadedEpisodes
+   * @returns Promise
    */
   public async getTorrents(
     anime: AniQuery,
@@ -50,12 +52,16 @@ class Nyaa {
     endEpisode: number,
     fsDownloadedEpisodes: number[]
   ): Promise<AnimeTorrent[] | AnimeTorrent | null> {
-    // Find movie
-    if (anime.media.format === "MOVIE") {
+    // Find movie/ova/ona
+    if (
+      anime.media.format === "MOVIE" ||
+      anime.media.format === "OVA" ||
+      anime.media.format === "ONA"
+    ) {
       const animeRSS = await this.getTorrent(
         anime.media.title.romaji,
         resolution as Resolution,
-        SearchMode.MOVIE
+        anime.media.format.toString() as SearchMode
       );
       if (animeRSS) return animeRSS;
     } else if (
@@ -111,12 +117,13 @@ class Nyaa {
   }
 
   /**
-   * Gets the torrent info for a specific anime and episode
+   * Query nyaa for the anime information. Then look through the RSS feed for the
+   * torrent. The torrent is then verified and returned.
    * @param {string} searchQuery The title of the anime to look for
    * @param {Resolution} resolution The resolution to search for
    * @param {SearchMode} searchMode What format we expect to search
    * @param {string} episodeNumber The episode number to search for, if applicable
-   * @returns {Promise<AnimeTorrent>} The anime torrent object. Used to load and download the torrent
+   * @returns {Promise<AnimeTorrent>} Returns the torrent info if a match is found, otherwise returns null
    */
   private async getTorrent(
     searchQuery: string,
@@ -231,15 +238,11 @@ class Nyaa {
 
         return movieMatch; // Return if all conditions are met
 
-      case SearchMode.ONA || SearchMode.OVA:
-        const parsedAnimeType2 = animeParsedData.anime_type;
+      case SearchMode.OVA:
+        return true; // Return if all conditions are met
 
-        if (!parsedAnimeType2) return false; // Guard against empty anime type
-
-        const onaMatch =
-          parsedAnimeType2.includes("ONA") || parsedAnimeType2.includes("OVA"); // Check if it is an ONA or OVA
-
-        return onaMatch; // Return if all conditions are met
+      case SearchMode.ONA:
+        return true; // Return if all conditions are met
 
       default:
         return false;
