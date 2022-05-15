@@ -52,6 +52,20 @@ class DB {
     }
   }
 
+  public async deleteAnimeEntry(mediaId: string): Promise<void> {
+    try {
+      await this.myProject
+        .firestore()
+        .collection("animelists")
+        .doc(DB.user.user?.uid)
+        .collection("anime")
+        .doc(mediaId)
+        .delete();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   public async getByMediaId(mediaId: string) {
     return await this.myProject
       .firestore()
