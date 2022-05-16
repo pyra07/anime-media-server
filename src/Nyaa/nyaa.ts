@@ -75,6 +75,7 @@ class Nyaa {
     } else if (
       /* Find batch of episodes (TV) to download if the
       anime has already finished airing */
+      anime.media.format === AnimeFormat.TV &&
       anime.media.status === "FINISHED" &&
       startEpisode === 0 &&
       fsDownloadedEpisodes.length === 0
