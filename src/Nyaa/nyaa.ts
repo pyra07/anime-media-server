@@ -234,11 +234,11 @@ class Nyaa {
         return episodeMatch; // Return if all conditions are met
 
       case SearchMode.BATCH:
-        const parsedReleaseInfo = animeParsedData.release_information;
+        // const parsedReleaseInfo = animeParsedData.release_information;
 
-        if (!parsedReleaseInfo) return false; // Guard against empty release info
+        // if (!parsedReleaseInfo) return false; // Guard against empty release info
 
-        const batchMatch = parsedReleaseInfo.includes("Batch"); // Check if it is a batch
+        // const batchMatch = parsedReleaseInfo.includes("Batch"); // Check if it is a batch
 
         return batchMatch; // Return if all conditions are met.
 
