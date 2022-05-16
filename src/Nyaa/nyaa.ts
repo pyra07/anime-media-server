@@ -147,12 +147,9 @@ class Nyaa {
     searchMode: SearchMode,
     episodeNumber?: string
   ): Promise<AnimeTorrent | null> {
-    const finalQuery =
-      searchMode === SearchMode.BATCH
-        ? `${searchQuery} Batch`
-        : episodeNumber
-        ? `${searchQuery} - ${episodeNumber}`
-        : searchQuery;
+    const finalQuery = episodeNumber
+      ? `${searchQuery} - ${episodeNumber}`
+      : searchQuery;
 
     // Set some filters, and then the search query
     this.rssLink.searchParams.set("page", "rss");
