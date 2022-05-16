@@ -48,12 +48,14 @@ export enum AnimeFormat {
 }
 
 // Enum which stores which format of anime is being searched for.
+
 export enum SearchMode {
   EPISODE = "EPISODE",
   OVA = "OVA",
   ONA = "ONA",
   MOVIE = "MOVIE",
   BATCH = "BATCH",
+  TV_SHORT = "TV_SHORT"
 }
 
 // Helper interface for Media. It is used to define the anime's cover art size.
