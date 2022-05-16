@@ -243,7 +243,7 @@ class Nyaa {
 
         const batchMatch = parsedReleaseInfo.includes("Batch"); // Check if it is a batch
 
-        return batchMatch; // Return if all conditions are met
+        return batchMatch; // Return if all conditions are met.
 
       case SearchMode.MOVIE:
 
