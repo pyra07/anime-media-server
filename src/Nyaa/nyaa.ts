@@ -193,7 +193,7 @@ class Nyaa {
 
       // If the title and episode are similar, and the resolution is similar, return
       if (isSimilar) {
-        item.episode = episodeNumber || "00";
+        item.episode = episodeNumber || "01";
         return item as AnimeTorrent;
       }
     }

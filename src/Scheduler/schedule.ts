@@ -55,11 +55,12 @@ class Scheduler {
         torrent.episode
       );
       if (isAdded)
-        isBatch || torrent.episode !== "00"
-          ? downloadedEpisodes.push(
-              ...Array.from({ length: anime.media.episodes }, (_, i) => i + 1)
-            )
-          : downloadedEpisodes.push(parseInt(torrent.episode));
+        if (isBatch)
+          downloadedEpisodes.push(
+            ...Array.from({ length: anime.media.episodes }, (_, i) => i + 1)
+          );
+        else if (torrent.episode)
+          downloadedEpisodes.push(parseInt(torrent.episode));
     }
 
     // Append to offlineDB
@@ -222,9 +223,9 @@ class Scheduler {
     if (animeDb.length === 0) return; // check if animeDb is empty
 
     await Promise.all(
-      animeDb.map(async (anime) => {
+      animeDb.map((anime) => {
         if (!this.offlineAnimeDB.hasOwnProperty(anime.mediaId))
-          await this.handleAnime(anime);
+          this.handleAnime(anime);
         else {
           const episodesOffline = this.offlineAnimeDB[anime.mediaId];
           const airingEpisodes = anime.media.nextAiringEpisode
