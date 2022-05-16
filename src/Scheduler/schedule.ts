@@ -137,17 +137,23 @@ class Scheduler {
     // firestore (fs) downloaded episodes.
     const fsDownloadedEpisodes: any[] = fireDBAnime.downloadedEpisodes || [];
 
+    // Make array of anime.progress until endEpisode
+    const animeProgress: number[] = Array.from(
+      { length: endEpisode - startEpisode },
+      (_, i) => i + startEpisode + 1
+    );
+
     /* If progress is up to date, then skip
     Or if the user has downloaded all episodes, then skip */
-    const isUpToDate =
-      startEpisode === endEpisode || // You are up to date
-      anime.progress >= endEpisode || // You are also up to date
-      anime.progress === anime.media.episodes || // You have watched all episodes
-      fsDownloadedEpisodes.length === endEpisode || // The downloaded episodes are up to date
-      fsDownloadedEpisodes.length === endEpisode - startEpisode || // you are up to date (but not all episodes need to be downloaded)
-      fsDownloadedEpisodes.length === anime.media.episodes; // You have downloaded all episodes\
+    const isUpToDate = animeProgress.every((episode) =>
+      fsDownloadedEpisodes.includes(episode)
+    );
 
-    if (isUpToDate) return;
+    if (isUpToDate) {
+      // If the user is up to date, then we can skip, and update the offlineDB
+      this.offlineAnimeDB[anime.mediaId] = fsDownloadedEpisodes;
+      return;
+    }
 
     // Attempt to find the anime.
     const isSuccessful = await this.getTorrents(
@@ -215,18 +221,17 @@ class Scheduler {
     if (animeDb.length === 0) return; // check if animeDb is empty
 
     await Promise.all(
-      animeDb.map((anime) => {
-        // TODO Check if anime is already in the offlineDB
+      animeDb.map(async (anime) => {
         if (!this.offlineAnimeDB.hasOwnProperty(anime.mediaId))
-          this.handleAnime(anime);
+          await this.handleAnime(anime);
         else {
           const episodesOffline = this.offlineAnimeDB[anime.mediaId];
           const airingEpisodes = anime.media.nextAiringEpisode
             ? anime.media.nextAiringEpisode.episode - 1
             : anime.media.episodes;
-          // If the user has downloaded all episodes, then do nothing
-          if (episodesOffline.length === airingEpisodes) return;
-          else this.handleAnime(anime);
+          // Handle if it needs more downloading
+          if (episodesOffline.length !== airingEpisodes)
+            this.handleAnime(anime);
         }
       })
     );
