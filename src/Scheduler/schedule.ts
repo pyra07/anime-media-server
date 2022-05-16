@@ -31,6 +31,16 @@ class Scheduler {
       true,
       "Asia/Muscat"
     );
+    const offlineDBJob = new cron.CronJob(
+      "0 */6 * * *",
+      () => {
+        log(`Clearing offlineDB at ${new Date().toLocaleString()}`); // log with current time
+        this.offlineAnimeDB = {};
+      },
+      null,
+      true,
+      "Asia/Muscat"
+    );
   }
 
   /**
