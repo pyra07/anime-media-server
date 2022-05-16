@@ -46,9 +46,7 @@ class Scheduler {
   ): Promise<void> {
     const downloadedEpisodes = new Array<number>();
     for (const torrent of animeTorrent) {
-      log(
-        `Downloading ${torrent.title} - EPISODE ${torrent.episode} @ ${torrent.link}`
-      );
+      log(`Downloading ${torrent.title} - ${torrent.episode} at ${torrent.link}`);
       // Download torrent
       var isAdded: boolean = await qbit.addTorrent(
         torrent.link,
@@ -56,7 +54,7 @@ class Scheduler {
         torrent.episode
       );
       if (isAdded)
-        isBatch || !torrent.episode
+        isBatch || torrent.episode !== "00"
           ? downloadedEpisodes.push(
               ...Array.from({ length: anime.media.episodes }, (_, i) => i + 1)
             )
