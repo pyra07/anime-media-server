@@ -2,7 +2,13 @@
  and returns it as a json object */
 
 import Parser from "rss-parser";
-import { AnimeTorrent, AniQuery, Resolution, SearchMode } from "../utils/types";
+import {
+  AnimeFormat,
+  AnimeTorrent,
+  AniQuery,
+  Resolution,
+  SearchMode,
+} from "../utils/types";
 import { resolution } from "../../profile.json";
 import { compareTwoStrings } from "string-similarity";
 import anitomy from "anitomy-js";
@@ -52,11 +58,13 @@ class Nyaa {
     endEpisode: number,
     fsDownloadedEpisodes: number[]
   ): Promise<AnimeTorrent[] | AnimeTorrent | null> {
-    // Find movie/ova/ona
+    // Find movie/ova/ona/tv_short if they are finished
     if (
-      anime.media.format === "MOVIE" ||
-      anime.media.format === "OVA" ||
-      anime.media.format === "ONA"
+      (anime.media.format === AnimeFormat.MOVIE ||
+        anime.media.format === AnimeFormat.OVA ||
+        anime.media.format === AnimeFormat.ONA ||
+        anime.media.format === AnimeFormat.TV_SHORT) &&
+      anime.media.status === "FINISHED"
     ) {
       const animeRSS = await this.getTorrent(
         anime.media.title.romaji,
@@ -65,8 +73,8 @@ class Nyaa {
       );
       if (animeRSS) return animeRSS;
     } else if (
-      /* Find batch of episodes to download if the
-       Anime has already finished airing */
+      /* Find batch of episodes (TV) to download if the
+      anime has already finished airing */
       anime.media.status === "FINISHED" &&
       startEpisode === 0 &&
       fsDownloadedEpisodes.length === 0
@@ -77,7 +85,14 @@ class Nyaa {
         SearchMode.BATCH
       );
       if (animeRSS) return animeRSS;
-    } else if (anime.media.format === "TV") {
+      // Search for a releasing episode
+    } else if (
+      (anime.media.format === AnimeFormat.TV ||
+        anime.media.format === AnimeFormat.TV_SHORT ||
+        anime.media.format === AnimeFormat.ONA ||
+        anime.media.format === AnimeFormat.OVA) &&
+      anime.media.status === "RELEASING"
+    ) {
       const animeTorrentList: AnimeTorrent[] = new Array();
 
       // Generate a list of episodes to download
@@ -177,11 +192,11 @@ class Nyaa {
 
       // If the title and episode are similar, and the resolution is similar, return
       if (isSimilar) {
-        item.episode = episodeNumber;
+        item.episode = episodeNumber || "00";
         return item as AnimeTorrent;
       }
     }
-    console.log(searchQuery, "-", episodeNumber ?? "", "not found");
+    console.log(searchQuery, searchMode, episodeNumber, "has not been found.");
     return null;
   }
   /**
@@ -230,18 +245,12 @@ class Nyaa {
         return batchMatch; // Return if all conditions are met
 
       case SearchMode.MOVIE:
-        const parsedAnimeType = animeParsedData.anime_type;
-
-        if (!parsedAnimeType) return false; // Guard against empty anime type
-
-        const movieMatch = parsedAnimeType.includes("Movie"); // Check if it is a movie
-
-        return movieMatch; // Return if all conditions are met
 
       case SearchMode.OVA:
-        return true; // Return if all conditions are met
 
       case SearchMode.ONA:
+
+      case SearchMode.TV_SHORT:
         return true; // Return if all conditions are met
 
       default:
