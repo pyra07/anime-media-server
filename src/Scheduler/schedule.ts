@@ -98,6 +98,7 @@ class Scheduler {
    * @returns Promise
    */
   private async handleAnime(anime: AniQuery): Promise<void> {
+    log(`Handling ${anime.media.title.romaji}`);
     let fireDBAnime;
 
     try {
@@ -230,7 +231,7 @@ class Scheduler {
             ? anime.media.nextAiringEpisode.episode - 1
             : anime.media.episodes;
           // Handle if it needs more downloading
-          if (episodesOffline.length !== airingEpisodes)
+          if (episodesOffline[episodesOffline.length - 1] !== airingEpisodes)
             this.handleAnime(anime);
         }
       })
