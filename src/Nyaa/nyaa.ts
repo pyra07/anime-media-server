@@ -147,12 +147,9 @@ class Nyaa {
     searchMode: SearchMode,
     episodeNumber?: string
   ): Promise<AnimeTorrent | null> {
-    const finalQuery =
-      searchMode === SearchMode.BATCH
-        ? `${searchQuery} Batch`
-        : episodeNumber
-        ? `${searchQuery} - ${episodeNumber}`
-        : searchQuery;
+    const finalQuery = episodeNumber
+      ? `${searchQuery} - ${episodeNumber}`
+      : searchQuery;
 
     // Set some filters, and then the search query
     this.rssLink.searchParams.set("page", "rss");
@@ -237,13 +234,16 @@ class Nyaa {
         return episodeMatch; // Return if all conditions are met
 
       case SearchMode.BATCH:
-        const parsedReleaseInfo = animeParsedData.release_information;
+        // const parsedReleaseInfo = animeParsedData.release_information;
 
-        if (!parsedReleaseInfo) return false; // Guard against empty release info
+        // if (!parsedReleaseInfo) return false; // Guard against empty release info
 
-        const batchMatch = parsedReleaseInfo.includes("Batch"); // Check if it is a batch
+        // const batchMatch = parsedReleaseInfo.includes("Batch"); // Check if it is a batch
 
-        return batchMatch; // Return if all conditions are met
+        // return batchMatch; // Return if all conditions are met
+        const isEpisode = animeParsedData.episode_number;
+
+        return isEpisode ? false : true;
 
       case SearchMode.MOVIE:
 
