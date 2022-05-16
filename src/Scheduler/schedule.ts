@@ -11,8 +11,10 @@ import { log } from "console";
 
 class Scheduler {
   private hook: Webhook; // Store discord webhook info
+  private offlineAnimeDB: { [key: string]: Array<number> };
   constructor() {
     this.hook = new Webhook(webhook);
+    this.offlineAnimeDB = {};
   }
 
   /**
@@ -59,6 +61,9 @@ class Scheduler {
             )
           : downloadedEpisodes.push(parseInt(torrent.episode));
     }
+
+    // Append to offlineDB
+    this.offlineAnimeDB[anime.mediaId] = downloadedEpisodes;
 
     this.hook.send(
       new MessageBuilder()
@@ -162,8 +167,7 @@ class Scheduler {
       // Loop over synonyms and find the one that matches a nyaa hit
       const synonyms = anime.media.synonyms;
       for (const synonym of synonyms) {
-        // If synonym is not in English, skip
-        // TODO
+        //TODO If synonym is not in English, skip
         anime.media.title.romaji = synonym;
         const isValidTitle = await this.getTorrents(
           anime,
@@ -210,7 +214,22 @@ class Scheduler {
 
     if (animeDb.length === 0) return; // check if animeDb is empty
 
-    await Promise.all(animeDb.map((anime) => this.handleAnime(anime)));
+    await Promise.all(
+      animeDb.map((anime) => {
+        // TODO Check if anime is already in the offlineDB
+        if (!this.offlineAnimeDB.hasOwnProperty(anime.mediaId))
+          this.handleAnime(anime);
+        else {
+          const episodesOffline = this.offlineAnimeDB[anime.mediaId];
+          const airingEpisodes = anime.media.nextAiringEpisode
+            ? anime.media.nextAiringEpisode.episode - 1
+            : anime.media.episodes;
+          // If the user has downloaded all episodes, then do nothing
+          if (episodesOffline.length === airingEpisodes) return;
+          else this.handleAnime(anime);
+        }
+      })
+    );
   }
 }
 
