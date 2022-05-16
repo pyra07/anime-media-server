@@ -19,8 +19,7 @@ class Scheduler {
    * Runs the scheduler periodically every x minutes
    */
   public async run(cronTime: string): Promise<void> {
-    const CronJob = cron.CronJob;
-    const job = new CronJob(
+    const job = new cron.CronJob(
       cronTime,
       async () => {
         log(`Running scheduler at ${new Date().toLocaleString()}`); // log with current time
@@ -28,7 +27,7 @@ class Scheduler {
       },
       null,
       true,
-      "Europe/London"
+      "Asia/Muscat"
     );
   }
 
@@ -46,7 +45,7 @@ class Scheduler {
   ): Promise<void> {
     const downloadedEpisodes = new Array<number>();
     for (const torrent of animeTorrent) {
-      log(`Downloading ${torrent.title} - ${torrent.episode} at ${torrent.link}`);
+      log(`Downloading ${torrent.title} ${torrent.episode} at ${torrent.link}`);
       // Download torrent
       var isAdded: boolean = await qbit.addTorrent(
         torrent.link,
