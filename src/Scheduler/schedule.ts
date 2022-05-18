@@ -35,12 +35,21 @@ class Scheduler {
       "0 */6 * * *",
       () => {
         log(`Clearing offlineDB at ${new Date().toLocaleString()}`); // log with current time
-        this.offlineAnimeDB = {};
+        this.clearOfflineDB();
       },
       null,
       true,
       "Asia/Muscat"
     );
+  }
+  /**
+   * Clears the offlineDB
+   * @param  {string} mediaId? - If specified, only clears that anime
+   * @returns void
+   */
+  public clearOfflineDB(mediaId?: string): void {
+    if (mediaId) this.offlineAnimeDB[mediaId] = [];
+    else this.offlineAnimeDB = {};
   }
 
   /**
@@ -48,7 +57,7 @@ class Scheduler {
    * @param  {AniQuery} anime
    * @param  {boolean} isBatch
    * @param  {AnimeTorrent[]} ...animeTorrent
-   * @returns Promise
+   * @returns Promise<void>
    */
   private async downloadTorrents(
     anime: AniQuery,
@@ -95,7 +104,11 @@ class Scheduler {
       ),
     });
   }
-
+  /**
+   * Displays the the range of an array
+   * @param  {any[]} array
+   * @returns {string} - Range of array
+   */
   private joinArr(array: any[]) {
     if (array.length === 1) {
       return array[0];
@@ -204,7 +217,14 @@ class Scheduler {
       }
     }
   }
-
+  /**
+   * Gets the torrents from nyaa.si
+   * @param  {AniQuery} anime - Anime to get torrents for
+   * @param  {number} start - Starting episode
+   * @param  {number} end - Ending episode
+   * @param  {any[]} fsDownloadedEpisodes - Episodes downloaded by firestore
+   * @returns Promise<boolean> - If successful
+   */
   private async getTorrents(
     anime: AniQuery,
     start: number,
@@ -226,7 +246,10 @@ class Scheduler {
     else await this.downloadTorrents(anime, true, torrents);
     return true;
   }
-
+  /**
+   * Main function. If there is a new anime, or new episode, then this function will execute.
+   * This also uses the offlineAnimeDB to check if the user is up to date.
+   */
   public async check() {
     const animeDb: AniQuery[] = await Anilist.getAnimeUserList();
 
