@@ -197,7 +197,7 @@ class Scheduler {
       fsDownloadedEpisodes.length === 0
     ) {
       // Loop over synonyms and find the one that matches a nyaa hit
-      const synonyms = anime.media.synonyms;
+      const synonyms = [anime.media.title.english, ...anime.media.synonyms];
       for (const synonym of synonyms) {
         //TODO If synonym is not in English, skip
         anime.media.title.romaji = synonym;
