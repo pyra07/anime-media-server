@@ -41,7 +41,7 @@ class ui {
     await db.logIn();
     // Run every x minutes, from 12:00 to 04:00
     // Then run every hour, from 05:00 to 11:00
-    await schedule.run(`*/${interval} 12-23,00-04 * * *`, true); // Peak hours
+    await schedule.run(`*/30 */${interval} 12-23,00-04 * * *`, true); // Peak hours
     await schedule.run(`0 05-11 * * *`, false); // Off peak hours
   }
 
