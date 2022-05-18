@@ -83,7 +83,8 @@ class Nyaa {
       const animeRSS = await this.getTorrent(
         anime.media.title.romaji,
         resolution as Resolution,
-        SearchMode.BATCH
+        SearchMode.BATCH,
+        `${startEpisode}-${endEpisode}`
       );
       if (animeRSS) return animeRSS;
       // Search for a releasing episode
@@ -147,7 +148,7 @@ class Nyaa {
     searchMode: SearchMode,
     episodeNumber?: string
   ): Promise<AnimeTorrent | null> {
-    const finalQuery = episodeNumber
+    const finalQuery = searchMode === SearchMode.EPISODE
       ? `${searchQuery} - ${episodeNumber}`
       : searchQuery;
 
@@ -221,12 +222,11 @@ class Nyaa {
     const titleMatch = compareTwoStrings(searchQuery, parsedTitle);
     const resolutionMatch = parsedResolution.includes(resolution);
 
-    if (titleMatch < 0.7 && !resolutionMatch) return false; // If title is not similar, and resolution is not similar, return false
+    if (titleMatch < 0.8 && !resolutionMatch) return false; // If title is not similar, and resolution is not similar, return false
 
     switch (searchMode) {
       case SearchMode.EPISODE:
         const parsedEpisode = animeParsedData.episode_number;
-
         if (!parsedEpisode) return false; // Guard against empty episode
 
         const episodeMatch = parseInt(episode!) === parseInt(parsedEpisode); // Check if episode is similar
@@ -235,8 +235,9 @@ class Nyaa {
 
       case SearchMode.BATCH:
         const parsedReleaseInfo = animeParsedData.release_information;
-
         if (!parsedReleaseInfo) return false; // Guard against empty release info
+
+        //const episodeRange = animeParsedData.episode_number;
 
         const batchMatch = parsedReleaseInfo.includes("Batch"); // Check if it is a batch
 
