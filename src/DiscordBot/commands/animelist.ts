@@ -7,6 +7,11 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName("anime_list")
     .setDescription("Retrieves your current WATCHING list"),
+  /**
+   * Runs the command anime_list, which retrieves your current anime list
+   * Displays the anime list in an embed
+   * @param  {CommandInteraction} interaction
+   */
   async execute(interaction: CommandInteraction) {
     await interaction.deferReply({ ephemeral: true });
     const myAniList = await anilist.getAnimeUserList();

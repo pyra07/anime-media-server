@@ -242,6 +242,7 @@ class Nyaa {
 
         return batchMatch; // Return if all conditions are met.
 
+      // For these following cases, they are only dependent on the title, and resolution.
       case SearchMode.MOVIE:
 
       case SearchMode.OVA:
@@ -249,7 +250,7 @@ class Nyaa {
       case SearchMode.ONA:
 
       case SearchMode.TV_SHORT:
-        return true; // Return if all conditions are met
+        return true;
 
       default:
         return false;
