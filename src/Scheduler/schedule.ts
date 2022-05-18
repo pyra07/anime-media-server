@@ -20,7 +20,7 @@ class Scheduler {
   /**
    * Runs the scheduler periodically every x minutes
    */
-  public async run(cronTime: string): Promise<void> {
+  public async run(cronTime: string, clearDB: boolean): Promise<void> {
     const job = new cron.CronJob(
       cronTime,
       async () => {
@@ -31,16 +31,17 @@ class Scheduler {
       true,
       "Asia/Muscat"
     );
-    const offlineDBJob = new cron.CronJob(
-      "0 */6 * * *",
-      () => {
-        log(`Clearing offlineDB at ${new Date().toLocaleString()}`); // log with current time
-        this.clearOfflineDB();
-      },
-      null,
-      true,
-      "Asia/Muscat"
-    );
+    if (clearDB)
+      new cron.CronJob(
+        "0 */6 * * *",
+        () => {
+          log(`Clearing offlineDB at ${new Date().toLocaleString()}`); // log with current time
+          this.clearOfflineDB();
+        },
+        null,
+        true,
+        "Asia/Muscat"
+      );
   }
   /**
    * Clears the offlineDB
