@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction } from "discord.js";
 import db from "../../database/db";
+import schedule from "../../Scheduler/schedule";
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -12,6 +13,10 @@ module.exports = {
         .setDescription("The Anime ID in order to modify the DB")
         .setRequired(true)
     ),
+  /**
+   * Runs the command delete_entry, which deletes an anime entry/entries.
+   * @param  {CommandInteraction} interaction - The interaction object
+   */
   async execute(interaction: CommandInteraction) {
     const options = interaction.options.data;
     const animeid = options.find((option) => option.name === "anime_id");
@@ -19,6 +24,7 @@ module.exports = {
     await db.modifyAnimeEntry(animeid!.value as string, {
       downloadedEpisodes: [],
     });
+    schedule.clearOfflineDB(animeid!.value as string);
     await interaction.editReply({
       embeds: [
         {
