@@ -14,8 +14,8 @@ import { compareTwoStrings } from "string-similarity";
 import anitomy from "anitomy-js";
 
 class Nyaa {
-  rssLink: URL;
-  parser: any;
+  private rssLink: URL;
+  private parser: any;
   constructor() {
     this.rssLink = new URL("https://nyaa.si/");
     this.parser = new Parser({
@@ -207,7 +207,7 @@ class Nyaa {
    * @param  {SearchMode} searchMode What to expect from the query. This can be in multiple forms
    * @param  {string} episode? The episode number to verify, if applicable
    */
-  private verifyQuery(
+  public verifyQuery(
     searchQuery: string,
     animeParsedData: anitomy.AnitomyResult,
     resolution: Resolution,
