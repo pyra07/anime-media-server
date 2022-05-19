@@ -239,6 +239,8 @@ class Nyaa {
         const parsedReleaseInfo = animeParsedData.release_information;
         if (!parsedReleaseInfo) return false; // Guard against empty release info
 
+        const batchMatch = parsedReleaseInfo.includes("Batch"); // Check if it is a batch
+
         const episodeRange = fileName.match(/\d+-\d+/); // Check if the file name contains a range of episodes
         if (episodeRange) {
           // If the file name contains a range of episodes, check if the episode is in the range
@@ -250,9 +252,8 @@ class Nyaa {
             parseInt(e[1]) === parseInt(myE[1])
           )
             return true; // If the range is similar, return true
+          else return false; // If the range is not similar, return false
         }
-
-        const batchMatch = parsedReleaseInfo.includes("Batch"); // Check if it is a batch
 
         return batchMatch; // Return if all conditions are met.
 
