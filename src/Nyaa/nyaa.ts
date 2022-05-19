@@ -84,7 +84,7 @@ class Nyaa {
         anime.media.title.romaji,
         resolution as Resolution,
         SearchMode.BATCH,
-        `${startEpisode}-${endEpisode}`
+        `${startEpisode + 1}-${endEpisode}`
       );
       if (animeRSS) return animeRSS;
       // Search for a releasing episode
