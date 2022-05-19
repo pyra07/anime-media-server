@@ -207,7 +207,7 @@ class Nyaa {
    * @param  {SearchMode} searchMode What to expect from the query. This can be in multiple forms
    * @param  {string} episode? The episode number to verify, if applicable
    */
-  public verifyQuery(
+  private verifyQuery(
     searchQuery: string,
     animeParsedData: anitomy.AnitomyResult,
     resolution: Resolution,
@@ -224,7 +224,9 @@ class Nyaa {
     const titleMatch = compareTwoStrings(searchQuery, parsedTitle);
     const resolutionMatch = parsedResolution.includes(resolution);
 
-    if (titleMatch < 0.8 && !resolutionMatch) return false; // If title is not similar, and resolution is not similar, return false
+    // If title is not similar, and resolution is not similar, return false
+    if (titleMatch < 0.8) return false;
+    if (!resolutionMatch) return false;
 
     switch (searchMode) {
       case SearchMode.EPISODE:
