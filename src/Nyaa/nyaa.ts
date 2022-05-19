@@ -148,9 +148,10 @@ class Nyaa {
     searchMode: SearchMode,
     episodeNumber?: string
   ): Promise<AnimeTorrent | null> {
-    const finalQuery = searchMode === SearchMode.EPISODE
-      ? `${searchQuery} - ${episodeNumber}`
-      : searchQuery;
+    const finalQuery =
+      searchMode === SearchMode.EPISODE
+        ? `${searchQuery} - ${episodeNumber}`
+        : searchQuery;
 
     // Set some filters, and then the search query
     this.rssLink.searchParams.set("page", "rss");
@@ -237,7 +238,7 @@ class Nyaa {
         const parsedReleaseInfo = animeParsedData.release_information;
         if (!parsedReleaseInfo) return false; // Guard against empty release info
 
-        //const episodeRange = animeParsedData.episode_number;
+        const episodeRange = animeParsedData.episode_number;
 
         const batchMatch = parsedReleaseInfo.includes("Batch"); // Check if it is a batch
 
