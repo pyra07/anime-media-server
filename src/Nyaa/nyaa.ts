@@ -221,13 +221,15 @@ class Nyaa {
     if (!parsedTitle || !parsedResolution) return false; // Guard against empty parsed data
 
     // Check if info is similar
-    const titleMatch = compareTwoStrings(searchQuery, parsedTitle);
-    console.log(titleMatch, searchQuery, episode);
-    
+    const titleMatch = compareTwoStrings(
+      searchQuery.toLowerCase(),
+      parsedTitle.toLowerCase()
+    );
+
     const resolutionMatch = parsedResolution.includes(resolution);
 
     // If title is not similar, and resolution is not similar, return false
-    if (titleMatch < 0.7) return false;
+    if (titleMatch < 0.8) return false;
     if (!resolutionMatch) return false;
 
     switch (searchMode) {
