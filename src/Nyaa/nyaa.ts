@@ -222,6 +222,8 @@ class Nyaa {
 
     // Check if info is similar
     const titleMatch = compareTwoStrings(searchQuery, parsedTitle);
+    console.log(titleMatch, searchQuery, episode);
+    
     const resolutionMatch = parsedResolution.includes(resolution);
 
     // If title is not similar, and resolution is not similar, return false
