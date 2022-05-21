@@ -225,7 +225,7 @@ class Nyaa {
     const resolutionMatch = parsedResolution.includes(resolution);
 
     // If title is not similar, and resolution is not similar, return false
-    if (titleMatch < 0.8) return false;
+    if (titleMatch < 0.7) return false;
     if (!resolutionMatch) return false;
 
     switch (searchMode) {
