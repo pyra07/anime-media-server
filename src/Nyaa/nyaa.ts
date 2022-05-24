@@ -220,16 +220,16 @@ class Nyaa {
 
     if (!parsedTitle || !parsedResolution) return false; // Guard against empty parsed data
 
-    // If animeTitle has a title in round brackets, extract it. If found, extract the title out of the brackets
-    const subAnimeTitle = fileName.match(/(?<=\().+?(?=\))/);
-    const subAnimeTitleString = subAnimeTitle ? subAnimeTitle[0] : "";
-    const mainAnimeTitle = fileName.replace(/\(.+?\)/, "").trim();
-
-    const titleMatch = findBestMatch(searchQuery, [
-      fileName,
-      mainAnimeTitle,
-      subAnimeTitleString,
-    ]);
+        // If animeTitle has a title in round brackets, extract it. If found, extract the title out of the brackets
+        const subAnimeTitle = fileName.match(/(?<=\().+?(?=\))/);
+        const subAnimeTitleString = subAnimeTitle ? subAnimeTitle[0] : "";
+        const mainAnimeTitle = fileName.replace(/\(.+?\)/, "").trim();
+    
+        const titleMatch = findBestMatch(searchQuery, [
+          fileName,
+          mainAnimeTitle,
+          subAnimeTitleString,
+        ]);
 
     const resolutionMatch = parsedResolution.includes(resolution);
 
