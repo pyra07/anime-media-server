@@ -93,7 +93,11 @@ class Scheduler {
         .setColor(0x0997e3)
         .addField("Title ID", anime.mediaId.toString(), true)
         .addField("Episode(s)", this.joinArr(downloadedEpisodes), true)
-        .addField("Seeders", animeTorrent[0]["nyaa:seeders"], true)
+        .addField(
+          "Seeders",
+          animeTorrent.map((t) => t["nyaa:seeders"]).join(", "),
+          true
+        )
         .addField("Title", animeTorrent[0].title, true)
         .setImage(anime.media.coverImage.extraLarge)
     );
