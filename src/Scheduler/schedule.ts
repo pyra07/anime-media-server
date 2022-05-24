@@ -91,6 +91,7 @@ class Scheduler {
         .setTimestamp()
         .setTitle(`**${anime.media.title.romaji}** is downloading!`)
         .setColor(0x0997e3)
+        .addField("Title ID", anime.mediaId.toString(), true)
         .addField("Episode(s)", this.joinArr(downloadedEpisodes), true)
         .addField("Seeders", animeTorrent[0]["nyaa:seeders"], true)
         .addField("Title", animeTorrent[0].title, true)
