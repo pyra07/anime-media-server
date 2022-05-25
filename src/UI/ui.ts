@@ -30,8 +30,7 @@ class ui {
 
   private async runSchedulerOnce() {
     console.log("Checking for Anime...");
-    await db.logIn();
-    await schedule.check();
+    await Promise.all([db.logIn(), schedule.check()]);
     console.log("Done! Exiting now...");
     process.exit();
   }
