@@ -261,7 +261,7 @@ class Scheduler {
 
     if (animeDb.length === 0) return; // check if animeDb is empty
 
-    await Promise.all(
+    await new Promise(() => {
       animeDb.map((anime) => {
         if (!this.offlineAnimeDB.hasOwnProperty(anime.mediaId))
           this.handleAnime(anime);
@@ -274,9 +274,24 @@ class Scheduler {
           if (episodesOffline[episodesOffline.length - 1] !== airingEpisodes)
             this.handleAnime(anime);
         }
-      })
-    );
-    log("Finished checking");
+      });
+    });
+
+    // await Promise.all(
+    //   animeDb.map((anime) => {
+    //     if (!this.offlineAnimeDB.hasOwnProperty(anime.mediaId))
+    //       this.handleAnime(anime);
+    //     else {
+    //       const episodesOffline = this.offlineAnimeDB[anime.mediaId];
+    //       const airingEpisodes = anime.media.nextAiringEpisode
+    //         ? anime.media.nextAiringEpisode.episode - 1
+    //         : anime.media.episodes;
+    //       // Handle if it needs more downloading
+    //       if (episodesOffline[episodesOffline.length - 1] !== airingEpisodes)
+    //         this.handleAnime(anime);
+    //     }
+    //   })
+    // );
   }
 }
 
