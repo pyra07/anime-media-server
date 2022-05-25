@@ -277,8 +277,7 @@ class Scheduler {
       }
     });
 
-    await Promise.all(promiseArr);
-    
+    await Promise.all(promiseArr).then(() => (promiseArr = []));
 
     // await Promise.all(
     //   animeDb.map((anime) => {
