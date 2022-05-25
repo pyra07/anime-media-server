@@ -8,7 +8,6 @@ import { AnimeTorrent, AniQuery } from "../utils/types";
 import { MessageBuilder, Webhook } from "discord-webhook-node";
 import { webhook } from "../../profile.json";
 import { log } from "console";
-import { resolve } from "path";
 
 class Scheduler {
   private hook: Webhook; // Store discord webhook info
@@ -262,21 +261,24 @@ class Scheduler {
 
     if (animeDb.length === 0) return; // check if animeDb is empty
 
-    await new Promise<void>((resolve) => {
-      animeDb.map((anime) => {
-        if (!this.offlineAnimeDB.hasOwnProperty(anime.mediaId))
-          this.handleAnime(anime);
-        else {
-          const episodesOffline = this.offlineAnimeDB[anime.mediaId];
-          const airingEpisodes = anime.media.nextAiringEpisode
-            ? anime.media.nextAiringEpisode.episode - 1
-            : anime.media.episodes;
-          // Handle if it needs more downloading
-          if (episodesOffline[episodesOffline.length - 1] !== airingEpisodes)
-            this.handleAnime(anime);
-        }
-      });
-    }).then(() => resolve());
+    let promiseArr: Promise<void>[] = [];
+
+    animeDb.map((anime) => {
+      if (!this.offlineAnimeDB.hasOwnProperty(anime.mediaId))
+        promiseArr.push(this.handleAnime(anime));
+      else {
+        const episodesOffline = this.offlineAnimeDB[anime.mediaId];
+        const airingEpisodes = anime.media.nextAiringEpisode
+          ? anime.media.nextAiringEpisode.episode - 1
+          : anime.media.episodes;
+        // Handle if it needs more downloading
+        if (episodesOffline[episodesOffline.length - 1] !== airingEpisodes)
+          promiseArr.push(this.handleAnime(anime));
+      }
+    });
+
+    await Promise.all(promiseArr);
+    
 
     // await Promise.all(
     //   animeDb.map((anime) => {
