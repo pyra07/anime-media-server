@@ -8,6 +8,7 @@ import { AnimeTorrent, AniQuery } from "../utils/types";
 import { MessageBuilder, Webhook } from "discord-webhook-node";
 import { webhook } from "../../profile.json";
 import { log } from "console";
+import { resolve } from "path";
 
 class Scheduler {
   private hook: Webhook; // Store discord webhook info
@@ -275,8 +276,7 @@ class Scheduler {
             this.handleAnime(anime);
         }
       });
-      resolve();
-    });
+    }).then(() => resolve());
 
     // await Promise.all(
     //   animeDb.map((anime) => {
