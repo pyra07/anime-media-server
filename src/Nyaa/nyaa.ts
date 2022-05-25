@@ -173,12 +173,15 @@ class Nyaa {
 
     // Sort rss.items by nyaa:seeders
     rss.items.sort((a: { [x: string]: string }, b: { [x: string]: string }) => {
-      return parseInt(b["nyaa:seeders"], 10) - parseInt(a["nyaa:seeders"], 10);
+      return parseInt(b["nyaa:seeders"]) - parseInt(a["nyaa:seeders"]);
     });
 
     /* Iterate through rss.items
     Check if the title contains mentions of both the query and resolution */
     for (const item of rss.items) {
+      // Ignore torrents with no seeders
+      if (item["nyaa:seeders"] === "0") continue;
+      
       let title: string = item.title;
       const animeParsedData = anitomy.parseSync(title);
 
@@ -220,16 +223,16 @@ class Nyaa {
 
     if (!parsedTitle || !parsedResolution) return false; // Guard against empty parsed data
 
-        // If animeTitle has a title in round brackets, extract it. If found, extract the title out of the brackets
-        const subAnimeTitle = fileName.match(/(?<=\().+?(?=\))/);
-        const subAnimeTitleString = subAnimeTitle ? subAnimeTitle[0] : "";
-        const mainAnimeTitle = fileName.replace(/\(.+?\)/, "").trim();
-    
-        const titleMatch = findBestMatch(searchQuery, [
-          fileName,
-          mainAnimeTitle,
-          subAnimeTitleString,
-        ]);
+    // If animeTitle has a title in round brackets, extract it. If found, extract the title out of the brackets
+    const subAnimeTitle = fileName.match(/(?<=\().+?(?=\))/);
+    const subAnimeTitleString = subAnimeTitle ? subAnimeTitle[0] : "";
+    const mainAnimeTitle = fileName.replace(/\(.+?\)/, "").trim();
+
+    const titleMatch = findBestMatch(searchQuery, [
+      fileName,
+      mainAnimeTitle,
+      subAnimeTitleString,
+    ]);
 
     const resolutionMatch = parsedResolution.includes(resolution);
 
