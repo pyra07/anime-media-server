@@ -261,7 +261,7 @@ class Scheduler {
 
     if (animeDb.length === 0) return; // check if animeDb is empty
 
-    await new Promise(() => {
+    await new Promise<void>((resolve) => {
       animeDb.map((anime) => {
         if (!this.offlineAnimeDB.hasOwnProperty(anime.mediaId))
           this.handleAnime(anime);
@@ -275,6 +275,7 @@ class Scheduler {
             this.handleAnime(anime);
         }
       });
+      resolve();
     });
 
     // await Promise.all(
