@@ -276,6 +276,7 @@ class Scheduler {
         }
       })
     );
+    log("Finished checking");
   }
 }
 
