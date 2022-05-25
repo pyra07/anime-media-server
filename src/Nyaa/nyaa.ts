@@ -181,7 +181,7 @@ class Nyaa {
     for (const item of rss.items) {
       // Ignore torrents with no seeders
       if (item["nyaa:seeders"] === "0") continue;
-      
+
       let title: string = item.title;
       const animeParsedData = anitomy.parseSync(title);
 
@@ -233,6 +233,8 @@ class Nyaa {
       mainAnimeTitle,
       subAnimeTitleString,
     ]);
+
+    console.log(titleMatch);
 
     const resolutionMatch = parsedResolution.includes(resolution);
 
