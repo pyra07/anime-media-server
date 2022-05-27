@@ -226,7 +226,7 @@ class Nyaa {
     // If parsedTitle has a title in round brackets, extract it. If found, extract the title out of the brackets
     const subAnimeTitle = parsedTitle.match(/(?<=\().+?(?=\))/);
     const subAnimeTitleString = subAnimeTitle ? subAnimeTitle[0] : "";
-    const mainAnimeTitle = parsedTitle.replace(/\(.+?\)/, "").trim();
+    const mainAnimeTitle = parsedTitle.replace(/\(.+?\)/, "");
 
     // if animeTitle is seperated by a '|', then split this.
     const vBarSplitTitle = parsedTitle.split("|");
@@ -258,6 +258,7 @@ class Nyaa {
         if (!parsedReleaseInfo) return false; // Guard against empty release info
 
         const batchMatch = parsedReleaseInfo.includes("Batch"); // Check if it is a batch
+
         /* Usually some batches don't explicitly specify that the torrent itself is a
            batch. This can be combated by proving there is no episode number to be parsed
            Therefore we assume this is a batch (to be tested further) */
@@ -274,10 +275,10 @@ class Nyaa {
             parseInt(e[1]) === parseInt(myE[1])
           )
             return true; // If the range is similar, return true
-          else return false; // If the range is not similar, return false
+         // else return false; // If the range is not similar, return false
         }
 
-        return batchMatch || !isEpisode; // Return if all conditions are met.
+        return batchMatch || isEpisode === undefined; // Return if all conditions are met.
 
       // For these following cases, they are only dependent on the title, and resolution.
       case SearchMode.MOVIE:
