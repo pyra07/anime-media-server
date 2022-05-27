@@ -137,7 +137,7 @@ class Nyaa {
    * Query nyaa for the anime information. Then look through the RSS feed for the
    * torrent. The torrent is then verified and returned.
    * @param {string} searchQuery The title of the anime to look for
-   * @param {Resolution} resolution The resolution to search for
+   * @param {Resolution} resolution The resolution of the video we expect
    * @param {SearchMode} searchMode What format we expect to search
    * @param {string} episodeNumber The episode number to search for, if applicable
    * @returns {Promise<AnimeTorrent>} Returns the torrent info if a match is found, otherwise returns null
@@ -223,18 +223,20 @@ class Nyaa {
 
     if (!parsedTitle || !parsedResolution) return false; // Guard against empty parsed data
 
-    // If animeTitle has a title in round brackets, extract it. If found, extract the title out of the brackets
+    // If parsedTitle has a title in round brackets, extract it. If found, extract the title out of the brackets
     const subAnimeTitle = parsedTitle.match(/(?<=\().+?(?=\))/);
     const subAnimeTitleString = subAnimeTitle ? subAnimeTitle[0] : "";
     const mainAnimeTitle = parsedTitle.replace(/\(.+?\)/, "").trim();
+
+    // if animeTitle is seperated by a '|', then split this.
+    const vBarSplitTitle = parsedTitle.split('|');
 
     const titleMatch = findBestMatch(searchQuery, [
       parsedTitle,
       mainAnimeTitle,
       subAnimeTitleString,
+      ...vBarSplitTitle
     ]);
-
-    console.log(titleMatch);
 
     const resolutionMatch = parsedResolution.includes(resolution);
 
