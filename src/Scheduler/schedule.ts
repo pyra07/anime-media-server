@@ -247,7 +247,7 @@ class Scheduler {
     if (torrents === null) {
       log(
         `${anime.media.title.romaji} ${
-          start === end ? `episode ${start}` : `episodes ${start}-${end}`
+          start === --end ? `episode ${start}` : `episodes ${start}-${end}`
         } not found`
       );
       return false; // Guard against null torrents (error | not found)
