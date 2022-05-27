@@ -244,7 +244,14 @@ class Scheduler {
       fsDownloadedEpisodes
     );
 
-    if (torrents === null) return false; // Guard against null torrents (in case of error)
+    if (torrents === null) {
+      log(
+        `${anime.media.title.romaji} ${
+          start === end ? `episode ${start}` : `episodes ${start}-${end}`
+        } not found`
+      );
+      return false; // Guard against null torrents (error | not found)
+    }
 
     if (Array.isArray(torrents))
       // Proceed to download them using qbit

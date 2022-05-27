@@ -199,7 +199,6 @@ class Nyaa {
         return item as AnimeTorrent;
       }
     }
-    console.log(searchQuery, searchMode, episodeNumber, "has not been found.");
     return null;
   }
   /**
