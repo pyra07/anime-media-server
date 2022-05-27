@@ -278,22 +278,6 @@ class Scheduler {
     });
 
     await Promise.all(promiseArr).then(() => (promiseArr = []));
-
-    // await Promise.all(
-    //   animeDb.map((anime) => {
-    //     if (!this.offlineAnimeDB.hasOwnProperty(anime.mediaId))
-    //       this.handleAnime(anime);
-    //     else {
-    //       const episodesOffline = this.offlineAnimeDB[anime.mediaId];
-    //       const airingEpisodes = anime.media.nextAiringEpisode
-    //         ? anime.media.nextAiringEpisode.episode - 1
-    //         : anime.media.episodes;
-    //       // Handle if it needs more downloading
-    //       if (episodesOffline[episodesOffline.length - 1] !== airingEpisodes)
-    //         this.handleAnime(anime);
-    //     }
-    //   })
-    // );
   }
 }
 
