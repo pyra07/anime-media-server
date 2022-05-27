@@ -229,13 +229,13 @@ class Nyaa {
     const mainAnimeTitle = parsedTitle.replace(/\(.+?\)/, "").trim();
 
     // if animeTitle is seperated by a '|', then split this.
-    const vBarSplitTitle = parsedTitle.split('|');
-
+    const vBarSplitTitle = parsedTitle.split("|");
+    console.log(vBarSplitTitle);
     const titleMatch = findBestMatch(searchQuery, [
       parsedTitle,
       mainAnimeTitle,
       subAnimeTitleString,
-      ...vBarSplitTitle
+      ...vBarSplitTitle,
     ]);
 
     const resolutionMatch = parsedResolution.includes(resolution);
@@ -258,10 +258,10 @@ class Nyaa {
         if (!parsedReleaseInfo) return false; // Guard against empty release info
 
         const batchMatch = parsedReleaseInfo.includes("Batch"); // Check if it is a batch
-        /*Usually some batches don't explicitly specify that the torrent itself is a
+        /* Usually some batches don't explicitly specify that the torrent itself is a
            batch. This can be combated by proving there is no episode number to be parsed
-Therefore we assume this is a batch (to be tested further)*/
-        const isEpisode = animeParsedData.episode_number; 
+           Therefore we assume this is a batch (to be tested further) */
+        const isEpisode = animeParsedData.episode_number;
 
         const episodeRange = fileName.match(/\d+-\d+/); // Check if the file name contains a range of episodes
         if (episodeRange) {
