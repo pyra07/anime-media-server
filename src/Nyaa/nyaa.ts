@@ -209,6 +209,7 @@ class Nyaa {
    * @param  {Resolution} resolution The resolution to verify
    * @param  {SearchMode} searchMode What to expect from the query. This can be in multiple forms
    * @param  {string} episode? The episode number to verify, if applicable
+   * @returns {boolean} Returns true if the query is similar to the media, otherwise returns false
    */
   private verifyQuery(
     searchQuery: string,
@@ -216,7 +217,7 @@ class Nyaa {
     resolution: Resolution,
     searchMode: SearchMode,
     episode?: string
-  ) {
+  ) : boolean {
     const fileName = animeParsedData.file_name;
     const parsedTitle = animeParsedData.anime_title;
     const parsedResolution = animeParsedData.video_resolution;
@@ -277,7 +278,7 @@ class Nyaa {
          // else return false; // If the range is not similar, return false
         }
 
-        return batchMatch || isEpisode === undefined; // Return if all conditions are met.
+        return !!(batchMatch || !isEpisode); // Return if all conditions are met.
 
       // For these following cases, they are only dependent on the title, and resolution.
       case SearchMode.MOVIE:
