@@ -255,9 +255,8 @@ class Nyaa {
 
       case SearchMode.BATCH:
         const parsedReleaseInfo = animeParsedData.release_information;
-        if (!parsedReleaseInfo) return false; // Guard against empty release info
 
-        const batchMatch = parsedReleaseInfo.includes("Batch"); // Check if it is a batch
+        const batchMatch = parsedReleaseInfo?.includes("Batch"); // Check if it is a batch
 
         /* Usually some batches don't explicitly specify that the torrent itself is a
            batch. This can be combated by proving there is no episode number to be parsed
