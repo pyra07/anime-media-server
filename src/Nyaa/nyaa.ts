@@ -256,6 +256,10 @@ class Nyaa {
         if (!parsedReleaseInfo) return false; // Guard against empty release info
 
         const batchMatch = parsedReleaseInfo.includes("Batch"); // Check if it is a batch
+        /*Usually some batches don't explicitly specify that the torrent itself is a
+           batch. This can be combated by proving there is no episode number to be parsed
+Therefore we assume this is a batch (to be tested further)*/
+        const isEpisode = animeParsedData.episode_number; 
 
         const episodeRange = fileName.match(/\d+-\d+/); // Check if the file name contains a range of episodes
         if (episodeRange) {
@@ -271,7 +275,7 @@ class Nyaa {
           else return false; // If the range is not similar, return false
         }
 
-        return batchMatch; // Return if all conditions are met.
+        return batchMatch || !isEpisode; // Return if all conditions are met.
 
       // For these following cases, they are only dependent on the title, and resolution.
       case SearchMode.MOVIE:
