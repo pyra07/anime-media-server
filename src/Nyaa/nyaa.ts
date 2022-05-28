@@ -230,7 +230,6 @@ class Nyaa {
 
     // if animeTitle is seperated by a '|', then split this.
     const vBarSplitTitle = parsedTitle.split("|");
-    console.log(vBarSplitTitle);
     const titleMatch = findBestMatch(searchQuery, [
       parsedTitle,
       mainAnimeTitle,
