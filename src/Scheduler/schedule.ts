@@ -284,7 +284,7 @@ class Scheduler {
       }
     });
 
-    await Promise.all(promiseArr).then(() => (promiseArr = []));
+    await Promise.all(promiseArr);
   }
 }
 
