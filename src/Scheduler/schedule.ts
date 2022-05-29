@@ -33,7 +33,7 @@ class Scheduler {
     );
     if (clearDB)
       new cron.CronJob(
-        "0 */6 * * *",
+        "0 */12 * * *",
         () => {
           log(`Clearing offlineDB at ${new Date().toLocaleString()}`); // log with current time
           this.clearOfflineDB();
