@@ -273,7 +273,7 @@ class Nyaa {
             parseInt(e[1]) === parseInt(myE[1])
           )
             return true; // If the range is similar, return true
-          // else return false; // If the range is not similar, return false
+            else return false; // If the range is not similar, return false
         }
 
         return !!(batchMatch || !isEpisode); // Return if all conditions are met.
