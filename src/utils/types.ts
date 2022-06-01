@@ -110,6 +110,7 @@ export class OfflineAnime {
   }
 
   public setTimeout() {
+    if (this.maxTimeouts === 50) this.maxTimeouts = 0;
     this.maxTimeouts += 2;
     this.timeouts = this.maxTimeouts;
   }
