@@ -55,7 +55,7 @@ export enum SearchMode {
   ONA = "ONA",
   MOVIE = "MOVIE",
   BATCH = "BATCH",
-  TV_SHORT = "TV_SHORT"
+  TV_SHORT = "TV_SHORT",
 }
 
 // Helper interface for Media. It is used to define the anime's cover art size.
@@ -93,4 +93,24 @@ export interface AniMedia {
 export interface Command {
   msg: string;
   cmd: Function;
+}
+
+// offline db
+export interface OfflineDB {
+  [key: string]: OfflineAnime;
+}
+
+export class OfflineAnime {
+  episodes: Array<number>;
+  timeouts: number = 0;
+  maxTimeouts: number = 0;
+
+  constructor(episodes: Array<number>) {
+    this.episodes = episodes;
+  }
+
+  public setTimeout() {
+    this.maxTimeouts += 2;
+    this.timeouts = this.maxTimeouts;
+  }
 }
