@@ -4,14 +4,19 @@ import DB from "../database/db";
 import Nyaa from "../Nyaa/nyaa";
 import firebase from "firebase";
 import qbit from "../qBitTorrent/qbit";
-import { AnimeTorrent, AniQuery } from "../utils/types";
+import {
+  AnimeTorrent,
+  AniQuery,
+  OfflineAnime,
+  OfflineDB,
+} from "../utils/types";
 import { MessageBuilder, Webhook } from "discord-webhook-node";
 import { webhook } from "../../profile.json";
 import { log } from "console";
 
 class Scheduler {
   private hook: Webhook; // Store discord webhook info
-  private offlineAnimeDB: { [key: string]: Array<number> };
+  private offlineAnimeDB: OfflineDB;
   constructor() {
     this.hook = new Webhook(webhook);
     this.offlineAnimeDB = {};
@@ -49,7 +54,7 @@ class Scheduler {
    * @returns void
    */
   public clearOfflineDB(mediaId?: string): void {
-    if (mediaId) this.offlineAnimeDB[mediaId] = [];
+    if (mediaId) this.offlineAnimeDB[mediaId] = new OfflineAnime([]);
     else this.offlineAnimeDB = {};
   }
 
@@ -84,7 +89,7 @@ class Scheduler {
     }
 
     // Append to offlineDB
-    this.offlineAnimeDB[anime.mediaId] = downloadedEpisodes;
+    this.offlineAnimeDB[anime.mediaId].episodes = downloadedEpisodes;
 
     this.hook.send(
       new MessageBuilder()
@@ -182,7 +187,7 @@ class Scheduler {
 
     if (isUpToDate) {
       // If the user is up to date, then we can skip, and update the offlineDB
-      this.offlineAnimeDB[anime.mediaId] = fsDownloadedEpisodes;
+      this.offlineAnimeDB[anime.mediaId].episodes = fsDownloadedEpisodes;
       return;
     }
 
@@ -244,7 +249,9 @@ class Scheduler {
       fsDownloadedEpisodes
     );
 
+    // If we found no torrents, then set a timeout to offlineDB
     if (torrents === null) {
+      this.offlineAnimeDB[anime.mediaId].setTimeout();
       log(
         `${anime.media.title.romaji} ${
           ++start === end ? `episode ${end}` : `episodes ${start}-${end}`
@@ -271,10 +278,20 @@ class Scheduler {
     let promiseArr: Promise<void>[] = [];
 
     animeDb.map((anime) => {
-      if (!this.offlineAnimeDB.hasOwnProperty(anime.mediaId))
+      if (!this.offlineAnimeDB.hasOwnProperty(anime.mediaId)) {
+        this.offlineAnimeDB[anime.mediaId] = new OfflineAnime([]);
         promiseArr.push(this.handleAnime(anime));
-      else {
-        const episodesOffline = this.offlineAnimeDB[anime.mediaId];
+      } else {
+        const tempOfflineAnime = this.offlineAnimeDB[anime.mediaId];
+        const timeout = tempOfflineAnime.timeouts;
+
+        // If the timeout is not expired, then we can skip
+        if (!!timeout) {
+          tempOfflineAnime.timeouts--;
+          this.offlineAnimeDB[anime.mediaId] = tempOfflineAnime;
+          return;
+        }
+        const episodesOffline = tempOfflineAnime.episodes;
         const airingEpisodes = anime.media.nextAiringEpisode
           ? anime.media.nextAiringEpisode.episode - 1
           : anime.media.episodes;
