@@ -252,11 +252,7 @@ class Scheduler {
     // If we found no torrents, then set a timeout to offlineDB
     if (torrents === null) {
       this.offlineAnimeDB[anime.mediaId].setTimeout();
-      log(
-        `${anime.media.title.romaji} ${
-          ++start === end ? `episode ${end}` : `episodes ${start}-${end}`
-        } not found`
-      );
+      log(`No torrents found for ${anime.media.title.romaji}`);
       return false; // Guard against null torrents (error | not found)
     }
 
