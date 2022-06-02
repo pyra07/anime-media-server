@@ -1,7 +1,6 @@
 import fs from "fs";
 import { Client, Collection, Intents } from "discord.js";
-import { token } from "profile.json";
-import { deployCommands } from "./deploy-commands";
+import { deployCommands } from "discord/deploy-commands";
 
 class DiscordBot {
   private client: Client<boolean>;

@@ -1,5 +1,5 @@
-import db from "database/db";
-import schedule from "Scheduler/schedule";
+import db from "db/db";
+import schedule from "scheduler/schedule";
 import { Command } from "utils";
 import readline from "readline";
 import { interval, token } from "profile.json";

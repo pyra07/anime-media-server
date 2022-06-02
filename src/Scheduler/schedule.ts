@@ -1,9 +1,9 @@
 import cron from "cron";
 import Anilist from "ani/anilist";
-import DB from "database/db";
-import Nyaa from "Nyaa/nyaa";
+import DB from "db/db";
+import Nyaa from "nyaa/nyaa";
 import firebase from "firebase";
-import qbit from "qBitTorrent/qbit";
+import qbit from "qbit/qbit";
 import {
   AnimeTorrent,
   AniQuery,
