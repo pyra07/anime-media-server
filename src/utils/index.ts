@@ -1,3 +1,3 @@
-export * from "Utils/interfaces";
-export * from "Utils/enums";
-export * from "Utils/classes";
+export * from "./interfaces";
+export * from "./enums";
+export * from "./classes";

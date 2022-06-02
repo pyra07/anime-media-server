@@ -1,4 +1,4 @@
-import db from "Database/db";
+import db from "@db/db";
 import schedule from "@scheduler/schedule";
 import { Command } from "@utils/index";
 import readline from "readline";
