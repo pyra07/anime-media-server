@@ -4,7 +4,7 @@
  */
 /*************************************************************************************** */
 
-import { AnimeFormat, animeStatus, OfflineAnime } from "utils";
+import { AnimeFormat, animeStatus, OfflineAnime } from "Utils";
 
 // This interface is used to store the torrent information from an anime retrieved in Nyaa.
 interface AnimeTorrent {

@@ -1,15 +1,10 @@
 import cron from "cron";
-import Anilist from "ani/anilist";
-import DB from "db/db";
-import Nyaa from "nyaa/nyaa";
+import Anilist from "@ani/anilist";
+import DB from "Database/db";
+import Nyaa from "@nyaa/nyaa";
 import firebase from "firebase";
-import qbit from "qbit/qbit";
-import {
-  AnimeTorrent,
-  AniQuery,
-  OfflineAnime,
-  OfflineDB,
-} from "utils";
+import qbit from "@qbit/qbit";
+import { AnimeTorrent, AniQuery, OfflineAnime, OfflineDB } from "Utils";
 import { MessageBuilder, Webhook } from "discord-webhook-node";
 import { webhook } from "profile.json";
 import { log } from "console";

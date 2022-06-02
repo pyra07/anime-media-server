@@ -8,7 +8,7 @@ import {
   AniQuery,
   Resolution,
   SearchMode,
-} from "utils";
+} from "@utils/index";
 import { resolution } from "profile.json";
 import { compareTwoStrings, findBestMatch } from "string-similarity";
 import anitomy from "anitomy-js";
