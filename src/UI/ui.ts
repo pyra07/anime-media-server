@@ -1,4 +1,4 @@
-import db from "@db/db";
+import DB from "@db/db";
 import schedule from "@scheduler/schedule";
 import { Command } from "@utils/index";
 import readline from "readline";
@@ -30,7 +30,7 @@ class ui {
 
   private async runSchedulerOnce() {
     console.log("Checking for Anime...");
-    await db.logIn();
+    await DB.logIn();
     await schedule.check();
     console.log("Done!");
     process.exit();
@@ -38,7 +38,7 @@ class ui {
 
   private async runScheduler() {
     console.log("Running the scheduler...");
-    await db.logIn();
+    await DB.logIn();
     // Run every x minutes, from 12:00 to 04:00
     // Then run every hour, from 05:00 to 11:00
     await schedule.run(`*/${interval} 12-23,00-04 * * *`, true); // Peak hours
