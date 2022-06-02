@@ -10,14 +10,14 @@
     "rootDir": "./src",
     "baseUrl": "./src",
     "paths": {
-      "ani/*" : ["Anilist/*"],
-      "db/*" : ["Database/*"],
-      "discord/*" : ["DiscordBot/*"],
-      "nyaa/*" : ["Nyaa/*"],
-      "qbit/*" : ["qBitTorrent/*"],
-      "scheduler/*" : ["Scheduler/*"],
+      "@ani/*" : ["Anilist/*"],
+      "@db/*" : ["Database/*"],
+      "@discord/*" : ["DiscordBot/*"],
+      "@nyaa/*" : ["Nyaa/*"],
+      "@qbit/*" : ["qBitTorrent/*"],
+      "@scheduler/*" : ["Scheduler/*"],
       "@ui/*" : ["UI/*"],
-      "utils/*" : ["Utils/*"],
+      "@utils/*" : ["Utils/*"],
     },
     // "lib": [],                                   /* Specify library files to be included in the compilation. */
     // "allowJs": true,                             /* Allow javascript files to be compiled. */
