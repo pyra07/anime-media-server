@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction } from "discord.js";
-import db from "../../database/db";
-import schedule from "../../Scheduler/schedule";
+import db from "database/db";
+import schedule from "Scheduler/schedule";
 
 module.exports = {
   data: new SlashCommandBuilder()

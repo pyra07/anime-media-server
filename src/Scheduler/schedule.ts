@@ -1,17 +1,17 @@
 import cron from "cron";
-import Anilist from "../Anilist/anilist";
-import DB from "../database/db";
-import Nyaa from "../Nyaa/nyaa";
+import Anilist from "ani/anilist";
+import DB from "database/db";
+import Nyaa from "Nyaa/nyaa";
 import firebase from "firebase";
-import qbit from "../qBitTorrent/qbit";
+import qbit from "qBitTorrent/qbit";
 import {
   AnimeTorrent,
   AniQuery,
   OfflineAnime,
   OfflineDB,
-} from "../utils/types";
+} from "utils";
 import { MessageBuilder, Webhook } from "discord-webhook-node";
-import { webhook } from "../../profile.json";
+import { webhook } from "profile.json";
 import { log } from "console";
 
 class Scheduler {

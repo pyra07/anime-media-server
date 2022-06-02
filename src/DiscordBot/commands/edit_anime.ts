@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction } from "discord.js";
-import db from "../../database/db";
+import db from "database/db";
 
 module.exports = {
   data: new SlashCommandBuilder()

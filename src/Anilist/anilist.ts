@@ -1,6 +1,6 @@
 import axios from "axios";
-import { aniUserName } from "../../profile.json";
-import { AniQuery } from "../utils/types";
+import { aniUserName } from "profile.json";
+import { AniQuery } from "utils";
 class Anilist {
   api: string;
   authLink: string;

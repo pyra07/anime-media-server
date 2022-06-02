@@ -1,6 +1,6 @@
 import { QBittorrent } from "@ctrl/qbittorrent";
 import path from "path/posix";
-import { torrent_url, password, username, rootDir } from "../../profile.json";
+import { torrent_url, password, username, rootDir } from "profile.json";
 
 class QbitTorrent {
   private client: QBittorrent;

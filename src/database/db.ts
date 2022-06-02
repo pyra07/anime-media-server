@@ -1,7 +1,7 @@
 import fb from "firebase";
-import { firebaseConfig } from "./creds.json";
-import { id, aniUserName, email, emailPassword } from "../../profile.json";
-import { AniQuery } from "../utils/types";
+import { firebaseConfig } from "database/creds.json";
+import { id, aniUserName, email, emailPassword } from "profile.json";
+import { AniQuery } from "utils";
 import firebase from "firebase";
 
 class DB {

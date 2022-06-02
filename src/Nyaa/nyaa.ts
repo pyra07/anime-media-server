@@ -8,8 +8,8 @@ import {
   AniQuery,
   Resolution,
   SearchMode,
-} from "../utils/types";
-import { resolution } from "../../profile.json";
+} from "utils";
+import { resolution } from "profile.json";
 import { compareTwoStrings, findBestMatch } from "string-similarity";
 import anitomy from "anitomy-js";
 
@@ -216,7 +216,7 @@ class Nyaa {
     resolution: Resolution,
     searchMode: SearchMode,
     episode?: string
-  ) : boolean {
+  ): boolean {
     const fileName = animeParsedData.file_name;
     const parsedTitle = animeParsedData.anime_title;
     const parsedResolution = animeParsedData.video_resolution;
@@ -273,7 +273,7 @@ class Nyaa {
             parseInt(e[1]) === parseInt(myE[1])
           )
             return true; // If the range is similar, return true
-            else return false; // If the range is not similar, return false
+          else return false; // If the range is not similar, return false
         }
 
         return !!(batchMatch || !isEpisode); // Return if all conditions are met.

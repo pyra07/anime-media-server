@@ -1,9 +1,9 @@
-import db from "../database/db";
-import schedule from "../Scheduler/schedule";
-import { Command } from "../utils/types";
+import db from "database/db";
+import schedule from "Scheduler/schedule";
+import { Command } from "utils";
 import readline from "readline";
-import { interval, token } from "../../profile.json";
-import discordBot from "../DiscordBot/main";
+import { interval, token } from "profile.json";
+import discordBot from "DiscordBot/main";
 
 class ui {
   private commands: Command[];
