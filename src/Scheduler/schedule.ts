@@ -2,7 +2,7 @@ import cron from "cron";
 import Anilist from "@ani/anilist";
 import DB from "Database/db";
 import Nyaa from "@nyaa/nyaa";
-import firebase from "firebase";
+import firebase from "firebase/compat/app";
 import qbit from "@qbit/qbit";
 import { AnimeTorrent, AniQuery, OfflineAnime, OfflineDB } from "Utils";
 import { MessageBuilder, Webhook } from "discord-webhook-node";
@@ -134,10 +134,10 @@ class Scheduler {
     try {
       const fireDBEntry = await DB.getByMediaId(`${anime.mediaId}`);
 
-      if (!fireDBEntry.exists) {
+      if (!fireDBEntry) {
         DB.addToDb(anime);
         fireDBAnime = anime;
-      } else fireDBAnime = fireDBEntry.data();
+      } else fireDBAnime = fireDBEntry;
     } catch (error) {
       console.error(error);
       return;
