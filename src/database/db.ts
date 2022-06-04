@@ -1,21 +1,35 @@
-import fb from "firebase";
+import { FirebaseApp, initializeApp } from "firebase/app";
 import { firebaseConfig } from "./creds.json";
 import { id, aniUserName, email, emailPassword } from "profile.json";
 import { AniQuery } from "Utils";
-import firebase from "firebase";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  UserCredential,
+} from "firebase/auth";
+import {
+  deleteDoc,
+  doc,
+  DocumentData,
+  getDoc,
+  getFirestore,
+  setDoc,
+  Timestamp,
+  updateDoc,
+} from "firebase/firestore";
 
 class DB {
-  private myProject: fb.app.App;
-  private static user: fb.auth.UserCredential;
+  private myProject: FirebaseApp;
+  private static user: UserCredential;
+  private db;
   constructor() {
-    this.myProject = fb.initializeApp(firebaseConfig);
+    this.myProject = initializeApp(firebaseConfig);
+    this.db = getFirestore(this.myProject);
   }
 
   public async logIn() {
-    // offline persistence
-    DB.user = await this.myProject
-      .auth()
-      .signInWithEmailAndPassword(email, emailPassword);
+    const auth = getAuth();
+    DB.user = await signInWithEmailAndPassword(auth, email, emailPassword);
   }
 
   /**
@@ -26,25 +40,41 @@ class DB {
   public async addToDb(...data: AniQuery[]): Promise<void> {
     for (let i = 0; i < data.length; i++) {
       const dataToAdd = data[i];
-      await this.myProject
-        .firestore()
-        .collection("animelists")
-        .doc(DB.user.user?.uid)
-        .collection("anime")
-        .doc(dataToAdd["mediaId"].toString())
-        .set(dataToAdd, { merge: false });
+
+      await setDoc(
+        doc(
+          this.db,
+          "animelists",
+          DB.user.user?.uid,
+          "anime",
+          dataToAdd["mediaId"].toString()
+        ),
+        dataToAdd
+      );
+
+      // await this.myProject
+      //   .firestore()
+      //   .collection("animelists")
+      //   .doc(DB.user.user?.uid)
+      //   .collection("anime")
+      //   .doc(dataToAdd["mediaId"].toString())
+      //   .set(dataToAdd, { merge: false });
     }
   }
 
-  public async modifyAnimeEntry(mediaId: string, data: Object) {
+  public async modifyAnimeEntry(mediaId: string, data: any) {
     try {
-      await this.myProject
-        .firestore()
-        .collection("animelists")
-        .doc(DB.user.user?.uid)
-        .collection("anime")
-        .doc(mediaId)
-        .update(data);
+      await updateDoc(
+        doc(this.db, "animelists", DB.user.user?.uid, "anime", mediaId),
+        data
+      );
+      // await this.myProject
+      //   .firestore()
+      //   .collection("animelists")
+      //   .doc(DB.user.user?.uid)
+      //   .collection("anime")
+      //   .doc(mediaId)
+      //   .update(data);
       return true;
     } catch (error) {
       console.error(error);
@@ -54,38 +84,47 @@ class DB {
 
   public async deleteAnimeEntry(mediaId: string): Promise<void> {
     try {
-      await this.myProject
-        .firestore()
-        .collection("animelists")
-        .doc(DB.user.user?.uid)
-        .collection("anime")
-        .doc(mediaId)
-        .delete();
+      await deleteDoc(
+        doc(this.db, "animelists", DB.user.user?.uid, "anime", mediaId)
+      );
+      // await this.myProject
+      //   .firestore()
+      //   .collection("animelists")
+      //   .doc(DB.user.user?.uid)
+      //   .collection("anime")
+      //   .doc(mediaId)
+      //   .delete();
     } catch (error) {
       console.error(error);
     }
   }
-
-  public async getByMediaId(mediaId: string) {
-    return await this.myProject
-      .firestore()
-      .collection("animelists")
-      .doc(DB.user.user?.uid)
-      .collection("anime")
-      .doc(mediaId)
-      .get({ source: "server" });
+  /**
+   * Gets the anime entry by mediaId
+   * @param  {string} mediaId
+   * @returns Promise of DocumentSnapshot
+   */
+  public async getByMediaId(
+    mediaId: string
+  ): Promise<DocumentData | undefined> {
+    const docSnap = await getDoc(
+      doc(this.db, "animelists", DB.user.user?.uid, "anime", mediaId)
+    );
+    if (docSnap.exists()) return docSnap.data();
+    return undefined;
   }
-
-  public async getAnimeEntries(...mediaId: string[]) {
+  /**
+   * Gets the anime entires from a users animelist (in bulk)
+   * @param  {string[]} ...mediaId - Anime mediaIds
+   * @returns Promise - Contains an array of anime entries found on firebase
+   */
+  public async getAnimeEntries(...mediaId: string[]): Promise<any[]> {
     let animeEntries = [];
     for (let i = 0; i < mediaId.length; i++) {
       const data = await this.getByMediaId(mediaId[i]);
 
       // Make sure the data is not undefined
       if (data) {
-        const entry = data.data();
-        if (entry) animeEntries.push(entry);
-        // else return [];
+        animeEntries.push(data);
       }
     }
     return animeEntries;
@@ -93,19 +132,15 @@ class DB {
 
   /**
    * Gets the users animelist
-   * @param  {string} mediaId
    * @returns {Promise}
    */
-  public async getFromDb(): Promise<
-    fb.firestore.QuerySnapshot<fb.firestore.DocumentData> | undefined
-  > {
+  public async getFromDb(): Promise<DocumentData | undefined> {
     try {
-      return await this.myProject
-        .firestore()
-        .collection("animelists")
-        .doc(DB.user.user?.uid)
-        .collection("anime")
-        .get();
+      const docSnap = await getDoc(
+        doc(this.db, "animelists", DB.user.user?.uid, "anime")
+      );
+      if (docSnap.exists()) return docSnap.data();
+      return undefined;
     } catch (error) {
       console.error(error);
       return undefined;
@@ -113,15 +148,12 @@ class DB {
   }
 
   public async createUserDB() {
-    await this.myProject
-      .firestore()
-      .collection("animelists")
-      .doc(DB.user.user?.uid)
-      .set({
-        Username: aniUserName,
-        "Anilist ID": id,
-        "Date Created": firebase.firestore.FieldValue.serverTimestamp(),
-      });
+    await setDoc(doc(this.db, "animelists", DB.user.user?.uid), {
+      userId: DB.user.user?.uid,
+      userName: aniUserName,
+      "Anilist ID": id,
+      "Date Created": Timestamp.now(),
+    });
   }
 }
 export default new DB();
