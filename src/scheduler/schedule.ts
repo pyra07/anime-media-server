@@ -8,6 +8,7 @@ import { AnimeTorrent, AniQuery, OfflineAnime, OfflineDB } from "@utils/index";
 import { MessageBuilder, Webhook } from "discord-webhook-node";
 import { webhook } from "profile.json";
 import { log } from "console";
+import { arrayUnion } from "firebase/firestore";
 
 class Scheduler {
   private hook: Webhook; // Store discord webhook info
@@ -105,9 +106,7 @@ class Scheduler {
     await DB.modifyAnimeEntry(anime.mediaId.toString(), {
       "media.nextAiringEpisode": anime.media.nextAiringEpisode,
       "media.status": anime.media.status,
-      downloadedEpisodes: firebase.firestore.FieldValue.arrayUnion(
-        ...downloadedEpisodes
-      ),
+      downloadedEpisodes: arrayUnion(...downloadedEpisodes),
     });
   }
   /**
