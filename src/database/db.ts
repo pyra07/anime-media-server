@@ -1,7 +1,7 @@
 import { FirebaseApp, initializeApp } from "firebase/app";
 import { firebaseConfig } from "./creds.json";
 import { id, aniUserName, email, emailPassword } from "profile.json";
-import { AniQuery } from "Utils";
+import { AniQuery } from "@utils/index";
 import {
   getAuth,
   signInWithEmailAndPassword,
