@@ -9,6 +9,7 @@ import {
   Resolution,
   SearchMode,
 } from "@utils/index";
+import { getNumbers } from "@nyaa/utils";
 import { resolution } from "profile.json";
 import { findBestMatch } from "string-similarity";
 import anitomy from "anitomy-js";
@@ -23,25 +24,6 @@ class Nyaa {
         item: ["nyaa:seeders"],
       },
     });
-  }
-
-  /**
-   * Gets the numbers between start and end
-   * @param  {number} start
-   * @param  {number} end
-   * @returns {number[]}
-   */
-
-  private getNumbers(
-    start: number,
-    inBetween: number[],
-    end: number
-  ): number[] {
-    let numbers = [];
-    for (let i = start + 1; i <= end; i++) {
-      if (inBetween.indexOf(i) === -1) numbers.push(i);
-    }
-    return numbers;
   }
 
   /**
@@ -98,7 +80,7 @@ class Nyaa {
       const animeTorrentList: AnimeTorrent[] = new Array();
 
       // Generate a list of episodes to download
-      const episodeList = this.getNumbers(
+      const episodeList = getNumbers(
         startEpisode,
         fsDownloadedEpisodes,
         endEpisode
