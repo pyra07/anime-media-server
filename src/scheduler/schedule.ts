@@ -60,9 +60,9 @@ class Scheduler {
 
   /**
    * Downloads the torrents, and updates the database
-   * @param  {AniQuery} anime
-   * @param  {boolean} isBatch
-   * @param  {AnimeTorrent[]} ...animeTorrent
+   * @param  {AniQuery} anime - The anime object
+   * @param  {boolean} isBatch - If true, then a batch of episodes is being downloaded (e.g episodes 01-12)
+   * @param  {AnimeTorrent[]} ...animeTorrent - The anime torrents returned from nyaa.si
    * @returns Promise<void>
    */
   private async downloadTorrents(
@@ -79,6 +79,7 @@ class Scheduler {
         anime.media.title.romaji,
         torrent.episode
       );
+      // If we successfully added the torrent, then add it to the database later
       if (isAdded)
         if (isBatch)
           downloadedEpisodes.push(
@@ -88,9 +89,11 @@ class Scheduler {
           downloadedEpisodes.push(parseInt(torrent.episode));
     }
 
-    // Append to offlineDB
+    // Append to offlineDB, and remove the timeout
     this.offlineAnimeDB[anime.mediaId].episodes = downloadedEpisodes;
+    this.offlineAnimeDB[anime.mediaId].resetTimeout();
 
+    // Inform the user via discord
     this.hook.send(
       new MessageBuilder()
         .setTimestamp()
@@ -106,7 +109,7 @@ class Scheduler {
         .addField("Title", animeTorrent[0].title, true)
         .setImage(anime.media.coverImage.extraLarge)
     );
-
+    // Update firestore
     await DB.modifyAnimeEntry(anime.mediaId.toString(), {
       "media.nextAiringEpisode": anime.media.nextAiringEpisode,
       "media.status": anime.media.status,
@@ -115,7 +118,8 @@ class Scheduler {
   }
 
   /**
-   * Handles the anime, and downloads the necessary torrents
+   * Handles the anime, decides which episodes to download,
+   * or actions to take.
    * @param  {AniQuery} anime - Anime object taken from userlist
    * @returns Promise
    */
@@ -196,7 +200,7 @@ class Scheduler {
       // Loop over synonyms and find the one that matches a nyaa hit
       const synonyms = [anime.media.title.english, ...anime.media.synonyms];
       for (const synonym of synonyms) {
-        //TODO If synonym is not in English, skip
+        // TODO If synonym is not in English, skip
         anime.media.title.romaji = synonym;
         const isValidTitle = await this.getTorrents(
           anime,

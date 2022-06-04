@@ -12,6 +12,10 @@ class OfflineAnime {
     this.maxTimeouts += 2;
     this.timeouts = this.maxTimeouts;
   }
+  public resetTimeout() {
+    this.timeouts = 0;
+    this.maxTimeouts = 0;
+  }
 }
 
 export { OfflineAnime };
