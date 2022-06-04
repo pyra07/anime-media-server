@@ -6,7 +6,7 @@ import fs from "fs";
 export async function deployCommands() {
   const commands: any[] = [];
   const commandFiles = fs
-    .readdirSync("./src/DiscordBot/commands")
+    .readdirSync("src/discord_bot/commands")
     .filter((file) => file.endsWith(".ts"));
 
   for (const file of commandFiles) {

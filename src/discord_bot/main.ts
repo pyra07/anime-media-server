@@ -12,7 +12,7 @@ class DiscordBot {
 
   private async setCommands() {
     const commandFiles = fs
-      .readdirSync("./src/DiscordBot/commands")
+      .readdirSync("src/discord_bot/commands")
       .filter((file) => file.endsWith(".ts"));
 
     for (const file of commandFiles) {
