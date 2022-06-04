@@ -10,7 +10,7 @@ import {
   SearchMode,
 } from "@utils/index";
 import { resolution } from "profile.json";
-import { compareTwoStrings, findBestMatch } from "string-similarity";
+import { findBestMatch } from "string-similarity";
 import anitomy from "anitomy-js";
 
 class Nyaa {
@@ -230,11 +230,11 @@ class Nyaa {
 
     // if animeTitle is seperated by a '|', then split this.
     const vBarSplitTitle = parsedTitle.split("|");
-    const titleMatch = findBestMatch(searchQuery, [
-      parsedTitle,
-      mainAnimeTitle,
-      subAnimeTitleString,
-      ...vBarSplitTitle,
+    const titleMatch = findBestMatch(searchQuery.toLowerCase(), [
+      parsedTitle.toLowerCase(),
+      mainAnimeTitle.toLowerCase(),
+      subAnimeTitleString.toLowerCase(),
+      ...vBarSplitTitle.map((x) => x.toLowerCase()),
     ]);
 
     const resolutionMatch = parsedResolution.includes(resolution);
