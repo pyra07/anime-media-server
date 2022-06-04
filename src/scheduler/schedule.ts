@@ -19,6 +19,9 @@ class Scheduler {
 
   /**
    * Runs the scheduler periodically every x minutes
+   * @param  {string} cronTime - Cron time
+   * @param  {boolean} clearDB - If true, clears the offlineDB
+   * @returns {Promise<void>}
    */
   public async run(cronTime: string, clearDB: boolean): Promise<void> {
     const job = new cron.CronJob(
@@ -33,7 +36,7 @@ class Scheduler {
     );
     if (clearDB)
       new cron.CronJob(
-        "0 */12 * * *",
+        "0 0 */1 * *",
         () => {
           log(`Clearing offlineDB at ${new Date().toLocaleString()}`); // log with current time
           this.clearOfflineDB();
