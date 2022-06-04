@@ -137,3 +137,4 @@ dist
 src/data/data.json
 profile.json
 test.ts
+yarn.lock
