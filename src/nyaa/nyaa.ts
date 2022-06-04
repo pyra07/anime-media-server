@@ -179,7 +179,6 @@ class Nyaa {
     /* Iterate through rss.items
     Check if the title contains mentions of both the query and resolution */
     for (const item of rss.items) {
-      // Ignore torrents with no seeders
       if (item["nyaa:seeders"] === "0") continue;
 
       let title: string = item.title;
@@ -193,8 +192,8 @@ class Nyaa {
         episodeNumber
       );
 
-      // If the title and episode are similar, and the resolution is similar, return
       if (isSimilar) {
+        // If the title and episode are similar, and the resolution is similar, return
         item.episode = episodeNumber || "01";
         return item as AnimeTorrent;
       }
@@ -208,7 +207,7 @@ class Nyaa {
    * @param  {Resolution} resolution The resolution to verify
    * @param  {SearchMode} searchMode What to expect from the query. This can be in multiple forms
    * @param  {string} episode? The episode number to verify, if applicable
-   * @returns {boolean} Returns true if the query is similar to the media, otherwise returns false
+   * @returns {boolean} Returns true if the query is similar to the media we want, otherwise returns false
    */
   private verifyQuery(
     searchQuery: string,
