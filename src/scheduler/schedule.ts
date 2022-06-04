@@ -3,6 +3,7 @@ import Anilist from "@ani/anilist";
 import DB from "@db/db";
 import Nyaa from "@nyaa/nyaa";
 import qbit from "@qbit/qbit";
+import { joinArr } from "@scheduler/utils";
 import { AnimeTorrent, AniQuery, OfflineAnime, OfflineDB } from "@utils/index";
 import { MessageBuilder, Webhook } from "discord-webhook-node";
 import { webhook } from "profile.json";
@@ -46,6 +47,7 @@ class Scheduler {
         "Asia/Muscat"
       );
   }
+
   /**
    * Clears the offlineDB
    * @param  {string} mediaId? - If specified, only clears that anime
@@ -95,7 +97,7 @@ class Scheduler {
         .setTitle(`**${anime.media.title.romaji}** is downloading!`)
         .setColor(0x0997e3)
         .addField("Title ID", anime.mediaId.toString(), true)
-        .addField("Episode(s)", this.joinArr(downloadedEpisodes), true)
+        .addField("Episode(s)", joinArr(downloadedEpisodes), true)
         .addField(
           "Seeders",
           animeTorrent.map((t) => t["nyaa:seeders"]).join(", "),
@@ -111,21 +113,10 @@ class Scheduler {
       downloadedEpisodes: arrayUnion(...downloadedEpisodes),
     });
   }
-  /**
-   * Displays the the range of an array
-   * @param  {any[]} array
-   * @returns {string} - Range of array
-   */
-  private joinArr(array: any[]) {
-    if (array.length === 1) {
-      return array[0];
-    }
-    return `${array[0]} - ${array[array.length - 1]}`;
-  }
 
   /**
    * Handles the anime, and downloads the necessary torrents
-   * @param  {AniQuery} anime
+   * @param  {AniQuery} anime - Anime object taken from userlist
    * @returns Promise
    */
   private async handleAnime(anime: AniQuery): Promise<void> {
@@ -258,6 +249,7 @@ class Scheduler {
     else await this.downloadTorrents(anime, true, torrents);
     return true;
   }
+
   /**
    * Main function. If there is a new anime, or new episode, then this function will execute.
    * This also uses the offlineAnimeDB to check if the user is up to date.
