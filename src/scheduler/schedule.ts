@@ -2,7 +2,6 @@ import cron from "cron";
 import Anilist from "@ani/anilist";
 import DB from "@db/db";
 import Nyaa from "@nyaa/nyaa";
-import firebase from "firebase/compat/app";
 import qbit from "@qbit/qbit";
 import { AnimeTorrent, AniQuery, OfflineAnime, OfflineDB } from "@utils/index";
 import { MessageBuilder, Webhook } from "discord-webhook-node";
