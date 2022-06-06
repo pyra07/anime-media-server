@@ -2,13 +2,7 @@
  and returns it as a json object */
 
 import Parser from "rss-parser";
-import {
-  AnimeFormat,
-  AnimeTorrent,
-  AniQuery,
-  Resolution,
-  SearchMode,
-} from "@utils/index";
+import { AnimeTorrent, AniQuery, Resolution, SearchMode } from "@utils/index";
 import { getNumbers, verifyQuery } from "@nyaa/utils";
 import { resolution } from "profile.json";
 import anitomy from "anitomy-js";
@@ -39,26 +33,10 @@ class Nyaa {
     endEpisode: number,
     fsDownloadedEpisodes: number[]
   ): Promise<AnimeTorrent[] | AnimeTorrent | null> {
-    // Find movie/ova/ona/tv_short if they are finished
-    // if (
-    //   (anime.media.format === AnimeFormat.MOVIE ||
-    //     anime.media.format === AnimeFormat.OVA ||
-    //     anime.media.format === AnimeFormat.ONA ||
-    //     anime.media.format === AnimeFormat.TV_SHORT) &&
-    //   anime.media.status === "FINISHED"
-    // ) {
-    //   const animeRSS = await this.getTorrent(
-    //     anime.media.title.romaji,
-    //     resolution as Resolution,
-    //     anime.media.format.toString() as SearchMode,
-    //     `${startEpisode + 1}-${endEpisode}`
-    //   );
-    //   if (animeRSS) return animeRSS;
-    // } else
     if (
       /* Find batch of episodes to download if the
-      anime has already finished airing */
-      /* TODO : Assess if this is the best way to do this (might remove)
+         anime has already finished airing.
+         Assess if this is the best way to do this (might remove)
          Reason : This accepts all anime formats */
       anime.media.status === "FINISHED" &&
       startEpisode === 0 &&
@@ -72,20 +50,14 @@ class Nyaa {
       );
       if (animeRSS) return animeRSS;
       // Search for a releasing episode
-    } else if (
-      (anime.media.format === AnimeFormat.TV ||
-        anime.media.format === AnimeFormat.TV_SHORT ||
-        anime.media.format === AnimeFormat.ONA ||
-        anime.media.format === AnimeFormat.OVA) &&
-      anime.media.status === "RELEASING"
-    ) {
+    } else {
       const animeTorrentList: AnimeTorrent[] = new Array();
 
       // Generate a list of episodes to download
       const episodeList = getNumbers(
         startEpisode,
-        fsDownloadedEpisodes,
-        endEpisode
+        endEpisode,
+        fsDownloadedEpisodes
       );
 
       // Search for episodes individually
