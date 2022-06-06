@@ -25,7 +25,7 @@ function getAnimeSeason(animeEntry: string): number {
    */
 
   const seasonRegex =
-    /s\d{1}|season(.*)\d{1}|(\d+(st|nd|rd|th)(.*)season)|[^a-zA-Z0-9]\d{1}$/i;
+    /s0?\d{1}|season(.*)0?\d{1}|(\d+(st|nd|rd|th)(.*)season)|[^a-zA-Z0-9]0?\d{1}$/i;
   const seasonString = animeEntry.match(seasonRegex);
   // If found, extract the season number
   if (seasonString) {
