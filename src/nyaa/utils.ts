@@ -1,7 +1,6 @@
 import { Resolution, SearchMode } from "@utils/index";
 import { findBestMatch } from "string-similarity";
 import anitomy from "anitomy-js";
-import readline from "readline";
 
 /**
  * Gets the numbers between start and end
@@ -38,23 +37,7 @@ function verifyEpisodeRange(
   else return false; // If the range is not similar, return false
 }
 
-function testVerify() {
-  const cl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-  const input = cl.question("Enter anime: ", (a) => {
-    const animeParsedData = anitomy.parseSync(a);
-    const v = verifyQuery(
-      "The Daily Life of the Immortal King",
-      animeParsedData,
-      Resolution.FHD,
-      SearchMode.BATCH,
-      ["01", "12"]
-    );
-    console.log(v);
-  });
-}
+
 
 /**
  * Verifies if the query has some degree of similarity to the media to look for, based on the input given.
