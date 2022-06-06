@@ -37,8 +37,6 @@ function verifyEpisodeRange(
   else return false; // If the range is not similar, return false
 }
 
-
-
 /**
  * Verifies if the query has some degree of similarity to the media to look for, based on the input given.
  * @param  {string} searchQuery The title of the anime to originally verify
@@ -66,8 +64,7 @@ function verifyQuery(
   const subAnimeTitleString = subAnimeTitle ? subAnimeTitle[0] : "";
   const mainAnimeTitle = parsedTitle.replace(/\(.+?\)/, "");
 
-  // if animeTitle is seperated by a '|', then split this.
-  const vBarSplitTitle = parsedTitle.split("|");
+  const vBarSplitTitle = parsedTitle.split("|"); // if animeTitle is seperated by a '|', then split this.
 
   /**Attempt to find best match based on various titles procured
    * Using lowercase to avoid tampering with bestMatch rating (not important)
@@ -109,17 +106,6 @@ function verifyQuery(
         return verifyEpisodeRange(paramEpisodeRange, episodeRange); // If so, check if the episode is in the range
 
       return !!(batchMatch || !isEpisode); // Return if all conditions are met.
-
-    // For these following cases, they are only dependent on the title, and resolution.
-    // case SearchMode.MOVIE:
-    // case SearchMode.TV_SHORT:
-    //   return true;
-
-    // case SearchMode.OVA:
-    // case SearchMode.ONA:
-    //   const oEpisodeRange = fileName.match(/\d+( *)[-~]( *)\d+/); // Check if the file name contains a range of episodes
-    //   if (oEpisodeRange) return verifyEpisodeRange(episode!, oEpisodeRange); // If so, check if the episode is in the range
-    //   return true;
 
     default:
       return false;
