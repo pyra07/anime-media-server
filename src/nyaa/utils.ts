@@ -18,8 +18,8 @@ function getNumbers(start: number, end: number, inBetween: number[]): number[] {
 }
 /**
  * Similarity check for episode range for batch torrents
- * @param  {string} episode The episode number to verify
- * @param  {RegExpMatchArray} episodeRange
+ * @param  {string} paramEpisodeRange List containing the episode range to check
+ * @param  {RegExpMatchArray} episodeRange The episode range extracted from nyaa
  * @returns boolean
  */
 function verifyEpisodeRange(
