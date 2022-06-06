@@ -40,24 +40,26 @@ class Nyaa {
     fsDownloadedEpisodes: number[]
   ): Promise<AnimeTorrent[] | AnimeTorrent | null> {
     // Find movie/ova/ona/tv_short if they are finished
+    // if (
+    //   (anime.media.format === AnimeFormat.MOVIE ||
+    //     anime.media.format === AnimeFormat.OVA ||
+    //     anime.media.format === AnimeFormat.ONA ||
+    //     anime.media.format === AnimeFormat.TV_SHORT) &&
+    //   anime.media.status === "FINISHED"
+    // ) {
+    //   const animeRSS = await this.getTorrent(
+    //     anime.media.title.romaji,
+    //     resolution as Resolution,
+    //     anime.media.format.toString() as SearchMode,
+    //     `${startEpisode + 1}-${endEpisode}`
+    //   );
+    //   if (animeRSS) return animeRSS;
+    // } else
     if (
-      (anime.media.format === AnimeFormat.MOVIE ||
-        anime.media.format === AnimeFormat.OVA ||
-        anime.media.format === AnimeFormat.ONA ||
-        anime.media.format === AnimeFormat.TV_SHORT) &&
-      anime.media.status === "FINISHED"
-    ) {
-      const animeRSS = await this.getTorrent(
-        anime.media.title.romaji,
-        resolution as Resolution,
-        anime.media.format.toString() as SearchMode,
-        `${startEpisode + 1}-${endEpisode}`
-      );
-      if (animeRSS) return animeRSS;
-    } else if (
-      /* Find batch of episodes (TV) to download if the
+      /* Find batch of episodes to download if the
       anime has already finished airing */
-      anime.media.format === AnimeFormat.TV &&
+      /* TODO : Assess if this is the best way to do this (might remove)
+         Reason : This accepts all anime formats */
       anime.media.status === "FINISHED" &&
       startEpisode === 0 &&
       fsDownloadedEpisodes.length === 0
@@ -66,7 +68,7 @@ class Nyaa {
         anime.media.title.romaji,
         resolution as Resolution,
         SearchMode.BATCH,
-        `${startEpisode + 1}-${endEpisode}`
+        [startEpisode.toString(), endEpisode.toString()]
       );
       if (animeRSS) return animeRSS;
       // Search for a releasing episode
@@ -104,7 +106,7 @@ class Nyaa {
           anime.media.title.romaji,
           resolution as Resolution,
           SearchMode.EPISODE,
-          episodeString
+          [episodeString]
         );
 
         if (animeRSS !== null) animeTorrentList.push(animeRSS); // Check if animeRSS is not null
@@ -128,11 +130,11 @@ class Nyaa {
     searchQuery: string,
     resolution: Resolution,
     searchMode: SearchMode,
-    episodeNumber?: string
+    episodeRange: string[]
   ): Promise<AnimeTorrent | null> {
     const finalQuery =
       searchMode === SearchMode.EPISODE
-        ? `${searchQuery} - ${episodeNumber}`
+        ? `${searchQuery} - ${episodeRange[0]}`
         : searchQuery;
 
     // Set some filters, and then the search query
@@ -171,12 +173,12 @@ class Nyaa {
         animeParsedData,
         resolution,
         searchMode,
-        episodeNumber
+        episodeRange
       );
 
       if (isSimilar) {
         // If the title and episode are similar, and the resolution is similar, return
-        item.episode = episodeNumber || "01";
+        item.episode = episodeRange.length === 1 ? episodeRange[0] : "01";
         return item as AnimeTorrent;
       }
     }
