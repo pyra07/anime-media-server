@@ -1,14 +1,7 @@
-import Parser from "rss-parser";
-import {
-  AnimeFormat,
-  AnimeTorrent,
-  AniQuery,
-  Resolution,
-  SearchMode,
-} from "@utils/index";
-import { resolution } from "profile.json";
+import { Resolution, SearchMode } from "@utils/index";
 import { findBestMatch } from "string-similarity";
 import anitomy from "anitomy-js";
+import readline from "readline";
 
 /**
  * Gets the numbers between start and end
@@ -43,6 +36,24 @@ function verifyEpisodeRange(
   )
     return true; // If the range is similar, return true
   else return false; // If the range is not similar, return false
+}
+
+function testVerify() {
+  const cl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+  const input = cl.question("Enter anime: ", (a) => {
+    const animeParsedData = anitomy.parseSync(a);
+    const v = verifyQuery(
+      "The Daily Life of the Immortal King",
+      animeParsedData,
+      Resolution.FHD,
+      SearchMode.BATCH,
+      ["01", "12"]
+    );
+    console.log(v);
+  });
 }
 
 /**
@@ -109,10 +120,10 @@ function verifyQuery(
          batch. This can be combated by proving there is no episode number to be parsed
          Therefore we assume this is a batch (to be tested further) */
       const isEpisode = animeParsedData.episode_number;
-      "".match(/\d+/g);
 
       const episodeRange = fileName.match(/\d+( *)[-~]( *)\d+/); // Check if the file name contains a range of episodes
-      if (episodeRange) return verifyEpisodeRange(paramEpisodeRange, episodeRange); // If so, check if the episode is in the range
+      if (episodeRange)
+        return verifyEpisodeRange(paramEpisodeRange, episodeRange); // If so, check if the episode is in the range
 
       return !!(batchMatch || !isEpisode); // Return if all conditions are met.
 
