@@ -9,7 +9,7 @@ import anitomy from "anitomy-js";
  * @returns {number[]}
  */
 
-function getNumbers(start: number, inBetween: number[], end: number): number[] {
+function getNumbers(start: number, end: number, inBetween: number[]): number[] {
   let numbers = [];
   for (let i = start + 1; i <= end; i++) {
     if (inBetween.indexOf(i) === -1) numbers.push(i);
