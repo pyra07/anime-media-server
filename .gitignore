@@ -134,7 +134,7 @@ dist
 # TernJS port file
 
 .tern-port
-src/data/data.json
 profile.json
-test.ts
-yarn.lock
+test*
+*.lock
+tempCodeRunner*
