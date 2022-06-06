@@ -275,7 +275,7 @@ class Scheduler {
         const tempOfflineAnime = this.offlineAnimeDB[anime.mediaId];
         const timeout = tempOfflineAnime.timeouts;
 
-        // If the timeout is not expired, then we can skip
+        // If the timeout is not expired, then we can skip checking this
         if (!!timeout) {
           tempOfflineAnime.timeouts--;
           this.offlineAnimeDB[anime.mediaId] = tempOfflineAnime;
