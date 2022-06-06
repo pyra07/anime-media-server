@@ -1,5 +1,5 @@
 import { Resolution, SearchMode } from "@utils/index";
-import { findBestMatch } from "string-similarity";
+import { BestMatch, findBestMatch } from "string-similarity";
 import anitomy from "anitomy-js";
 
 /**
@@ -36,6 +36,21 @@ function verifyEpisodeRange(
     return true; // If the range is similar, return true
   else return false; // If the range is not similar, return false
 }
+/**
+ * Functions similary to findBestMatch from string-similarity, but lowercases the strings before comparing
+ * @param  {string} mainString The main string to compare
+ * @param  {string[]} targetStrings The strings to compare against
+ * @returns BestMatch Details of the strings matched together
+ */
+function findBestMatchLowerCase(
+  mainString: string,
+  ...targetStrings: string[]
+): BestMatch {
+  return findBestMatch(
+    mainString.toLowerCase(),
+    targetStrings.map((x) => x.toLowerCase())
+  );
+}
 
 /**
  * Verifies if the query has some degree of similarity to the media to look for, based on the input given.
@@ -43,7 +58,7 @@ function verifyEpisodeRange(
  * @param  {anitomy.AnitomyResult} animeParsedData The parsed data of the RSS item title
  * @param  {Resolution} resolution The resolution to verify
  * @param  {SearchMode} searchMode What to expect from the query. This can be in multiple forms
- * @param  {string} episode? The episode number to verify, if applicable
+ * @param  {string} paramEpisodeRange The episode number to verify, if applicable
  * @returns {boolean} Returns true if the query is similar to the media we want, otherwise returns false
  */
 function verifyQuery(
@@ -63,18 +78,15 @@ function verifyQuery(
   const subAnimeTitle = parsedTitle.match(/(?<=\().+?(?=\))/);
   const subAnimeTitleString = subAnimeTitle ? subAnimeTitle[0] : "";
   const mainAnimeTitle = parsedTitle.replace(/\(.+?\)/, "");
-
   const vBarSplitTitle = parsedTitle.split("|"); // if animeTitle is seperated by a '|', then split this.
 
-  /**Attempt to find best match based on various titles procured
-   * Using lowercase to avoid tampering with bestMatch rating (not important)
-   */
-  const titleMatch = findBestMatch(searchQuery.toLowerCase(), [
-    parsedTitle.toLowerCase(),
-    mainAnimeTitle.toLowerCase(),
-    subAnimeTitleString.toLowerCase(),
-    ...vBarSplitTitle.map((x) => x.toLowerCase()),
-  ]);
+  const titleMatch = findBestMatchLowerCase(
+    searchQuery,
+    parsedTitle,
+    mainAnimeTitle,
+    subAnimeTitleString,
+    ...vBarSplitTitle
+  );
 
   const resolutionMatch = parsedResolution.includes(resolution);
 
