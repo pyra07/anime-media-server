@@ -7,6 +7,6 @@ module.exports = {
     .setDescription("Throws an error lol"),
   async execute(interaction: CommandInteraction) {
     await interaction.reply("Throw an error!");
-    throw new Error("This is a test error");
+    process.exit(1);
   },
 };
