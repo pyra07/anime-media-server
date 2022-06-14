@@ -28,9 +28,10 @@ class DB {
   }
 
   public async logIn() {
+    try {
     const auth = getAuth();
     DB.user = await signInWithEmailAndPassword(auth, email, emailPassword);
-  }
+  } catch(e) {process.exit(0)}}
 
   /**
    * Adds data to firestore
