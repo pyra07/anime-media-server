@@ -200,7 +200,7 @@ class Scheduler {
       // Loop over synonyms and find the one that matches a nyaa hit
       const synonyms = [anime.media.title.english, ...anime.media.synonyms];
       for (const synonym of synonyms) {
-        // TODO If synonym is not in English, skip
+        if (!synonym) continue;
         anime.media.title.romaji = synonym;
         const isValidTitle = await this.getTorrents(
           anime,
