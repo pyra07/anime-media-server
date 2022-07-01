@@ -27,7 +27,9 @@ class Scheduler {
     const job = new cron.CronJob(
       cronTime,
       async () => {
-        console.log(`Running scheduler at ${new Date().toLocaleString()}`); // log with current time
+        console.log(
+          `===============Running scheduler at ${new Date().toLocaleString()}===============`
+        ); // log with current time
         await this.check();
       },
       null,
@@ -180,7 +182,7 @@ class Scheduler {
     if (isUpToDate) {
       // If the user is up to date, then we can skip, and update the offlineDB
       this.offlineAnimeDB[anime.mediaId].episodes = fsDownloadedEpisodes;
-      
+
       return;
     }
 
