@@ -24,6 +24,7 @@ interface AnimeTorrent {
 interface nextAiringEpisode {
   episode: number;
   id: number;
+  timeUntilAiring: number;
 }
 
 // Helper interface for Media. It is used to define the title of the anime. This can be in 3 different forms.
