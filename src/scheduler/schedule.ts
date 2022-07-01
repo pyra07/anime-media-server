@@ -181,7 +181,7 @@ class Scheduler {
       // If the user is up to date, then we can skip, and update the offlineDB
       this.offlineAnimeDB[anime.mediaId].episodes = fsDownloadedEpisodes;
       console.log(`${anime.media.title.romaji} is up to date`);
-      
+
       return;
     }
 
@@ -288,7 +288,11 @@ class Scheduler {
           ? anime.media.nextAiringEpisode.episode - 1
           : anime.media.episodes;
         // Handle if it needs more downloading
-        if (episodesOffline[episodesOffline.length - 1] !== airingEpisodes)
+        // Don't handle if the anime hasn't aired yet
+        if (
+          episodesOffline[episodesOffline.length - 1] !== airingEpisodes ||
+          airingEpisodes !== 1
+        )
           promiseArr.push(this.handleAnime(anime));
       }
     });
