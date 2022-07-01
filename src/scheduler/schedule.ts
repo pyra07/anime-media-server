@@ -180,8 +180,6 @@ class Scheduler {
     if (isUpToDate) {
       // If the user is up to date, then we can skip, and update the offlineDB
       this.offlineAnimeDB[anime.mediaId].episodes = fsDownloadedEpisodes;
-      console.log(`${anime.media.title.romaji} is up to date`);
-
       return;
     }
 
