@@ -74,6 +74,7 @@ class Anilist {
               nextAiringEpisode {
                 id
                 episode
+                timeUntilAiring
               }
               synonyms
               title {
