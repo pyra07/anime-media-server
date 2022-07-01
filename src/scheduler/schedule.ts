@@ -289,7 +289,7 @@ class Scheduler {
         // Don't handle if the anime hasn't aired yet
         if (
           episodesOffline[episodesOffline.length - 1] !== airingEpisodes ||
-          airingEpisodes !== 1
+          airingEpisodes !== 0 
         )
           promiseArr.push(this.handleAnime(anime));
       }
