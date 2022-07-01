@@ -286,7 +286,7 @@ class Scheduler {
           ? anime.media.nextAiringEpisode.episode - 1
           : anime.media.episodes;
         // Don't handle if the anime hasn't aired yet
-        if (airingEpisodes !== 0) return;
+        if (airingEpisodes === 0) return;
         // Handle if it needs more downloading
         if (episodesOffline[episodesOffline.length - 1] !== airingEpisodes)
           promiseArr.push(this.handleAnime(anime));
