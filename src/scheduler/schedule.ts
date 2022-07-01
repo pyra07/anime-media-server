@@ -291,7 +291,10 @@ class Scheduler {
         // Don't handle if the anime hasn't aired yet
         if (airingEpisodes === 0) return;
         // Handle if it needs more downloading
-        if (episodesOffline[episodesOffline.length - 1] !== airingEpisodes)
+        if (
+          episodesOffline[episodesOffline.length - 1] !== airingEpisodes ||
+          episodesOffline.length !== airingEpisodes
+        )
           promiseArr.push(this.handleAnime(anime));
       }
     });
