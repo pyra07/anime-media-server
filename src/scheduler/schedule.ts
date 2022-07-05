@@ -201,13 +201,14 @@ class Scheduler {
       !fireDBAnime.media.alternativeTitle &&
       fsDownloadedEpisodes.length === 0
     ) {
+      // Get short name by seperating romaji title by colon
+      const shortName = anime.media.title.romaji.split(":")[0];
       // Loop over synonyms and find the one that matches a nyaa hit
       const synonyms = [anime.media.title.english, ...anime.media.synonyms];
+      if (shortName !== anime.media.title.romaji) synonyms.unshift
       for (const synonym of synonyms) {
         if (!synonym) continue;
-
         console.log(`Handling ${synonym}`);
-
         anime.media.title.romaji = synonym;
         const isValidTitle = await this.getTorrents(
           anime,
