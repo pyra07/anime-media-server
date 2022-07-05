@@ -205,7 +205,7 @@ class Scheduler {
       const shortName = anime.media.title.romaji.split(":")[0];
       // Loop over synonyms and find the one that matches a nyaa hit
       const synonyms = [anime.media.title.english, ...anime.media.synonyms];
-      if (shortName !== anime.media.title.romaji) synonyms.unshift
+      if (shortName !== anime.media.title.romaji) synonyms.unshift(shortName);
       for (const synonym of synonyms) {
         if (!synonym) continue;
         anime.media.title.romaji = synonym;
