@@ -28,9 +28,10 @@ class DB {
   }
 
   public async logIn() {
+    try {
     const auth = getAuth();
     DB.user = await signInWithEmailAndPassword(auth, email, emailPassword);
-  }
+  } catch(e) {process.exit(0)}}
 
   /**
    * Adds data to firestore
@@ -51,14 +52,6 @@ class DB {
         ),
         dataToAdd
       );
-
-      // await this.myProject
-      //   .firestore()
-      //   .collection("animelists")
-      //   .doc(DB.user.user?.uid)
-      //   .collection("anime")
-      //   .doc(dataToAdd["mediaId"].toString())
-      //   .set(dataToAdd, { merge: false });
     }
   }
 
@@ -68,13 +61,7 @@ class DB {
         doc(this.db, "animelists", DB.user.user?.uid, "anime", mediaId),
         data
       );
-      // await this.myProject
-      //   .firestore()
-      //   .collection("animelists")
-      //   .doc(DB.user.user?.uid)
-      //   .collection("anime")
-      //   .doc(mediaId)
-      //   .update(data);
+
       return true;
     } catch (error) {
       console.error(error);
@@ -87,13 +74,6 @@ class DB {
       await deleteDoc(
         doc(this.db, "animelists", DB.user.user?.uid, "anime", mediaId)
       );
-      // await this.myProject
-      //   .firestore()
-      //   .collection("animelists")
-      //   .doc(DB.user.user?.uid)
-      //   .collection("anime")
-      //   .doc(mediaId)
-      //   .delete();
     } catch (error) {
       console.error(error);
     }

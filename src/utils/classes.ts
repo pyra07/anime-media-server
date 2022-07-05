@@ -1,3 +1,5 @@
+import { interval } from "profile.json";
+
 class OfflineAnime {
   episodes: Array<number>;
   timeouts: number = 0;
@@ -5,6 +7,15 @@ class OfflineAnime {
 
   constructor(episodes: Array<number>) {
     this.episodes = episodes;
+  }
+  /**
+   * Sets a timeout until the next episode is aired.
+   * @param  {number} time - The time in seconds until the next episode is aired.
+   */
+  public setTimeoutUntil(time: number) : void {
+    const timeInMinutes = time / 60;
+    this.timeouts = Math.round(timeInMinutes / interval);
+
   }
 
   public setTimeout() {

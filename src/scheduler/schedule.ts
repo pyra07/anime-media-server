@@ -7,7 +7,6 @@ import { joinArr } from "@scheduler/utils";
 import { AnimeTorrent, AniQuery, OfflineAnime, OfflineDB } from "@utils/index";
 import { MessageBuilder, Webhook } from "discord-webhook-node";
 import { webhook } from "profile.json";
-import { log } from "console";
 import { arrayUnion } from "firebase/firestore";
 
 class Scheduler {
@@ -28,7 +27,9 @@ class Scheduler {
     const job = new cron.CronJob(
       cronTime,
       async () => {
-        log(`Running scheduler at ${new Date().toLocaleString()}`); // log with current time
+        console.log(
+          `===============Running scheduler at ${new Date().toLocaleString()}===============`
+        ); // log with current time
         await this.check();
       },
       null,
@@ -39,7 +40,7 @@ class Scheduler {
       new cron.CronJob(
         "0 0 */1 * *",
         () => {
-          log(`Clearing offlineDB at ${new Date().toLocaleString()}`); // log with current time
+          console.log(`Clearing offlineDB at ${new Date().toLocaleString()}`); // log with current time
           this.clearOfflineDB();
         },
         null,
@@ -72,7 +73,9 @@ class Scheduler {
   ): Promise<void> {
     const downloadedEpisodes = new Array<number>();
     for (const torrent of animeTorrent) {
-      log(`Downloading ${torrent.title} ${torrent.episode} at ${torrent.link}`);
+      console.log(
+        `Downloading ${torrent.title} ${torrent.episode} at ${torrent.link}`
+      );
       // Download torrent
       var isAdded: boolean = await qbit.addTorrent(
         torrent.link,
@@ -124,7 +127,7 @@ class Scheduler {
    * @returns Promise
    */
   private async handleAnime(anime: AniQuery): Promise<void> {
-    log(`Handling ${anime.media.title.romaji}`);
+    console.log(`Handling ${anime.media.title.romaji}`);
     let fireDBAnime;
 
     try {
@@ -179,8 +182,7 @@ class Scheduler {
     if (isUpToDate) {
       // If the user is up to date, then we can skip, and update the offlineDB
       this.offlineAnimeDB[anime.mediaId].episodes = fsDownloadedEpisodes;
-      console.log(`${anime.media.title.romaji} is up to date`);
-      
+
       return;
     }
 
@@ -203,6 +205,9 @@ class Scheduler {
       const synonyms = [anime.media.title.english, ...anime.media.synonyms];
       for (const synonym of synonyms) {
         if (!synonym) continue;
+
+        console.log(`Handling ${synonym}`);
+
         anime.media.title.romaji = synonym;
         const isValidTitle = await this.getTorrents(
           anime,
@@ -245,7 +250,7 @@ class Scheduler {
     // If we found no torrents, then set a timeout to offlineDB
     if (torrents === null) {
       this.offlineAnimeDB[anime.mediaId].setTimeout();
-      log(`No torrents found for ${anime.media.title.romaji}`);
+      console.log(`No torrents found for ${anime.media.title.romaji}`);
       return false; // Guard against null torrents (error | not found)
     }
 
@@ -275,7 +280,7 @@ class Scheduler {
         const tempOfflineAnime = this.offlineAnimeDB[anime.mediaId];
         const timeout = tempOfflineAnime.timeouts;
 
-        // If the timeout is not expired, then we can skip
+        // If the timeout is not expired, then we can skip checking this
         if (!!timeout) {
           tempOfflineAnime.timeouts--;
           this.offlineAnimeDB[anime.mediaId] = tempOfflineAnime;
@@ -285,6 +290,8 @@ class Scheduler {
         const airingEpisodes = anime.media.nextAiringEpisode
           ? anime.media.nextAiringEpisode.episode - 1
           : anime.media.episodes;
+        // Don't handle if the anime hasn't aired yet
+        if (airingEpisodes === 0) return;
         // Handle if it needs more downloading
         if (episodesOffline[episodesOffline.length - 1] !== airingEpisodes)
           promiseArr.push(this.handleAnime(anime));

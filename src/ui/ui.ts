@@ -29,7 +29,7 @@ class ui {
   }
 
   private async runSchedulerOnce() {
-    console.log("Checking for Anime...");
+    console.log("===============Checking for Anime...===============");
     await DB.logIn();
     await schedule.check();
     console.log("Done!");
