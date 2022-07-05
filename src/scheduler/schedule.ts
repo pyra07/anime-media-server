@@ -205,7 +205,9 @@ class Scheduler {
       const synonyms = [anime.media.title.english, ...anime.media.synonyms];
       for (const synonym of synonyms) {
         if (!synonym) continue;
+
         console.log(`Handling ${synonym}`);
+
         anime.media.title.romaji = synonym;
         const isValidTitle = await this.getTorrents(
           anime,
