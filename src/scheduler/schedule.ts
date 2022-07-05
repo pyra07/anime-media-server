@@ -208,7 +208,6 @@ class Scheduler {
       if (shortName !== anime.media.title.romaji) synonyms.unshift
       for (const synonym of synonyms) {
         if (!synonym) continue;
-        console.log(`Handling ${synonym}`);
         anime.media.title.romaji = synonym;
         const isValidTitle = await this.getTorrents(
           anime,
