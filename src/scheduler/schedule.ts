@@ -282,6 +282,7 @@ class Scheduler {
 
         // If the timeout is not expired, then we can skip checking this
         if (!!timeout) {
+console.log(tempOfflineAnime.timeouts)
           tempOfflineAnime.timeouts--;
           this.offlineAnimeDB[anime.mediaId] = tempOfflineAnime;
           return;
