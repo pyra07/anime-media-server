@@ -195,6 +195,7 @@ class Scheduler {
     );
 
     if (isSuccessful) return; // Finish the function if successful
+else this.offlineAnimeDB[anime.mediaId].setTimeout();
 
     // For new entries, sometimes you need to use a different title.
     if (
@@ -249,7 +250,6 @@ class Scheduler {
 
     // If we found no torrents, then set a timeout to offlineDB
     if (torrents === null) {
-      this.offlineAnimeDB[anime.mediaId].setTimeout();
       console.log(`No torrents found for ${anime.media.title.romaji}`);
       return false; // Guard against null torrents (error | not found)
     }
