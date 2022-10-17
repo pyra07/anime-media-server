@@ -195,7 +195,7 @@ class Scheduler {
     );
 
     if (isSuccessful) return; // Finish the function if successful
-else this.offlineAnimeDB[anime.mediaId].setTimeout();
+    else this.offlineAnimeDB[anime.mediaId].setTimeout();
 
     // For new entries, sometimes you need to use a different title.
     if (
@@ -282,7 +282,9 @@ else this.offlineAnimeDB[anime.mediaId].setTimeout();
 
         // If the timeout is not expired, then we can skip checking this
         if (!!timeout) {
-console.log(tempOfflineAnime.timeouts)
+          console.log(
+            `${tempOfflineAnime.timeouts} timeouts remain for ${anime.media.title.romaji}`
+          );
           tempOfflineAnime.timeouts--;
           this.offlineAnimeDB[anime.mediaId] = tempOfflineAnime;
           return;
