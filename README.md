@@ -40,4 +40,4 @@ You could make your own, however. These instructions are for future me.
 5. Run `ts-node main.ts` (P.S you might need VPN)
 
 ## Current Development Status
-App is working fine! LOL
+I love this ngl
