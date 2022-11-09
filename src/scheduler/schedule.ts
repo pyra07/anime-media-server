@@ -100,10 +100,13 @@ class Scheduler {
     this.hook.send(
       new MessageBuilder()
         .setTimestamp()
-        .setTitle(`**${anime.media.title.romaji}** is downloading!`)
+        .setTitle(
+          `**${anime.media.title.romaji} ${joinArr(
+            downloadedEpisodes
+          )}** is downloading!`
+        )
         .setColor(0x0997e3)
         .addField("Title ID", anime.mediaId.toString(), true)
-        .addField("Episode(s)", joinArr(downloadedEpisodes), true)
         .addField(
           "Seeders",
           animeTorrent.map((t) => t["nyaa:seeders"]).join(", "),
