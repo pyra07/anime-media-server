@@ -101,7 +101,7 @@ class Scheduler {
       new MessageBuilder()
         .setTimestamp()
         .setTitle(
-          `**${anime.media.title.romaji} ${joinArr(
+          `**${anime.media.title.romaji} - ${joinArr(
             downloadedEpisodes
           )}** is downloading!`
         )
