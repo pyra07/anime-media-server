@@ -124,7 +124,7 @@ class Scheduler {
   }
 
   /**
-   * Handles the anime, decides which episodes to download,
+   * Handles an anime series, decides which episodes to download,
    * or actions to take.
    * @param  {AniQuery} anime - Anime object taken from userlist
    * @returns Promise
@@ -154,6 +154,8 @@ class Scheduler {
     const startingEpisode = fireDBAnime.media.startingEpisode
       ? fireDBAnime.media.startingEpisode
       : 0;
+    // Stupid, lazy implementation TODO remove
+    this.offlineAnimeDB[anime.mediaId].starting_episode = startingEpisode;
 
     /* Sometimes the title found in nyaa.si is different.
     Therefore, we manually define an alt title if applicable. */
@@ -299,7 +301,10 @@ class Scheduler {
         // Don't handle if the anime hasn't aired yet
         if (airingEpisodes === 0) return;
         // Handle if it needs more downloading
-        if (episodesOffline[episodesOffline.length - 1] !== airingEpisodes)
+        if (
+          episodesOffline[episodesOffline.length - 1] !==
+          airingEpisodes + tempOfflineAnime.starting_episode
+        )
           promiseArr.push(this.handleAnime(anime));
       }
     });
