@@ -1,12 +1,12 @@
 import fs from "fs";
-import { Client, Collection, Intents } from "discord.js";
+import { Client, Collection, IntentsBitField } from "discord.js";
 import { deployCommands } from "@discord/deploy-commands";
 
 class DiscordBot {
   private client: Client<boolean>;
   private commands: Collection<unknown, unknown>;
   constructor() {
-    this.client = new Client({ intents: [Intents.FLAGS.GUILDS] });
+    this.client = new Client({ intents: [IntentsBitField.Flags.Guilds] });
     this.commands = new Collection();
   }
 
