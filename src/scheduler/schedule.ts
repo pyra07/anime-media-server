@@ -167,7 +167,7 @@ class Scheduler {
     // NextAiringEpisode can be null if the anime is finished. So check for that
     const endEpisode = anime.media.nextAiringEpisode
       ? anime.media.nextAiringEpisode.episode - 1 + startingEpisode
-      : anime.media.episodes;
+      : anime.media.episodes + startingEpisode;
 
     // firestore (fs) downloaded episodes.
     const fsDownloadedEpisodes: any[] = fireDBAnime.downloadedEpisodes || [];
@@ -189,7 +189,7 @@ class Scheduler {
       this.offlineAnimeDB[anime.mediaId].episodes = fsDownloadedEpisodes.sort((a,b) => a-b);
 
       return;
-    }
+    }    
 
     // Attempt to find the anime.
     const isSuccessful = await this.getTorrents(
