@@ -31,6 +31,11 @@ class DiscordBot {
       console.log("Ready!");
     });
 
+    this.client.on("disconnect", () => {
+      console.log("Disconnected");
+      this.client.login(token);
+    });
+
     this.client.on("interactionCreate", async (interaction) => {
       if (!interaction.isCommand()) return;
 
