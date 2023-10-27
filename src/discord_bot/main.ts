@@ -1,13 +1,30 @@
 import fs from "fs";
-import { Client, Collection, IntentsBitField } from "discord.js";
+import {
+  ActivityOptions,
+  ActivityType,
+  Client,
+  Collection,
+  IntentsBitField,
+} from "discord.js";
 import { deployCommands } from "@discord/deploy-commands";
 
 class DiscordBot {
   private client: Client<boolean>;
   private commands: Collection<unknown, unknown>;
+  private status: Array<ActivityOptions>;
   constructor() {
     this.client = new Client({ intents: [IntentsBitField.Flags.Guilds] });
     this.commands = new Collection();
+    this.status = [
+      {
+        name: "Dawn",
+        type: ActivityType.Watching,
+      },
+      {
+        name: "Quran",
+        type: ActivityType.Listening,
+      },
+    ];
   }
 
   private async setCommands() {
@@ -31,10 +48,11 @@ class DiscordBot {
       console.log("Ready!");
     });
 
-    this.client.on("disconnect", () => {
-      console.log("Disconnected");
-      this.client.login(token);
-    });
+    // Keep this bot alive by changing status
+    setInterval(() => {
+      let random = Math.floor(Math.random() * this.status.length);
+      this.client.user!.setActivity(this.status[random]);
+    }, 3600000);
 
     this.client.on("interactionCreate", async (interaction) => {
       if (!interaction.isCommand()) return;
