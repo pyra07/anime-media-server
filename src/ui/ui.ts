@@ -39,10 +39,10 @@ class ui {
   private async runScheduler() {
     console.log("Running the scheduler...");
     await DB.logIn();
-    // Run every x minutes, from 12:00 to 04:00
-    // Then run every hour, from 05:00 to 11:00
-    await schedule.run(`*/${interval} 07-23,00-01 * * *`, true); // Peak hours
-    await schedule.run(`0 02-06 * * *`, false); // Off peak hours
+    // Run every x minutes, from 12:00pm to 04:00am
+    // Then run every hour, from 05:00am to 11:00am
+    await schedule.run(`*/${interval} 12-23,00-04 * * *`, true); // Peak hours
+    await schedule.run(`0 05-11 * * *`, false); // Off peak hours
   }
 
   private async runSchedulerDiscord() {
