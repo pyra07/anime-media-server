@@ -132,13 +132,15 @@ class Scheduler {
   private async handleAnime(anime: AniQuery): Promise<void> {
     console.log(`Handling ${anime.media.title.romaji}`);
     let fireDBAnime;
+    let isNewEntry = false;
 
     try {
-      const fireDBEntry = await DB.getByMediaId(`${anime.mediaId}`);
+      var fireDBEntry = await DB.getByMediaId(`${anime.mediaId}`);
 
       if (!fireDBEntry) {
         DB.addToDb(anime);
         fireDBAnime = anime;
+        isNewEntry = true;
       } else fireDBAnime = fireDBEntry;
     } catch (error) {
       console.error(error);
@@ -170,7 +172,7 @@ class Scheduler {
       : anime.media.episodes + startingEpisode;
 
     // firestore (fs) downloaded episodes.
-    const fsDownloadedEpisodes: any[] = fireDBAnime.downloadedEpisodes || [];
+    const fsDownloadedEpisodes: any[] = isNewEntry ? [] : fireDBEntry!.downloadedEpisodes;
 
     // Make array of anime.progress until endEpisode
     const animeProgress: number[] = Array.from(
