@@ -4,8 +4,9 @@
 import Parser from "rss-parser";
 import { AnimeTorrent, AniQuery, Resolution, SearchMode } from "@utils/index";
 import { getNumbers, verifyQuery } from "@nyaa/utils";
-import { resolution } from "profile.json";
+import { resolution, proxyAddress, proxyPort } from "profile.json";
 import anitomy from "anitomy-js";
+import axios from "axios";
 
 class Nyaa {
   private rssLink: URL;
@@ -116,7 +117,15 @@ class Nyaa {
     this.rssLink.searchParams.set("f", "0");
 
     try {
-      var rss = await this.parser.parseURL(this.rssLink.href);
+      const response = await axios.get(this.rssLink.href, {
+        proxy : {
+          protocol : "http",
+          host: proxyAddress,
+          port: proxyPort
+        }
+      })
+
+      var rss = await this.parser.parseString(response.data);
     } catch (error) {
       console.log(
         "An error has occured while trying to retreive the RSS feed from Nyaa:\n",
