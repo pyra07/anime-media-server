@@ -171,9 +171,7 @@ class Scheduler {
       : anime.media.episodes + startingEpisode;
 
     // firestore (fs) downloaded episodes.
-    const fsDownloadedEpisodes: any[] = fireDBAnime.downloadedEpisodes || [];
-    console.log(anime.media.title.romaji, fsDownloadedEpisodes);
-    
+    const fsDownloadedEpisodes: any[] = fireDBAnime.downloadedEpisodes || [];    
 
     // Make array of anime.progress until endEpisode
     const animeProgress: number[] = Array.from(
