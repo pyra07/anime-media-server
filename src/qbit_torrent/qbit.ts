@@ -19,6 +19,7 @@ class QbitTorrent {
     episodeStr?: string
   ): Promise<boolean> {
     await this.client.login();
+    link = link.replace("nyaa.si","nyaa.ink.iss");
     const isAdded = await this.client.addMagnet(link, {
       savepath: path.join(rootDir, title),
       sequentialDownload: "true",
