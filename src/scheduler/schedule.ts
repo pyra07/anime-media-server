@@ -7,7 +7,7 @@ import { joinArr } from "@scheduler/utils";
 import { AnimeTorrent, AniQuery, OfflineAnime, OfflineDB } from "@utils/index";
 import { MessageBuilder, Webhook } from "discord-webhook-node";
 import { webhook } from "profile.json";
-import { arrayUnion } from "firebase/firestore";
+import { arrayUnion, DocumentData } from "firebase/firestore";
 
 class Scheduler {
   private hook: Webhook; // Store discord webhook info
@@ -131,16 +131,15 @@ class Scheduler {
    */
   private async handleAnime(anime: AniQuery): Promise<void> {
     console.log(`Handling ${anime.media.title.romaji}`);
-    let fireDBAnime;
+    let fireDBAnime : DocumentData;
     let isNewEntry = false;
 
     try {
-      var fireDBEntry = await DB.getByMediaId(`${anime.mediaId}`);
+      const fireDBEntry = await DB.getByMediaId(`${anime.mediaId}`);
 
       if (!fireDBEntry) {
         DB.addToDb(anime);
-        fireDBAnime = anime;
-        isNewEntry = true;
+        fireDBAnime = anime as DocumentData;
       } else fireDBAnime = fireDBEntry;
     } catch (error) {
       console.error(error);
@@ -172,7 +171,9 @@ class Scheduler {
       : anime.media.episodes + startingEpisode;
 
     // firestore (fs) downloaded episodes.
-    const fsDownloadedEpisodes: any[] = isNewEntry ? [] : fireDBEntry!.downloadedEpisodes;
+    const fsDownloadedEpisodes: any[] = fireDBAnime.downloadedEpisodes || [];
+    console.log(anime.media.title.romaji, fsDownloadedEpisodes);
+    
 
     // Make array of anime.progress until endEpisode
     const animeProgress: number[] = Array.from(
