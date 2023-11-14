@@ -19,6 +19,9 @@ class QbitTorrent {
     episodeStr?: string
   ): Promise<boolean> {
     await this.client.login();
+    /* *sigh* this is so qbit can download the torrent file, without 
+       the need for a VPN. ink.iss FTW
+       As of Nov '23 RSS still doesn't work here */
     link = link.replace("nyaa.si","nyaa.ink.iss");
     const isAdded = await this.client.addMagnet(link, {
       savepath: path.join(rootDir, title),
