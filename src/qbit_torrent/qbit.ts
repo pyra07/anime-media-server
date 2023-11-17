@@ -19,17 +19,18 @@ class QbitTorrent {
     episodeStr?: string
   ): Promise<boolean> {
     /* *sigh* this is so qbit can download the torrent file, without 
-    the need for a VPN. Mirrors FTW
-    As of Nov '23 RSS still doesn't work here */
-    link = link.replace("nyaa.si","nyaa.iss.ink");
+    the need for a VPN. Mirrors FTW */
+    link = link.replace("nyaa.si","nyaa.land");
     console.log(link);
-    await this.client.login();
+    const isLogged = await this.client.login();
+
+    if (!isLogged) return isLogged;
     
-    const isAdded = await this.client.addMagnet(link, {
+    const isAdded = await this.client.addTorrent(link, {
       savepath: path.join(rootDir, title),
-      sequentialDownload: "true",
       rename: episodeStr ? `${title} - ${episodeStr}` : title,
     });
+
     return isAdded;
   }
 }
