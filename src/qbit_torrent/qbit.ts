@@ -22,11 +22,9 @@ class QbitTorrent {
     the need for a VPN. Mirrors FTW */
     link = link.replace("nyaa.si","nyaa.land");
     console.log(link);
-    const isLogged = await this.client.login();
-
-    if (!isLogged) return isLogged;
+    await this.client.login();    
     
-    const isAdded = await this.client.addTorrent(link, {
+    const isAdded = await this.client.addMagnet(link, {
       savepath: path.join(rootDir, title),
       rename: episodeStr ? `${title} - ${episodeStr}` : title,
     });

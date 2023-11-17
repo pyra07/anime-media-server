@@ -82,14 +82,15 @@ class Scheduler {
         anime.media.title.romaji,
         torrent.episode
       );
+      if (!isAdded) this.offlineAnimeDB[anime.mediaId].setTimeout();
+
       // If we successfully added the torrent, then add it to the database later
-      if (isAdded)
-        if (isBatch)
-          downloadedEpisodes.push(
-            ...Array.from({ length: anime.media.episodes }, (_, i) => i + 1)
-          );
-        else if (torrent.episode)
-          downloadedEpisodes.push(parseInt(torrent.episode));
+      if (isBatch)
+        downloadedEpisodes.push(
+          ...Array.from({ length: anime.media.episodes }, (_, i) => i + 1)
+        );
+      else if (torrent.episode)
+        downloadedEpisodes.push(parseInt(torrent.episode));
     }
 
     // Append to offlineDB, and remove the timeout
@@ -131,8 +132,7 @@ class Scheduler {
    */
   private async handleAnime(anime: AniQuery): Promise<void> {
     console.log(`Handling ${anime.media.title.romaji}`);
-    let fireDBAnime : DocumentData;
-    let isNewEntry = false;
+    let fireDBAnime: DocumentData;
 
     try {
       const fireDBEntry = await DB.getByMediaId(`${anime.mediaId}`);
@@ -171,7 +171,7 @@ class Scheduler {
       : anime.media.episodes + startingEpisode;
 
     // firestore (fs) downloaded episodes.
-    const fsDownloadedEpisodes: any[] = fireDBAnime.downloadedEpisodes || [];    
+    const fsDownloadedEpisodes: any[] = fireDBAnime.downloadedEpisodes || [];
 
     // Make array of anime.progress until endEpisode
     const animeProgress: number[] = Array.from(
@@ -187,10 +187,12 @@ class Scheduler {
 
     if (isUpToDate) {
       // If the user is up to date, then we can skip, and update the offlineDB
-      this.offlineAnimeDB[anime.mediaId].episodes = fsDownloadedEpisodes.sort((a,b) => a-b);
+      this.offlineAnimeDB[anime.mediaId].episodes = fsDownloadedEpisodes.sort(
+        (a, b) => a - b
+      );
 
       return;
-    }    
+    }
 
     // Attempt to find the anime.
     const isSuccessful = await this.getTorrents(
