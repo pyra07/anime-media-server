@@ -21,7 +21,7 @@ class DiscordBot {
         type: ActivityType.Watching,
       },
       {
-        name: "Quran",
+        name: "the sea",
         type: ActivityType.Listening,
       },
     ];
