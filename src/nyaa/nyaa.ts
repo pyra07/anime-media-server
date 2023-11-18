@@ -34,11 +34,12 @@ class Nyaa {
     endEpisode: number,
     fsDownloadedEpisodes: number[]
   ): Promise<AnimeTorrent[] | AnimeTorrent | null> {
+
+    /* Find batch of episodes to download if the
+       anime has already finished airing.
+       Assess if this is the best way to do this (might remove)
+       Reason : This accepts all anime formats */
     if (
-      /* Find batch of episodes to download if the
-         anime has already finished airing.
-         Assess if this is the best way to do this (might remove)
-         Reason : This accepts all anime formats */
       anime.media.status === "FINISHED" &&
       startEpisode === 0 &&
       fsDownloadedEpisodes.length === 0
@@ -96,7 +97,7 @@ class Nyaa {
    * @param {string} searchQuery The title of the anime to look for
    * @param {Resolution} resolution The resolution of the video we expect
    * @param {SearchMode} searchMode What format we expect to search
-   * @param {string} episodeNumber The episode number to search for, if applicable
+   * @param {string} episodeRange The episode number to search for, if applicable
    * @returns {Promise<AnimeTorrent>} Returns the torrent info if a match is found, otherwise returns null
    */
   private async getTorrent(
@@ -116,6 +117,7 @@ class Nyaa {
     this.rssLink.searchParams.set("c", "1_2");
     this.rssLink.searchParams.set("f", "0");
 
+    // Used proxy due to internet restrictions. 
     try {
       const response = await axios.get(this.rssLink.href, {
         proxy : {
