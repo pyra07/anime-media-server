@@ -195,14 +195,14 @@ class Scheduler {
     }
 
     // Attempt to find the anime.
-    const isSuccessful = await this.getTorrents(
+    const isAnimeFound = await this.getTorrents(
       anime,
       startEpisode,
       endEpisode,
       fsDownloadedEpisodes
     );
 
-    if (isSuccessful) return; // Finish the function if successful
+    if (isAnimeFound) return; // Finish the function if successful
     else this.offlineAnimeDB[anime.mediaId].setTimeout();
 
     // For new entries, sometimes you need to use a different title.
