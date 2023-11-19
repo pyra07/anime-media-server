@@ -30,7 +30,7 @@ function verifyEpisodeRange(
   // If so we can assume the torrent is a batch as well.
   const e = episodeRange[0].split(/[-~]/);
   if (
-    parseInt(e[0]) === parseInt(paramEpisodeRange[0]) &&
+    parseInt(e[0]) === 1 &&
     parseInt(e[1]) === parseInt(paramEpisodeRange[1])
   )
     return true; // If the range is similar, return true
@@ -115,6 +115,7 @@ function verifyQuery(
 
       const episodeRange = fileName.match(/\d+( *)[-~]( *)\d+/); // Check if the file name contains a range of episodes
       if (episodeRange)
+        
         return verifyEpisodeRange(paramEpisodeRange, episodeRange); // If so, check if the episode is in the range
 
       return !!(batchMatch || !isEpisode); // Return if all conditions are met.
