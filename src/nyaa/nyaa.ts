@@ -116,6 +116,8 @@ class Nyaa {
     this.rssLink.searchParams.set("q", finalQuery);
     this.rssLink.searchParams.set("c", "1_2");
     this.rssLink.searchParams.set("f", "0");
+    this.rssLink.searchParams.set("o", "desc");
+    this.rssLink.searchParams.set("s", "seeders");
 
     // Used proxy due to internet restrictions. 
     try {
