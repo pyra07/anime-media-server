@@ -82,7 +82,10 @@ class Scheduler {
         anime.media.title.romaji,
         torrent.episode
       );
-      if (!isAdded) this.offlineAnimeDB[anime.mediaId].setTimeout();
+      if (!isAdded) {
+        this.offlineAnimeDB[anime.mediaId].setTimeout();
+        return;
+      }
 
       // If we successfully added the torrent, then add it to the database later
       if (isBatch)
