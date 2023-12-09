@@ -43,10 +43,6 @@ class QbitTorrent {
   ): Promise<boolean> {
     const authLink = new URL(qbit_url);
     authLink.pathname = "/api/v2/torrents/add";
-
-    await this.authenticate();
-    if (!this.sid) return false;
-
     link = link.replace("nyaa.si", "nyaa.land");
 
     try {
@@ -60,7 +56,7 @@ class QbitTorrent {
         {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
-            Cookie: `SID=${this.sid}`,
+            // Cookie: `SID=${this.sid}`,
           },
         }
       );
