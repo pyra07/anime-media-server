@@ -7,8 +7,8 @@ class QbitTorrent {
 
   // Function to authenticate and get the SID (Session ID)
   private async authenticate() {
-      const authLink = new URL(qbit_url);
-      authLink.pathname = "/api/v2/auth/login";
+    const authLink = new URL(qbit_url);
+    authLink.pathname = "/api/v2/auth/login";
 
     try {
       const response = await axios.post(
@@ -41,13 +41,17 @@ class QbitTorrent {
     title: string,
     episodeStr?: string
   ): Promise<boolean> {
+    const authLink = new URL(qbit_url);
+    authLink.pathname = "/api/v2/torrents/add";
+
     await this.authenticate();
     if (!this.sid) return false;
+
     link = link.replace("nyaa.si", "nyaa.land");
 
     try {
       const response = await axios.post(
-        `${qbit_url}/api/v2/torrents/add`,
+        authLink.toString(),
         `urls=${encodeURIComponent(link)}&savepath=${encodeURIComponent(
           path.join(rootDir, title)
         )}&rename=${encodeURIComponent(
@@ -64,9 +68,13 @@ class QbitTorrent {
       if (response.data === "Ok.") {
         return true;
       } else {
+        console.log("No data", response);
+
         return false;
       }
     } catch (error) {
+      console.log(error);
+
       return false;
     }
   }
