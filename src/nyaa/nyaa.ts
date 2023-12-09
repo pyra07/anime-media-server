@@ -34,7 +34,6 @@ class Nyaa {
     endEpisode: number,
     fsDownloadedEpisodes: number[]
   ): Promise<AnimeTorrent[] | AnimeTorrent | null> {
-
     /* Find batch of episodes to download if the
        anime has already finished airing.
        Assess if this is the best way to do this (might remove)
@@ -91,6 +90,31 @@ class Nyaa {
     return null;
   }
 
+  private setParams(finalQuery: string) {
+    // Set some filters, and then the search query
+    this.rssLink.searchParams.set("page", "rss");
+    this.rssLink.searchParams.set("q", finalQuery);
+    this.rssLink.searchParams.set("c", "1_2");
+    this.rssLink.searchParams.set("f", "0");
+    this.rssLink.searchParams.set("o", "desc");
+    this.rssLink.searchParams.set("s", "seeders");
+  }
+
+  private async getResponse(useProxy: boolean) {
+    return await axios.get(
+      this.rssLink.href,
+      useProxy
+        ? {
+            proxy: {
+              protocol: "http",
+              host: proxyAddress,
+              port: proxyPort,
+            },
+          }
+        : {}
+    );
+  }
+
   /**
    * Query nyaa for the anime information. Then look through the RSS feed for the
    * torrent. The torrent is then verified and returned.
@@ -111,24 +135,11 @@ class Nyaa {
         ? `${searchQuery} - ${episodeRange[0]}`
         : searchQuery;
 
-    // Set some filters, and then the search query
-    this.rssLink.searchParams.set("page", "rss");
-    this.rssLink.searchParams.set("q", finalQuery);
-    this.rssLink.searchParams.set("c", "1_2");
-    this.rssLink.searchParams.set("f", "0");
-    this.rssLink.searchParams.set("o", "desc");
-    this.rssLink.searchParams.set("s", "seeders");
+    this.setParams(finalQuery);
 
-    // Used proxy due to internet restrictions. 
+    // Used proxy due to internet restrictions.
     try {
-      const response = await axios.get(this.rssLink.href, {
-        proxy : {
-          protocol : "http",
-          host: proxyAddress,
-          port: proxyPort
-        }
-      })
-
+      const response = await this.getResponse(true);
       var rss = await this.parser.parseString(response.data);
     } catch (error) {
       console.log(
@@ -152,7 +163,7 @@ class Nyaa {
 
       // Skip if episode was published before the airing date
       let pubDate = new Date(item["pubDate"]);
-      let dateNow = Date.now()
+      let dateNow = Date.now();
       if (dateNow < pubDate.getTime()) continue;
 
       let title: string = item.title;
