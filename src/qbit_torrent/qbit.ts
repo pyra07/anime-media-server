@@ -1,15 +1,18 @@
 import axios from "axios";
 import path from "path/posix";
-import { torrent_url, password, username, rootDir } from "profile.json";
+import { qbit_url, password, username, rootDir } from "profile.json";
 
 class QbitTorrent {
   private sid?: string;
 
   // Function to authenticate and get the SID (Session ID)
   private async authenticate() {
+      const authLink = new URL(qbit_url);
+      authLink.pathname = "/api/v2/auth/login";
+
     try {
       const response = await axios.post(
-        `${torrent_url}/api/v2/auth/login`,
+        authLink.toString(),
         `username=${encodeURIComponent(username)}&password=${encodeURIComponent(
           password
         )}`,
@@ -44,7 +47,7 @@ class QbitTorrent {
 
     try {
       const response = await axios.post(
-        `${torrent_url}/api/v2/torrents/add`,
+        `${qbit_url}/api/v2/torrents/add`,
         `urls=${encodeURIComponent(link)}&savepath=${encodeURIComponent(
           path.join(rootDir, title)
         )}&rename=${encodeURIComponent(
