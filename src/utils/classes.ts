@@ -19,7 +19,7 @@ class OfflineAnime {
   }
 
   public setTimeout() {
-    if (this.maxTimeouts === 10) this.maxTimeouts = 0;
+    if (this.maxTimeouts === 6) this.maxTimeouts = 0;
     this.maxTimeouts += 2;
     this.timeouts = this.maxTimeouts;
   }
