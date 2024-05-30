@@ -12,7 +12,7 @@ class Nyaa {
   private rssLink: URL;
   private parser: any;
   constructor() {
-    this.rssLink = new URL("https://nyaa.si/");
+    this.rssLink = new URL("https://nyaa.land/");
     this.parser = new Parser({
       customFields: {
         item: ["nyaa:seeders"],
@@ -139,7 +139,7 @@ class Nyaa {
 
     // Used proxy due to internet restrictions.
     try {
-      const response = await this.getResponse(true);
+      const response = await this.getResponse(false);
       var rss = await this.parser.parseString(response.data);
     } catch (error) {
       console.log(
