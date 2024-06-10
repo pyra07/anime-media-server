@@ -4,7 +4,7 @@
 import Parser from "rss-parser";
 import { AnimeTorrent, AniQuery, Resolution, SearchMode } from "@utils/index";
 import { getNumbers, verifyQuery } from "@nyaa/utils";
-import { resolution, proxyAddress, proxyPort } from "profile.json";
+import { resolution, proxyAddress, proxyPort, useProxy } from "profile.json";
 import anitomy from "anitomy-js";
 import axios from "axios";
 
@@ -100,7 +100,7 @@ class Nyaa {
     this.rssLink.searchParams.set("s", "seeders");
   }
 
-  private async getResponse(useProxy: boolean) {
+  private async getResponse() {
     return await axios.get(
       this.rssLink.href,
       useProxy
@@ -139,7 +139,7 @@ class Nyaa {
 
     // Used proxy due to internet restrictions.
     try {
-      const response = await this.getResponse(false);
+      const response = await this.getResponse();
       var rss = await this.parser.parseString(response.data);
     } catch (error) {
       console.log(
