@@ -160,12 +160,7 @@ class Nyaa {
     Check if the title contains mentions of both the query and resolution */
     for (const item of rss.items) {
       if (item["nyaa:seeders"] === "0") continue;
-
-      // Skip if episode was published before the airing date
-      let pubDate = new Date(item["pubDate"]);
-      let dateNow = Date.now();
-      if (dateNow < pubDate.getTime()) continue;
-
+      
       let title: string = item.title;
       const animeParsedData = anitomy.parseSync(title);
 
