@@ -160,7 +160,7 @@ class Nyaa {
     Check if the title contains mentions of both the query and resolution */
     for (const item of rss.items) {
       if (item["nyaa:seeders"] === "0") continue;
-      
+
       let title: string = item.title;
       const animeParsedData = anitomy.parseSync(title);
 
@@ -171,6 +171,8 @@ class Nyaa {
         searchMode,
         episodeRange
       );
+
+      console.log(isSimilar, title);
 
       if (isSimilar) {
         // If the title and episode are similar, and the resolution is similar, return
