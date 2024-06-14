@@ -149,8 +149,6 @@ class Nyaa {
       return null;
     }
 
-    console.log("Found " + rss.items.length + " torrents");
-
     if (rss.items.length === 0) return null; // Guard against empty rss
 
     // Sort rss.items by nyaa:seeders
@@ -173,8 +171,6 @@ class Nyaa {
         searchMode,
         episodeRange
       );
-
-      console.log(isSimilar, finalQuery, "\n", title);
 
       if (isSimilar) {
         // If the title and episode are similar, and the resolution is similar, return
