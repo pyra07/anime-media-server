@@ -12,7 +12,7 @@ class Nyaa {
   private rssLink: URL;
   private parser: any;
   constructor() {
-    this.rssLink = new URL("https://nyaa.land/");
+    this.rssLink = new URL("https://nyaa.si/");
     this.parser = new Parser({
       customFields: {
         item: ["nyaa:seeders"],
