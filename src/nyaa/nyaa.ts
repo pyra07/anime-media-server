@@ -172,7 +172,7 @@ class Nyaa {
         episodeRange
       );
 
-      console.log(isSimilar, title);
+      console.log(isSimilar, finalQuery, "\n", title);
 
       if (isSimilar) {
         // If the title and episode are similar, and the resolution is similar, return
