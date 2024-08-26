@@ -94,6 +94,9 @@ class Scheduler {
         );
       else if (torrent.episode)
         downloadedEpisodes.push(parseInt(torrent.episode));
+
+      // Wait for 5 seconds
+      await new Promise((resolve) => setTimeout(resolve, 5000));
     }
 
     // Append to offlineDB, and remove the timeout
