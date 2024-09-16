@@ -33,7 +33,15 @@ class QbitTorrent {
     } catch (error) {
       console.error("Error during authentication:", error);
     }
+    await new Promise((resolve) => setTimeout(resolve, 1000)); // 1 second delay
   }
+
+  private async ensureAuthenticated() {
+    if (!this.sid) {
+        await this.authenticate();
+    }
+    return !!this.sid;
+}
 
   // Function to add a torrent using the obtained SID
   public async addTorrent(
@@ -44,8 +52,12 @@ class QbitTorrent {
     const authLink = new URL(qbit_url);
     authLink.pathname = "/api/v2/torrents/add";
 
-    await this.authenticate();
-    if (!this.sid) return false;
+    const authenticated = await this.ensureAuthenticated();
+    if (!authenticated) {
+        console.error("Failed to authenticate.");
+        return false;
+    }
+
 
     link = link.replace("nyaa.si", "nyaa.land");
 
@@ -65,13 +77,13 @@ class QbitTorrent {
         }
       );
 
-      if (response.data === "Ok.") {
-        return true;
-      } else {
-        console.log("No data", response);
-
-        return false;
-      }
+      if (response.status === 200 && response.data === "Ok.") {
+    return true;
+} else {
+    console.error("Unexpected response from qBittorrent:", response.data);
+    return false;
+}
+      
     } catch (error) {
       console.log(error);
 
