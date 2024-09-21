@@ -28,6 +28,7 @@ class Anilist {
         query,
         variables,
       },
+      timeout: 10000,
     });
   }
 
