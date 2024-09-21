@@ -76,7 +76,7 @@ class QbitTorrent {
         {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
-            Cookie: `SID=${this.sid}`,
+            Cookie: `SID=${this.sid?.SID}`,
           },
         }
       );
