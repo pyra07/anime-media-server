@@ -76,6 +76,11 @@ interface OfflineDB {
   [key: string]: OfflineAnime;
 }
 
+interface qbitSID {
+  SID?: string;
+  expires: number;
+}
+
 export {
   AnimeTorrent,
   nextAiringEpisode,
@@ -85,4 +90,5 @@ export {
   AniMedia,
   Command,
   OfflineDB,
+  qbitSID,
 };

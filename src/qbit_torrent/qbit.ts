@@ -1,9 +1,10 @@
+import { qbitSID } from "@utils/interfaces";
 import axios from "axios";
 import path from "path/posix";
 import { qbit_url, password, username, rootDir } from "profile.json";
 
 class QbitTorrent {
-  private sid?: string;
+  private sid?: qbitSID;
 
   // Function to authenticate and get the SID (Session ID)
   private async authenticate() {
@@ -26,7 +27,10 @@ class QbitTorrent {
       const cookie = response.headers["set-cookie"];
       if (cookie) {
         const sidMatch = /SID=([^;]+)/.exec(cookie[0]);
-        this.sid = sidMatch ? sidMatch[1] : undefined;
+        this.sid = {
+          SID: sidMatch ? sidMatch[1] : undefined,
+          expires: Date.now() + 24 * 3600 * 1000,
+        }
       } else {
         console.error("Authentication failed. No session cookie received.");
       }
@@ -37,8 +41,8 @@ class QbitTorrent {
   }
 
   private async ensureAuthenticated() {
-    if (!this.sid) {
-        await this.authenticate();
+    if (!this.sid || Date.now() > this.sid.expires) {
+      await this.authenticate();
     }
     return !!this.sid;
 }
