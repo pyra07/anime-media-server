@@ -29,7 +29,7 @@ class QbitTorrent {
         const sidMatch = /SID=([^;]+)/.exec(cookie[0]);
         this.sid = {
           SID: sidMatch ? sidMatch[1] : undefined,
-          expires: Date.now() + 24 * 3600 * 1000,
+          expires: Date.now() + 3000 * 1000,
         }
       } else {
         console.error("Authentication failed. No session cookie received.");
