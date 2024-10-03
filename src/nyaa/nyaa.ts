@@ -4,7 +4,14 @@
 import Parser from "rss-parser";
 import { AnimeTorrent, AniQuery, Resolution, SearchMode } from "@utils/index";
 import { getNumbers, verifyQuery } from "@nyaa/utils";
-import { resolution, proxyAddress, proxyPort, useProxy } from "profile.json";
+import {
+  resolution,
+  proxyAddress,
+  proxyPort,
+  proxyUsername,
+  proxyPassword,
+  useProxy,
+} from "profile.json";
 import anitomy from "anitomy-js";
 import axios from "axios";
 
@@ -109,6 +116,10 @@ class Nyaa {
               protocol: "http",
               host: proxyAddress,
               port: proxyPort,
+              auth: {
+                username: proxyUsername,
+                password: proxyPassword,
+              },
             },
           }
         : {}

@@ -1,6 +1,13 @@
 import axios from "axios";
 import { aniUserName } from "profile.json";
 import { AniQuery } from "@utils/index";
+import {
+  proxyAddress,
+  proxyPort,
+  proxyUsername,
+  proxyPassword,
+  useProxy,
+} from "profile.json";
 class Anilist {
   api: string;
   authLink: string;
@@ -28,6 +35,18 @@ class Anilist {
         query,
         variables,
       },
+      proxy: useProxy
+        ? {
+            protocol: "http",
+            host: proxyAddress,
+            port: proxyPort,
+            auth: {
+              username: proxyUsername,
+              password: proxyPassword,
+            },
+          }
+        : undefined,
+
       timeout: 10000,
     });
   }
