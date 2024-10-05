@@ -31,22 +31,12 @@ class Scheduler {
           `===============Running scheduler at ${new Date().toLocaleString()}===============`
         ); // log with current time
         await this.check();
+        if (clearDB) this.clearOfflineDB();
       },
       null,
       true,
       "Asia/Muscat"
     );
-    if (clearDB)
-      new cron.CronJob(
-        "0 0 */1 * *",
-        () => {
-          console.log(`Clearing offlineDB at ${new Date().toLocaleString()}`); // log with current time
-          this.clearOfflineDB();
-        },
-        null,
-        true,
-        "Asia/Muscat"
-      );
   }
 
   /**
@@ -129,7 +119,6 @@ class Scheduler {
       downloadedEpisodes: arrayUnion(...downloadedEpisodes),
     });
   }
-
   /**
    * Handles an anime series, decides which episodes to download,
    * or actions to take.
@@ -161,6 +150,7 @@ class Scheduler {
     const startingEpisode = fireDBAnime.media.startingEpisode
       ? fireDBAnime.media.startingEpisode
       : 0;
+      
     // Stupid, lazy implementation TODO remove
     this.offlineAnimeDB[anime.mediaId].starting_episode = startingEpisode;
 
@@ -240,16 +230,14 @@ class Scheduler {
         }
       }
     }
-  }
-  /**
-   * Gets the torrents from nyaa.si
+  }   
+  /** Gets the torrents from nyaa.si
    * @param  {AniQuery} anime - Anime to get torrents for
    * @param  {number} start - Starting episode
    * @param  {number} end - Ending episode
    * @param  {any[]} fsDownloadedEpisodes - Episodes downloaded by firestore
    * @returns Promise<boolean> - If successful
-   */
-  private async getTorrents(
+   */  private async getTorrents(
     anime: AniQuery,
     start: number,
     end: number,
@@ -280,45 +268,40 @@ class Scheduler {
    * This also uses the offlineAnimeDB to check if the user is up to date.
    */
   public async check() {
-    const animeDb: AniQuery[] = await Anilist.getAnimeUserList();
+    const animeList: AniQuery[] = await Anilist.getAnimeUserList();
 
-    if (animeDb.length === 0) return; // check if animeDb is empty
+    if (animeList.length === 0) return;
 
-    let promiseArr: Promise<void>[] = [];
+    const promises: Promise<void>[] = [];
 
-    animeDb.map((anime) => {
+    for (const anime of animeList) {
       if (!this.offlineAnimeDB.hasOwnProperty(anime.mediaId)) {
         this.offlineAnimeDB[anime.mediaId] = new OfflineAnime([]);
-        promiseArr.push(this.handleAnime(anime));
+        promises.push(this.handleAnime(anime));
       } else {
-        const tempOfflineAnime = this.offlineAnimeDB[anime.mediaId];
-        const timeout = tempOfflineAnime.timeouts;
+        const offlineAnime = this.offlineAnimeDB[anime.mediaId];
 
-        // If the timeout is not expired, then we can skip checking this
-        if (!!timeout) {
-          console.log(
-            `${tempOfflineAnime.timeouts} timeout(s) remain for ${anime.media.title.romaji}`
-          );
-          tempOfflineAnime.timeouts--;
-          this.offlineAnimeDB[anime.mediaId] = tempOfflineAnime;
-          return;
+        if (offlineAnime.timeouts > 0) {
+          this.offlineAnimeDB[anime.mediaId].timeouts = --offlineAnime.timeouts;
+          continue;
         }
-        const episodesOffline = tempOfflineAnime.episodes;
+
+        const episodesOffline = offlineAnime.episodes;
         const airingEpisodes = anime.media.nextAiringEpisode
           ? anime.media.nextAiringEpisode.episode - 1
           : anime.media.episodes;
-        // Don't handle if the anime hasn't aired yet
-        if (airingEpisodes === 0) return;
-        // Handle if it needs more downloading
+
+        if (airingEpisodes === 0) continue;
+
         if (
           episodesOffline[episodesOffline.length - 1] !==
-          airingEpisodes + tempOfflineAnime.starting_episode
+          airingEpisodes + offlineAnime.starting_episode
         )
-          promiseArr.push(this.handleAnime(anime));
+          promises.push(this.handleAnime(anime));
       }
-    });
+    }
 
-    await Promise.all(promiseArr);
+    await Promise.all(promises);
   }
 }
 

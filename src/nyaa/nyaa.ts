@@ -28,73 +28,53 @@ class Nyaa {
   }
 
   /**
-   * Determines which mode to use for the search
-   * @param  {AniQuery} anime
-   * @param  {number} startEpisode
-   * @param  {number} endEpisode
-   * @param  {number[]} fsDownloadedEpisodes
-   * @returns Promise
+   * Finds torrents for the given anime and episodes
+   * @param anime The anime object
+   * @param startEpisode The starting episode number
+   * @param endEpisode The ending episode number
+   * @param downloadedEpisodes The episodes that have already been downloaded
+   * @returns A list of torrents, or null if none are found
    */
   public async getTorrents(
     anime: AniQuery,
     startEpisode: number,
     endEpisode: number,
-    fsDownloadedEpisodes: number[]
-  ): Promise<AnimeTorrent[] | AnimeTorrent | null> {
-    /* Find batch of episodes to download if the
-       anime has already finished airing.
-       Assess if this is the best way to do this (might remove)
-       Reason : This accepts all anime formats */
-    if (
-      anime.media.status === "FINISHED" &&
+    downloadedEpisodes: number[]
+  ): Promise<AnimeTorrent[] | null> {
+    let searchMode = anime.media.status === "FINISHED" &&
       startEpisode === 0 &&
-      fsDownloadedEpisodes.length === 0
-    ) {
-      const animeRSS = await this.getTorrent(
+      downloadedEpisodes.length === 0
+      ? SearchMode.BATCH
+      : SearchMode.EPISODE;
+
+    if (searchMode === SearchMode.BATCH) {
+      const batchTorrent = await this.getTorrent(
         anime.media.title.romaji,
         resolution as Resolution,
-        SearchMode.BATCH,
+        searchMode,
         [startEpisode.toString(), endEpisode.toString()]
       );
-      if (animeRSS) return animeRSS;
-      // Search for a releasing episode
-    } else {
-      const animeTorrentList: AnimeTorrent[] = new Array();
 
-      // Generate a list of episodes to download
-      const episodeList = getNumbers(
-        startEpisode,
-        endEpisode,
-        fsDownloadedEpisodes
+      if (batchTorrent) return [batchTorrent];
+      searchMode = SearchMode.EPISODE;
+    }
+
+    const episodeList = getNumbers(startEpisode, endEpisode, downloadedEpisodes);
+    const torrents: AnimeTorrent[] = [];
+
+    for (const episode of episodeList) {
+      const episodeString = episode < 10 ? `0${episode}` : `${episode}`;
+      const torrent = await this.getTorrent(
+        anime.media.title.romaji,
+        resolution as Resolution,
+        searchMode,
+        [episodeString]
       );
 
-      // Search for episodes individually
-      for (let j = 0; j < episodeList.length; j++) {
-        const episode = episodeList[j];
-        const episodeString =
-          episodeList.length >= 100
-            ? episode >= 10 && episode <= 99
-              ? "0" + episode
-              : episode >= 100
-              ? episode.toString()
-              : "00" + episode
-            : episode < 10
-            ? "0" + episode
-            : episode.toString();
-
-        const animeRSS = await this.getTorrent(
-          anime.media.title.romaji,
-          resolution as Resolution,
-          SearchMode.EPISODE,
-          [episodeString]
-        );
-
-        if (animeRSS !== null) animeTorrentList.push(animeRSS); // Check if animeRSS is not null
-      }
-
-      return animeTorrentList.length ? animeTorrentList : null;
+      if (torrent) torrents.push(torrent);
     }
-    return null;
+
+    return torrents.length ? torrents : null;
   }
 
   private setParams(finalQuery: string) {
@@ -106,7 +86,6 @@ class Nyaa {
     this.rssLink.searchParams.set("o", "desc");
     this.rssLink.searchParams.set("s", "seeders");
   }
-
   private async getResponse() {
     return await axios.get(
       this.rssLink.href,
@@ -141,53 +120,47 @@ class Nyaa {
     searchMode: SearchMode,
     episodeRange: string[]
   ): Promise<AnimeTorrent | null> {
-    const finalQuery =
-      searchMode === SearchMode.EPISODE
-        ? `${searchQuery} ${episodeRange[0]}`
-        : searchQuery;
+    const finalQuery = searchMode === SearchMode.EPISODE ?
+      `${searchQuery} ${episodeRange[0]}` :
+      searchQuery;
 
     this.setParams(finalQuery);
 
-    // Used proxy due to internet restrictions.
     try {
       const response = await this.getResponse();
-      var rss = await this.parser.parseString(response.data);
+      const rss = await this.parser.parseString(response.data);
+      const items = rss.items;
+
+      if (items.length === 0) {
+        return null;
+      }
+
+      items.sort((a: { [x: string]: string; }, b: { [x: string]: string; }) => parseInt(b["nyaa:seeders"]) - parseInt(a["nyaa:seeders"]));
+
+      for (const item of items) {
+        const title = item.title;
+        const animeParsedData = anitomy.parseSync(title);
+
+        const isSimilar = verifyQuery(
+          searchQuery,
+          animeParsedData,
+          resolution,
+          searchMode,
+          episodeRange
+        );
+
+        if (isSimilar) {
+          // If the title and episode are similar, and the resolution is similar, return
+          item.episode = episodeRange.length === 1 ? episodeRange[0] : "01";
+          return item as AnimeTorrent;
+        }
+      }
     } catch (error) {
-      console.log(
-        "An error has occured while trying to retreive the RSS feed from Nyaa:\n",
+      console.error(
+        "An error has occured while trying to retreive the RSS feed from Nyaa:",
         error
       );
       return null;
-    }
-
-    if (rss.items.length === 0) return null; // Guard against empty rss
-
-    // Sort rss.items by nyaa:seeders
-    rss.items.sort((a: { [x: string]: string }, b: { [x: string]: string }) => {
-      return parseInt(b["nyaa:seeders"]) - parseInt(a["nyaa:seeders"]);
-    });
-
-    /* Iterate through rss.items
-    Check if the title contains mentions of both the query and resolution */
-    for (const item of rss.items) {
-      // if (item["nyaa:seeders"] === "0") continue;
-
-      let title: string = item.title;
-      const animeParsedData = anitomy.parseSync(title);
-
-      const isSimilar = verifyQuery(
-        searchQuery,
-        animeParsedData,
-        resolution,
-        searchMode,
-        episodeRange
-      );
-
-      if (isSimilar) {
-        // If the title and episode are similar, and the resolution is similar, return
-        item.episode = episodeRange.length === 1 ? episodeRange[0] : "01";
-        return item as AnimeTorrent;
-      }
     }
     return null;
   }
