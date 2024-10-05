@@ -3,14 +3,13 @@ import { Routes } from "discord-api-types/v9";
 import { clientId, guildId, token } from "profile.json";
 import fs from "fs";
 
-export async function deployCommands() {
+export async function deployCommands(commandsPath: string) {
   const commands: any[] = [];
   const commandFiles = fs
-    .readdirSync("src/discord_bot/commands")
-    .filter((file) => file.endsWith(".ts"));
+    .readdirSync(commandsPath)
 
   for (const file of commandFiles) {
-    const command = require(`./commands/${file}`);
+    const command = require(`${commandsPath}/${file}`);
     commands.push(command.data.toJSON());
   }
 

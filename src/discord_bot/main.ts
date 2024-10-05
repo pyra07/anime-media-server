@@ -7,11 +7,13 @@ import {
   IntentsBitField,
 } from "discord.js";
 import { deployCommands } from "@discord/deploy-commands";
+import path from "path";
 
 class DiscordBot {
   private client: Client<boolean>;
   private commands: Collection<unknown, unknown>;
   private status: Array<ActivityOptions>;
+  private commandsPath: string;
   constructor() {
     this.client = new Client({ intents: [IntentsBitField.Flags.Guilds] });
     this.commands = new Collection();
@@ -25,18 +27,18 @@ class DiscordBot {
         type: ActivityType.Listening,
       },
     ];
+    this.commandsPath = path.resolve(__dirname, "commands");
   }
 
   private async setCommands() {
     const commandFiles = fs
-      .readdirSync("src/discord_bot/commands")
-      .filter((file) => file.endsWith(".ts"));
+      .readdirSync(this.commandsPath);
 
     for (const file of commandFiles) {
-      const command = require(`./commands/${file}`);
+      const command = require(`${this.commandsPath}/${file}`);
       this.commands.set(command.data.name, command);
     }
-    await deployCommands();
+    await deployCommands(this.commandsPath);
   }
 
   public async start(token: string) {
