@@ -24,14 +24,32 @@ class Scheduler {
    * @returns {Promise<void>}
    */
   public async run(cronTime: string, clearDB: boolean): Promise<void> {
+    let isRunning = false; // Lock to prevent overlapping jobs
+
     const job = new cron.CronJob(
       cronTime,
       async () => {
-        console.log(
-          `===============Running scheduler at ${new Date().toLocaleString()}===============`
-        ); // log with current time
-        await this.check();
-        if (clearDB) this.clearOfflineDB();
+        if (isRunning) {
+          console.log("Previous job still running. Skipping this run.");
+          return; // Exit if the previous job is still running
+        }
+
+        try {
+          isRunning = true; // Lock the job execution
+          console.log(
+            `===============Running scheduler at ${new Date().toLocaleString()}===============`
+          ); // Log with current time
+
+          await this.check(); // Execute the job
+
+          if (clearDB) {
+            this.clearOfflineDB(); // Clear DB if needed
+          }
+        } catch (error) {
+          console.error("Error during cron job execution:", error); // Handle any errors
+        } finally {
+          isRunning = false; // Release the lock when done
+        }
       },
       null,
       true,
@@ -150,7 +168,7 @@ class Scheduler {
     const startingEpisode = fireDBAnime.media.startingEpisode
       ? fireDBAnime.media.startingEpisode
       : 0;
-      
+
     // Stupid, lazy implementation TODO remove
     this.offlineAnimeDB[anime.mediaId].starting_episode = startingEpisode;
 
@@ -230,14 +248,14 @@ class Scheduler {
         }
       }
     }
-  }   
+  }
   /** Gets the torrents from nyaa.si
    * @param  {AniQuery} anime - Anime to get torrents for
    * @param  {number} start - Starting episode
    * @param  {number} end - Ending episode
    * @param  {any[]} fsDownloadedEpisodes - Episodes downloaded by firestore
    * @returns Promise<boolean> - If successful
-   */  private async getTorrents(
+   */ private async getTorrents(
     anime: AniQuery,
     start: number,
     end: number,
