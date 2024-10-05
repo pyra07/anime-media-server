@@ -41,7 +41,7 @@ class ui {
     await DB.logIn();
     // Run every x minutes, from 12:00pm to 04:00am
     // Then run every hour, from 05:00am to 11:00am
-    await schedule.run(`*/10 * 12-23,00-04 * * *`); // Peak hours
+    await schedule.run(`*${interval} 12-23,00-04 * * *`); // Peak hours
     await schedule.run(`*/15 05-11 * * *`); // Off peak hours
     schedule.runClearOfflineDB(`0 0 */1 * *`); // Clear the offlineDB every day
   }  private async runSchedulerDiscord() {
