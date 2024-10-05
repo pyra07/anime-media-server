@@ -62,13 +62,17 @@ class Scheduler {
     new cron.CronJob(
       cronTime,
       () => {
-        if (mediaId) this.offlineAnimeDB[mediaId] = new OfflineAnime([]);
-        else this.offlineAnimeDB = {};
+        this.clearOfflineDB();
       },
       null,
       true,
       "Asia/Muscat"
     );
+  }
+
+  public clearOfflineDB(mediaId?: string) {
+    if (mediaId) this.offlineAnimeDB[mediaId] = new OfflineAnime([]);
+    else this.offlineAnimeDB = {};
   }
 
   /**
