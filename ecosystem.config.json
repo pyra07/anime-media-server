@@ -3,7 +3,8 @@
     {
       "name": "Animu",
       "script": "build/main.js",
-      "watch": true,
+      "watch": ["build"],
+      "ignore_watch": ["node_modules", ".git"],
       "args": "3"
     }
   ]
