@@ -23,10 +23,10 @@ class Scheduler {
    * @param  {boolean} clearDB - If true, clears the offlineDB
    * @returns {Promise<void>}
    */
-  public async run(cronTime: string, clearDB: boolean): Promise<void> {
+  public async run(cronTime: string): Promise<void> {
     let isRunning = false; // Lock to prevent overlapping jobs
 
-    const job = new cron.CronJob(
+    new cron.CronJob(
       cronTime,
       async () => {
         if (isRunning) {
@@ -41,10 +41,6 @@ class Scheduler {
           ); // Log with current time
 
           await this.check(); // Execute the job
-
-          if (clearDB) {
-            this.clearOfflineDB(); // Clear DB if needed
-          }
         } catch (error) {
           console.error("Error during cron job execution:", error); // Handle any errors
         } finally {
@@ -62,9 +58,17 @@ class Scheduler {
    * @param  {string} mediaId? - If specified, only clears that anime
    * @returns void
    */
-  public clearOfflineDB(mediaId?: string): void {
-    if (mediaId) this.offlineAnimeDB[mediaId] = new OfflineAnime([]);
-    else this.offlineAnimeDB = {};
+  public runClearOfflineDB(cronTime: string, mediaId?: string): void {
+    new cron.CronJob(
+      cronTime,
+      () => {
+        if (mediaId) this.offlineAnimeDB[mediaId] = new OfflineAnime([]);
+        else this.offlineAnimeDB = {};
+      },
+      null,
+      true,
+      "Asia/Muscat"
+    );
   }
 
   /**
@@ -299,8 +303,11 @@ class Scheduler {
       } else {
         const offlineAnime = this.offlineAnimeDB[anime.mediaId];
 
-        if (offlineAnime.timeouts > 0) {
+        if (!!offlineAnime.timeouts) {
           this.offlineAnimeDB[anime.mediaId].timeouts = --offlineAnime.timeouts;
+          console.log(
+            `Timeouts left for ${anime.media.title.romaji} is ${offlineAnime.timeouts}`
+          );
           continue;
         }
 
@@ -309,13 +316,16 @@ class Scheduler {
           ? anime.media.nextAiringEpisode.episode - 1
           : anime.media.episodes;
 
-        if (airingEpisodes === 0) continue;
+        if (airingEpisodes === 0) {
+          continue;
+        }
 
         if (
           episodesOffline[episodesOffline.length - 1] !==
           airingEpisodes + offlineAnime.starting_episode
-        )
+        ) {
           promises.push(this.handleAnime(anime));
+        }
       }
     }
 
