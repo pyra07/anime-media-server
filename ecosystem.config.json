@@ -1,0 +1,10 @@
+{
+  "apps": [
+    {
+      "name": "Animu",
+      "script": "build/main.js",
+      "watch": true,
+      "args": "3"
+    }
+  ]
+}
