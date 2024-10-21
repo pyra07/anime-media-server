@@ -30,7 +30,7 @@ class QbitTorrent {
         this.sid = {
           SID: sidMatch ? sidMatch[1] : undefined,
           expires: Date.now() + 3000 * 1000,
-        }
+        };
       } else {
         console.error("Authentication failed. No session cookie received.");
       }
@@ -45,7 +45,7 @@ class QbitTorrent {
       await this.authenticate();
     }
     return !!this.sid;
-}
+  }
 
   // Function to add a torrent using the obtained SID
   public async addTorrent(
@@ -58,12 +58,9 @@ class QbitTorrent {
 
     const authenticated = await this.ensureAuthenticated();
     if (!authenticated) {
-        console.error("Failed to authenticate.");
-        return false;
+      console.error("Failed to authenticate.");
+      return false;
     }
-
-
-    link = link.replace("nyaa.si", "nyaa.land");
 
     try {
       const response = await axios.post(
@@ -82,12 +79,11 @@ class QbitTorrent {
       );
 
       if (response.status === 200 && response.data === "Ok.") {
-    return true;
-} else {
-    console.error("Unexpected response from qBittorrent:", response.data);
-    return false;
-}
-      
+        return true;
+      } else {
+        console.error("Unexpected response from qBittorrent:", response.data);
+        return false;
+      }
     } catch (error) {
       console.log(error);
 
