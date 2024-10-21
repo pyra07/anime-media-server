@@ -4,16 +4,10 @@
 import Parser from "rss-parser";
 import { AnimeTorrent, AniQuery, Resolution, SearchMode } from "@utils/index";
 import { getNumbers, verifyQuery } from "@nyaa/utils";
-import {
-  resolution,
-  proxyAddress,
-  proxyPort,
-  proxyUsername,
-  proxyPassword,
-  useProxy,
-} from "profile.json";
+import { resolution, useProxy } from "profile.json";
 import anitomy from "anitomy-js";
 import axios from "axios";
+import { proxy } from "@utils/models";
 
 class Nyaa {
   private rssLink: URL;
@@ -41,11 +35,12 @@ class Nyaa {
     endEpisode: number,
     downloadedEpisodes: number[]
   ): Promise<AnimeTorrent[] | null> {
-    let searchMode = anime.media.status === "FINISHED" &&
+    let searchMode =
+      anime.media.status === "FINISHED" &&
       startEpisode === 0 &&
       downloadedEpisodes.length === 0
-      ? SearchMode.BATCH
-      : SearchMode.EPISODE;
+        ? SearchMode.BATCH
+        : SearchMode.EPISODE;
 
     if (searchMode === SearchMode.BATCH) {
       const batchTorrent = await this.getTorrent(
@@ -59,7 +54,11 @@ class Nyaa {
       searchMode = SearchMode.EPISODE;
     }
 
-    const episodeList = getNumbers(startEpisode, endEpisode, downloadedEpisodes);
+    const episodeList = getNumbers(
+      startEpisode,
+      endEpisode,
+      downloadedEpisodes
+    );
     const torrents: AnimeTorrent[] = [];
 
     for (const episode of episodeList) {
@@ -91,15 +90,7 @@ class Nyaa {
       this.rssLink.href,
       useProxy
         ? {
-            proxy: {
-              protocol: "http",
-              host: proxyAddress,
-              port: proxyPort,
-              auth: {
-                username: proxyUsername,
-                password: proxyPassword,
-              },
-            },
+            proxy: proxy,
           }
         : {}
     );
@@ -120,9 +111,10 @@ class Nyaa {
     searchMode: SearchMode,
     episodeRange: string[]
   ): Promise<AnimeTorrent | null> {
-    const finalQuery = searchMode === SearchMode.EPISODE ?
-      `${searchQuery} ${episodeRange[0]}` :
-      searchQuery;
+    const finalQuery =
+      searchMode === SearchMode.EPISODE
+        ? `${searchQuery} ${episodeRange[0]}`
+        : searchQuery;
 
     this.setParams(finalQuery);
 
@@ -135,7 +127,10 @@ class Nyaa {
         return null;
       }
 
-      items.sort((a: { [x: string]: string; }, b: { [x: string]: string; }) => parseInt(b["nyaa:seeders"]) - parseInt(a["nyaa:seeders"]));
+      items.sort(
+        (a: { [x: string]: string }, b: { [x: string]: string }) =>
+          parseInt(b["nyaa:seeders"]) - parseInt(a["nyaa:seeders"])
+      );
 
       for (const item of items) {
         const title = item.title;

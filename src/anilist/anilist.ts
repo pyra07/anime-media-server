@@ -8,6 +8,7 @@ import {
   proxyPassword,
   useProxy,
 } from "profile.json";
+import { proxy } from "@utils/models";
 class Anilist {
   api: string;
   authLink: string;
@@ -35,17 +36,7 @@ class Anilist {
         query,
         variables,
       },
-      proxy: useProxy
-        ? {
-            protocol: "http",
-            host: proxyAddress,
-            port: proxyPort,
-            auth: {
-              username: proxyUsername,
-              password: proxyPassword,
-            },
-          }
-        : undefined,
+      proxy: useProxy ? proxy : undefined,
 
       timeout: 10000,
     });
