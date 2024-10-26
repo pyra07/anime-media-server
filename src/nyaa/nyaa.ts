@@ -34,7 +34,7 @@ class Nyaa {
     startEpisode: number,
     endEpisode: number,
     downloadedEpisodes: number[]
-  ): Promise<AnimeTorrent[] | null> {
+  ): Promise<AnimeTorrent[] | AnimeTorrent | null> {
     let searchMode =
       anime.media.status === "FINISHED" &&
       startEpisode === 0 &&
@@ -50,7 +50,7 @@ class Nyaa {
         [startEpisode.toString(), endEpisode.toString()]
       );
 
-      if (batchTorrent) return [batchTorrent];
+      if (batchTorrent) return batchTorrent;
       searchMode = SearchMode.EPISODE;
     }
 
