@@ -113,7 +113,7 @@ class Nyaa {
     searchMode: SearchMode,
     episodeRange: string[]
   ): Promise<AnimeTorrent | null> {
-    let finalQuery =
+    const finalQuery =
       searchMode === SearchMode.EPISODE
         ? `${searchQuery} ${episodeRange[0]}`
         : searchQuery;
