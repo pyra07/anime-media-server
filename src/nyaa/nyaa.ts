@@ -10,10 +10,8 @@ import axios from "axios";
 import { proxy } from "@utils/models";
 
 class Nyaa {
-  private rssLink: URL;
   private parser: any;
   constructor() {
-    this.rssLink = new URL("https://nyaa.si/");
     this.parser = new Parser({
       customFields: {
         item: ["nyaa:seeders"],
@@ -76,18 +74,22 @@ class Nyaa {
     return torrents.length ? torrents : null;
   }
 
-  private setParams(finalQuery: string) {
+  private setParams(query: string): URL {
+    const rssLink = new URL("https://nyaa.si/");
+
     // Set some filters, and then the search query
-    this.rssLink.searchParams.set("page", "rss");
-    this.rssLink.searchParams.set("q", finalQuery);
-    this.rssLink.searchParams.set("c", "1_2");
-    this.rssLink.searchParams.set("f", "0");
-    this.rssLink.searchParams.set("o", "desc");
-    this.rssLink.searchParams.set("s", "seeders");
+    rssLink.searchParams.set("page", "rss");
+    rssLink.searchParams.set("q", query);
+    rssLink.searchParams.set("c", "1_2");
+    rssLink.searchParams.set("f", "0");
+    rssLink.searchParams.set("o", "desc");
+    rssLink.searchParams.set("s", "seeders");
+
+    return rssLink;
   }
-  private async getResponse() {
+  private async getResponse(rssLink: URL) {
     return await axios.get(
-      this.rssLink.href,
+      rssLink.href,
       useProxy
         ? {
             proxy: proxy,
@@ -111,17 +113,25 @@ class Nyaa {
     searchMode: SearchMode,
     episodeRange: string[]
   ): Promise<AnimeTorrent | null> {
-    const finalQuery =
+    let finalQuery =
       searchMode === SearchMode.EPISODE
-        ? `${searchQuery} ${episodeRange[0]}|${searchQuery} "E${episodeRange[0]}"`
+        ? `${searchQuery} ${episodeRange[0]}`
         : searchQuery;
 
-    this.setParams(finalQuery);
+    const rssLink = this.setParams(finalQuery);
 
     try {
-      const response = await this.getResponse();
+      const response = await this.getResponse(rssLink);
       const rss = await this.parser.parseString(response.data);
       const items = rss.items;
+
+      if (searchMode === SearchMode.EPISODE) {
+        const finalQueryAlt = `${searchQuery} "E${episodeRange[0]}"`
+        const rssLinkAlt = this.setParams(finalQueryAlt);
+        const responseAlt = await this.getResponse(rssLinkAlt);
+        const rssAlt = await this.parser.parseString(responseAlt.data);
+        items.push(...rssAlt.items);
+      }
 
       if (items.length === 0) {
         return null;
