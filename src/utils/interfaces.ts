@@ -39,7 +39,7 @@ interface AniCoverImage {
   extraLarge: string;
   large: string;
   medium: string;
-  color: string;
+  color?: string;
 }
 
 // The parent of AniMedia. This is what is retrieved from AniList. It contains user progress, and info about the anime itself.
@@ -52,6 +52,7 @@ interface AniQuery {
 // Main interface for the application. It is used to store the entire infromation about the anime.
 interface AniMedia {
   episodes: number;
+  genres: string[];
   format: AnimeFormat;
   status: animeStatus;
   endDate: {
