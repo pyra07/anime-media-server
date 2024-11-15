@@ -1,13 +1,7 @@
 import axios from "axios";
 import { aniUserName } from "profile.json";
 import { AniQuery } from "@utils/index";
-import {
-  proxyAddress,
-  proxyPort,
-  proxyUsername,
-  proxyPassword,
-  useProxy,
-} from "profile.json";
+import { bearerTokenAnilist, useProxy } from "profile.json";
 import { proxy } from "@utils/models";
 class Anilist {
   api: string;
@@ -28,8 +22,9 @@ class Anilist {
   private async getData(query: string, variables?: Object): Promise<any> {
     return await axios(this.api, {
       headers: {
-        Application: "application/json",
-        "content-type": "application/json",
+        Authorization: `Bearer ${bearerTokenAnilist}`, // Add the bearer token here
+        Accept: "application/json",
+        "Content-Type": "application/json",
       },
       method: "post",
       data: {
@@ -37,7 +32,6 @@ class Anilist {
         variables,
       },
       proxy: useProxy ? proxy : undefined,
-
       timeout: 10000,
     });
   }
@@ -74,6 +68,7 @@ class Anilist {
                 medium
                 color
               }
+              genres
               format
               episodes
               status
