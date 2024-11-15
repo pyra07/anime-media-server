@@ -167,7 +167,7 @@ class Nyaa {
         const isSimilar = verifyQuery(
           searchQuery,
           animeParsedData,
-          resolution,
+          useAltUrl ? Resolution.NONE : resolution,
           searchMode,
           episodeRange
         );
