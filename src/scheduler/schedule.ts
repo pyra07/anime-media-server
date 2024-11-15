@@ -119,6 +119,10 @@ class Scheduler {
     this.offlineAnimeDB[anime.mediaId].episodes = downloadedEpisodes;
     this.offlineAnimeDB[anime.mediaId].resetTimeout();
 
+    const color = anime.media.coverImage.color
+      ? Number(anime.media.coverImage.color.replace("#", "0x"))
+      : 0x0997e3;
+
     // Inform the user via discord
     this.hook.send(
       new MessageBuilder()
@@ -128,7 +132,7 @@ class Scheduler {
             downloadedEpisodes
           )}** is downloading!`
         )
-        .setColor(0x0997e3)
+        .setColor(color)
         .addField("Title ID", anime.mediaId.toString(), true)
         .addField(
           "Seeders",
@@ -152,7 +156,7 @@ class Scheduler {
    * @returns Promise
    */
   private async handleAnime(anime: AniQuery): Promise<void> {
-    console.log(`Handling ${anime.media.title.romaji}`);
+    console.log(`Handling ${anime.media.title.romaji} ID ${anime.mediaId}`);
     let fireDBAnime: DocumentData;
 
     try {
