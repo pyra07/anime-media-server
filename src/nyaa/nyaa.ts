@@ -4,7 +4,13 @@
 import Parser from "rss-parser";
 import { AnimeTorrent, AniQuery, Resolution, SearchMode } from "@utils/index";
 import { getNumbers, verifyQuery } from "@nyaa/utils";
-import { resolution, useProxy } from "profile.json";
+import {
+  resolution,
+  useProxy,
+  nyaaUrl,
+  altNyaaUrl,
+  triggerGenre,
+} from "profile.json";
 import anitomy from "anitomy-js";
 import axios from "axios";
 import { proxy } from "@utils/models";
@@ -33,6 +39,12 @@ class Nyaa {
     endEpisode: number,
     downloadedEpisodes: number[]
   ): Promise<AnimeTorrent[] | AnimeTorrent | null> {
+    let useAltUrl = false;
+
+    if (anime.media.genres) {
+      if (anime.media.genres.includes(triggerGenre)) useAltUrl = true;
+    }
+
     let searchMode =
       anime.media.status === "FINISHED" &&
       startEpisode === 0 &&
@@ -45,7 +57,8 @@ class Nyaa {
         anime.media.title.romaji,
         resolution as Resolution,
         searchMode,
-        [startEpisode.toString(), endEpisode.toString()]
+        [startEpisode.toString(), endEpisode.toString()],
+        useAltUrl
       );
 
       if (batchTorrent) return batchTorrent;
@@ -65,7 +78,8 @@ class Nyaa {
         anime.media.title.romaji,
         resolution as Resolution,
         searchMode,
-        [episodeString]
+        [episodeString],
+        useAltUrl
       );
 
       if (torrent) torrents.push(torrent);
@@ -74,13 +88,13 @@ class Nyaa {
     return torrents.length ? torrents : null;
   }
 
-  private setParams(query: string): URL {
-    const rssLink = new URL("https://nyaa.si/");
+  private setParams(url: string, query: string): URL {
+    const rssLink = new URL(url);
 
     // Set some filters, and then the search query
     rssLink.searchParams.set("page", "rss");
     rssLink.searchParams.set("q", query);
-    rssLink.searchParams.set("c", "1_2");
+    // rssLink.searchParams.set("c", "1_2");
     rssLink.searchParams.set("f", "0");
     rssLink.searchParams.set("o", "desc");
     rssLink.searchParams.set("s", "seeders");
@@ -111,14 +125,18 @@ class Nyaa {
     searchQuery: string,
     resolution: Resolution,
     searchMode: SearchMode,
-    episodeRange: string[]
+    episodeRange: string[],
+    useAltUrl: boolean
   ): Promise<AnimeTorrent | null> {
     const finalQuery =
       searchMode === SearchMode.EPISODE
         ? `${searchQuery} ${episodeRange[0]}`
         : searchQuery;
 
-    const rssLink = this.setParams(finalQuery);
+    // If useAltUrl is true, pass in the alt nyaa url to setParams function
+    const url: string = useAltUrl ? altNyaaUrl : nyaaUrl;
+
+    const rssLink = this.setParams(url, finalQuery);
 
     try {
       const response = await this.getResponse(rssLink);
@@ -126,8 +144,8 @@ class Nyaa {
       const items = rss.items;
 
       if (searchMode === SearchMode.EPISODE) {
-        const finalQueryAlt = `${searchQuery} "E${episodeRange[0]}"`
-        const rssLinkAlt = this.setParams(finalQueryAlt);
+        const finalQueryAlt = `${searchQuery} "E${episodeRange[0]}"`;
+        const rssLinkAlt = this.setParams(url, finalQueryAlt);
         const responseAlt = await this.getResponse(rssLinkAlt);
         const rssAlt = await this.parser.parseString(responseAlt.data);
         items.push(...rssAlt.items);
@@ -152,6 +170,11 @@ class Nyaa {
           resolution,
           searchMode,
           episodeRange
+        );
+        
+        // Log the similarity of the query to the item
+        console.log(
+          `Similarity of ${searchQuery} to ${title}: ${isSimilar ? "Yes" : "No"}`
         );
 
         if (isSimilar) {

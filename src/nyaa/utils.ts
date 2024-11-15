@@ -29,10 +29,7 @@ function verifyEpisodeRange(
   // If the file name contains a range of episodes, check if the episode is in the range
   // If so we can assume the torrent is a batch as well.
   const e = episodeRange[0].split(/[-~]/);
-  if (
-    parseInt(e[0]) === 1 &&
-    parseInt(e[1]) === parseInt(paramEpisodeRange[1])
-  )
+  if (parseInt(e[0]) === 1 && parseInt(e[1]) === parseInt(paramEpisodeRange[1]))
     return true; // If the range is similar, return true
   else return false; // If the range is not similar, return false
 }
@@ -70,7 +67,9 @@ function verifyQuery(
 ): boolean {
   const fileName = animeParsedData.file_name;
   const parsedTitle = animeParsedData.anime_title;
-  const parsedResolution = animeParsedData.video_resolution;
+
+  const parsedResolution =
+    resolution === Resolution.NONE ? Resolution.NONE : animeParsedData.video_resolution;
 
   if (!parsedTitle || !parsedResolution) return false; // Guard against empty parsed data
 
@@ -88,7 +87,9 @@ function verifyQuery(
     ...vBarSplitTitle
   );
 
-  const resolutionMatch = parsedResolution.includes(resolution);
+  const resolutionMatch =
+    parsedResolution === Resolution.NONE ||
+    parsedResolution.includes(resolution);
 
   // If title is not similar, and resolution is not similar, return false
   if (titleMatch.bestMatch.rating < 0.8) return false;
@@ -115,7 +116,6 @@ function verifyQuery(
 
       const episodeRange = fileName.match(/\d+( *)[-~]( *)\d+/); // Check if the file name contains a range of episodes
       if (episodeRange)
-        
         return verifyEpisodeRange(paramEpisodeRange, episodeRange); // If so, check if the episode is in the range
 
       return !!(batchMatch || !isEpisode); // Return if all conditions are met.
