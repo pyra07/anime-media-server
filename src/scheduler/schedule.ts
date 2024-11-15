@@ -3,7 +3,8 @@ import Anilist from "@ani/anilist";
 import DB from "@db/db";
 import Nyaa from "@nyaa/nyaa";
 import qbit from "@qbit/qbit";
-import { joinArr } from "@scheduler/utils";
+import pLimit from "p-limit";
+import { handleWithDelay, joinArr } from "@scheduler/utils";
 import { AnimeTorrent, AniQuery, OfflineAnime, OfflineDB } from "@utils/index";
 import { MessageBuilder, Webhook } from "discord-webhook-node";
 import { webhook } from "profile.json";
@@ -12,9 +13,12 @@ import { arrayUnion, DocumentData } from "firebase/firestore";
 class Scheduler {
   private hook: Webhook; // Store discord webhook info
   private offlineAnimeDB: OfflineDB;
+  private limit;
+
   constructor() {
     this.hook = new Webhook(webhook);
     this.offlineAnimeDB = {};
+    this.limit = pLimit(2);
   }
 
   /**
@@ -302,12 +306,13 @@ class Scheduler {
 
     if (animeList.length === 0) return;
 
-    const promises: Promise<void>[] = [];
+    const promises: AniQuery[] = [];
 
     for (const anime of animeList) {
+      
       if (!this.offlineAnimeDB.hasOwnProperty(anime.mediaId)) {
         this.offlineAnimeDB[anime.mediaId] = new OfflineAnime([]);
-        promises.push(this.handleAnime(anime));
+        promises.push(anime);
       } else {
         const offlineAnime = this.offlineAnimeDB[anime.mediaId];
 
@@ -332,12 +337,16 @@ class Scheduler {
           episodesOffline[episodesOffline.length - 1] !==
           airingEpisodes + offlineAnime.starting_episode
         ) {
-          promises.push(this.handleAnime(anime));
+          promises.push(anime);
         }
       }
     }
 
-    await Promise.all(promises);
+    const tasks = promises.map((anime) =>
+      this.limit(() => handleWithDelay.call(this, anime))
+    );
+
+    await Promise.all(tasks);
   }
 }
 

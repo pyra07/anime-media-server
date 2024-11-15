@@ -161,6 +161,8 @@ class Nyaa {
       );
 
       for (const item of items) {
+        if (parseInt(item["nyaa:seeders"]) === 0) continue;
+
         const title = item.title;
         const animeParsedData = anitomy.parseSync(title);
 
@@ -170,11 +172,6 @@ class Nyaa {
           useAltUrl ? Resolution.NONE : resolution,
           searchMode,
           episodeRange
-        );
-        
-        // Log the similarity of the query to the item
-        console.log(
-          `Similarity of ${searchQuery} to ${title}: ${isSimilar ? "Yes" : "No"}`
         );
 
         if (isSimilar) {

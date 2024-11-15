@@ -1,3 +1,4 @@
+
 /**
  * Displays the the range of an array
  * @param  {any[]} array
@@ -36,4 +37,14 @@ function getAnimeSeason(animeEntry: string): number {
   return 1;
 }
 
-export { joinArr, getAnimeSeason };
+/**
+ * Handles an anime with a delay of 500ms to prevent hitting the rate limit
+ * @param  {any} anime - Anime object to handle
+ * @returns Promise
+ */
+async function handleWithDelay(this: any, anime: any): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  return this.handleAnime(anime);
+}
+
+export { joinArr, getAnimeSeason, handleWithDelay };
