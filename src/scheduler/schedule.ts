@@ -18,7 +18,7 @@ class Scheduler {
   constructor() {
     this.hook = new Webhook(webhook);
     this.offlineAnimeDB = {};
-    this.limit = pLimit(2);
+    this.limit = pLimit(4);
   }
 
   /**
