@@ -69,7 +69,7 @@ class QbitTorrent {
           path.join(rootDir, title)
         )}&rename=${encodeURIComponent(
           episodeStr ? `${title} - ${episodeStr}` : title
-        )}`,
+        )}&sequentialDownload=true&category=${encodeURIComponent("animu")}`,
         {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
