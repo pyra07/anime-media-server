@@ -94,7 +94,8 @@ class Nyaa {
     // Set some filters, and then the search query
     rssLink.searchParams.set("page", "rss");
     rssLink.searchParams.set("q", query);
-    // rssLink.searchParams.set("c", "1_2");
+    if (url === nyaaUrl) rssLink.searchParams.set("c", "1_2");
+    else rssLink.searchParams.set("c", "1_1");
     rssLink.searchParams.set("f", "0");
     rssLink.searchParams.set("o", "desc");
     rssLink.searchParams.set("s", "seeders");
