@@ -65,11 +65,15 @@ function verifyQuery(
   searchMode: SearchMode,
   paramEpisodeRange: string[]
 ): boolean {
+  if (animeParsedData.subtitles?.includes("Dub")) return false;
+
   const fileName = animeParsedData.file_name;
   const parsedTitle = animeParsedData.anime_title;
 
   const parsedResolution =
-    resolution === Resolution.NONE ? Resolution.NONE : animeParsedData.video_resolution;
+    resolution === Resolution.NONE
+      ? Resolution.NONE
+      : animeParsedData.video_resolution;
 
   if (!parsedTitle || !parsedResolution) return false; // Guard against empty parsed data
 
