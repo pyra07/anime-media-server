@@ -27,6 +27,15 @@ interface nextAiringEpisode {
   timeUntilAiring: number;
 }
 
+interface airingSchedule {
+  nodes: [
+    {
+      airingAt: number;
+      episode: number;
+    }
+  ]
+}
+
 // Helper interface for Media. It is used to define the title of the anime. This can be in 3 different forms.
 interface AniTitle {
   romaji: string;
@@ -61,6 +70,7 @@ interface AniMedia {
     day: number | null;
   };
   nextAiringEpisode: nextAiringEpisode | null;
+  airingSchedule: airingSchedule;
   title: AniTitle;
   synonyms: string[];
   coverImage: AniCoverImage;
@@ -91,5 +101,6 @@ export {
   AniMedia,
   Command,
   OfflineDB,
+  airingSchedule,
   qbitSID,
 };

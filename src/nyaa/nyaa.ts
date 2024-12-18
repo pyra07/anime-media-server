@@ -14,6 +14,7 @@ import {
 import anitomy from "anitomy-js";
 import axios from "axios";
 import { proxy } from "@utils/models";
+import anilist from "@ani/anilist";
 
 class Nyaa {
   private parser: any;
@@ -23,6 +24,21 @@ class Nyaa {
         item: ["nyaa:seeders"],
       },
     });
+  }
+
+  public async getEpisodeAirDates(mediaId: number, episodeList: number[]) {
+    const nodes = [];
+    const startPage = Math.ceil(episodeList[0] / 25);
+    const endPage = Math.ceil(episodeList[episodeList.length - 1] / 25);
+
+    for (let i = startPage; i <= endPage; i++) {
+      const data = await anilist.getAiringSchedule(i, mediaId);
+      // Sleep to avoid rate limiting
+      await new Promise((r) => setTimeout(r, 1400));
+      nodes.push(data);
+    }
+
+    return nodes;
   }
 
   /**

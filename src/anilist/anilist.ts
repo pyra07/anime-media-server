@@ -1,6 +1,6 @@
 import axios from "axios";
 import { aniUserName } from "profile.json";
-import { AniQuery } from "@utils/index";
+import { airingSchedule, AniQuery } from "@utils/index";
 import { bearerTokenAnilist, useProxy } from "profile.json";
 import { proxy } from "@utils/models";
 class Anilist {
@@ -47,14 +47,46 @@ class Anilist {
     return response.data;
   }
 
+  public async getAiringSchedule(page: number, id: number) {
+    const query = `
+        query($id: Int, $page: Int) {
+          Media(id: $id) {
+            title {
+              romaji
+              english
+              }
+            airingSchedule(page: $page) {
+              nodes {
+                airingAt
+                episode
+              }
+            }
+            }
+        }
+`;
+    const variables = {
+      id: 141182,
+      page: 1,
+    };
+
+    try {
+      const response = await this.getData(query, variables);
+      const data = response.data.data.Media.airingSchedule.nodes;
+      console.log(data);
+      return data
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  }
+
   /**
    * Returns what the user current WATCHING list is.
    * @returns Promise
    */
   public async getAnimeUserList(): Promise<AniQuery[]> {
     // I love loooong lines
-    var query = `
-    query ($userName :String) {
+    var query = `query ($userName :String) {
       MediaListCollection(userName: $userName, type: ANIME, status_in: CURRENT) {
         lists {
           name
@@ -92,8 +124,7 @@ class Anilist {
           }
         }
       }
-    }
-    `;
+    }`;
 
     var variables = {
       userName: aniUserName,
