@@ -4,10 +4,11 @@ import DB from "@db/db";
 import Nyaa from "@nyaa/nyaa";
 import qbit from "@qbit/qbit";
 import pLimit from "p-limit";
+import "colors";
 import { handleWithDelay, joinArr } from "@scheduler/utils";
-import { AnimeTorrent, AniQuery, OfflineAnime, OfflineDB } from "@utils/index";
+import { NyaaTorrent, AniQuery, OfflineAnime, OfflineDB } from "@utils/index";
 import { MessageBuilder, Webhook } from "discord-webhook-node";
-import { webhook } from "profile.json";
+import { webhook, interval } from "profile.json";
 import { arrayUnion, DocumentData } from "firebase/firestore";
 
 class Scheduler {
@@ -24,7 +25,6 @@ class Scheduler {
   /**
    * Runs the scheduler periodically every x minutes
    * @param  {string} cronTime - Cron time
-   * @param  {boolean} clearDB - If true, clears the offlineDB
    * @returns {Promise<void>}
    */
   public async run(cronTime: string): Promise<void> {
@@ -34,15 +34,14 @@ class Scheduler {
       cronTime,
       async () => {
         if (isRunning) {
-          console.log("Previous job still running. Skipping this run.");
+          console.log("❌ Previous job still running. Skipping this run.".blue);
           return; // Exit if the previous job is still running
         }
 
         try {
           isRunning = true; // Lock the job execution
-          console.log(
-            `===============Running scheduler at ${new Date().toLocaleString()}===============`
-          ); // Log with current time
+          `===============Running scheduler at ${new Date().toLocaleString()}===============`
+            .black.bold; // Log with current time
 
           await this.check(); // Execute the job
         } catch (error) {
@@ -82,25 +81,20 @@ class Scheduler {
   /**
    * Downloads the torrents, and updates the database
    * @param  {AniQuery} anime - The anime object
-   * @param  {boolean} isBatch - If true, then a batch of episodes is being downloaded (e.g episodes 01-12)
-   * @param  {AnimeTorrent[]} ...animeTorrent - The anime torrents returned from nyaa.si
+   * @param  {nyaaTorrents[]} ...nyaaTorrents - The anime torrents returned from nyaa.si
    * @returns Promise<void>
    */
   private async downloadTorrents(
     anime: AniQuery,
-    isBatch: boolean,
-    ...animeTorrent: AnimeTorrent[]
+    ...nyaaTorrents: NyaaTorrent[]
   ): Promise<void> {
     const downloadedEpisodes = new Array<number>();
-    for (const torrent of animeTorrent) {
-      console.log(
-        `Downloading ${torrent.title} ${torrent.episode} at ${torrent.link}`
-      );
+    for (const nyaaTorrent of nyaaTorrents) {
       // Download torrent
-      var isAdded: boolean = await qbit.addTorrent(
-        torrent.link,
+      const isAdded: boolean = await qbit.addTorrent(
+        nyaaTorrent.link,
         anime.media.title.romaji,
-        torrent.episode
+        nyaaTorrent.episode
       );
       if (!isAdded) {
         this.offlineAnimeDB[anime.mediaId].setTimeout();
@@ -108,15 +102,20 @@ class Scheduler {
       }
 
       // If we successfully added the torrent, then add it to the database later
-      if (isBatch)
+
+      if (nyaaTorrent.episode) downloadedEpisodes.push(nyaaTorrent.episode);
+      else
         downloadedEpisodes.push(
           ...Array.from({ length: anime.media.episodes }, (_, i) => i + 1)
         );
-      else if (torrent.episode)
-        downloadedEpisodes.push(parseInt(torrent.episode));
 
-      // Wait for 5 seconds
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      console.log(
+        `⬇️ Downloading ${nyaaTorrent.title} ${
+          nyaaTorrent.episode ? nyaaTorrent.episode : ""
+        } at ${nyaaTorrent.link}`.green.bold
+      );
+      // Wait for 2 seconds
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     }
 
     // Append to offlineDB, and remove the timeout
@@ -131,19 +130,21 @@ class Scheduler {
     this.hook.send(
       new MessageBuilder()
         .setTimestamp()
-        .setTitle(
-          `**${anime.media.title.romaji} - ${joinArr(
-            downloadedEpisodes
-          )}** is downloading!`
-        )
+        .setTitle(`**${anime.media.title.romaji}** is downloading!`)
         .setColor(color)
         .addField("Title ID", anime.mediaId.toString(), true)
+        .addField("Episode(s)", downloadedEpisodes.join(", "), true)
         .addField(
-          "Seeders",
-          animeTorrent.map((t) => t["nyaa:seeders"]).join(", "),
+          "Size",
+          nyaaTorrents.map((t) => t["nyaa:size"]).join(", "),
           true
         )
-        .addField("Title", animeTorrent[0].title, true)
+        .addField(
+          "Seeders",
+          nyaaTorrents.map((t) => t["nyaa:seeders"]).join(", "),
+          true
+        )
+        .addField("Title", nyaaTorrents[0].title, true)
         .setImage(anime.media.coverImage.extraLarge)
     );
     // Update firestore
@@ -160,7 +161,6 @@ class Scheduler {
    * @returns Promise
    */
   private async handleAnime(anime: AniQuery): Promise<void> {
-    console.log(`Handling ${anime.media.title.romaji} ID ${anime.mediaId}`);
     let fireDBAnime: DocumentData;
 
     try {
@@ -201,7 +201,7 @@ class Scheduler {
       : anime.media.episodes + startingEpisode;
 
     // firestore (fs) downloaded episodes.
-    const fsDownloadedEpisodes: any[] = fireDBAnime.downloadedEpisodes || [];
+    const downloadedEpisodes: any[] = fireDBAnime.downloadedEpisodes || [];
 
     // Make array of anime.progress until endEpisode
     const animeProgress: number[] = Array.from(
@@ -212,12 +212,12 @@ class Scheduler {
     /* If progress is up to date, then skip
     Or if the user has downloaded all episodes, then skip */
     const isUpToDate = animeProgress.every((episode) =>
-      fsDownloadedEpisodes.includes(episode)
+      downloadedEpisodes.includes(episode)
     );
 
     if (isUpToDate) {
       // If the user is up to date, then we can skip, and update the offlineDB
-      this.offlineAnimeDB[anime.mediaId].episodes = fsDownloadedEpisodes.sort(
+      this.offlineAnimeDB[anime.mediaId].episodes = downloadedEpisodes.sort(
         (a, b) => a - b
       );
 
@@ -225,20 +225,30 @@ class Scheduler {
     }
 
     // Attempt to find the anime.
-    const isAnimeFound = await this.getTorrents(
+    const isAnimeFound = await Nyaa.getTorrents(
       anime,
       startEpisode,
       endEpisode,
-      fsDownloadedEpisodes
+      downloadedEpisodes
     );
 
-    if (isAnimeFound) return; // Finish the function if successful
-    else this.offlineAnimeDB[anime.mediaId].setTimeout();
+    if (isAnimeFound) {
+      await this.downloadTorrents(anime, ...isAnimeFound);
+      return;
+    } // Finish the function if successful
+    else {
+      this.offlineAnimeDB[anime.mediaId].setTimeout();
+      console.log(
+        `❌ Failed to find ${anime.media.title.romaji}. Next run in ${
+          this.offlineAnimeDB[anime.mediaId].timeouts * interval + interval
+        } minutes.`.red.bold
+      );
+    }
 
     // For new entries, sometimes you need to use a different title.
     if (
       !fireDBAnime.media.alternativeTitle &&
-      fsDownloadedEpisodes.length === 0
+      downloadedEpisodes.length === 0
     ) {
       // Get short name by seperating romaji title by colon
       const shortName = anime.media.title.romaji.split(":")[0];
@@ -248,11 +258,11 @@ class Scheduler {
       for (const synonym of synonyms) {
         if (!synonym) continue;
         anime.media.title.romaji = synonym;
-        const isValidTitle = await this.getTorrents(
+        const isValidTitle = await Nyaa.getTorrents(
           anime,
           startEpisode,
           endEpisode,
-          fsDownloadedEpisodes
+          downloadedEpisodes
         );
         /* If we found a valid title, then we can stop looping.
            Add the title to firebase */
@@ -264,37 +274,6 @@ class Scheduler {
         }
       }
     }
-  }
-  /** Gets the torrents from nyaa.si
-   * @param  {AniQuery} anime - Anime to get torrents for
-   * @param  {number} start - Starting episode
-   * @param  {number} end - Ending episode
-   * @param  {any[]} fsDownloadedEpisodes - Episodes downloaded by firestore
-   * @returns Promise<boolean> - If successful
-   */ private async getTorrents(
-    anime: AniQuery,
-    start: number,
-    end: number,
-    fsDownloadedEpisodes: any[]
-  ): Promise<boolean> {
-    const torrents = await Nyaa.getTorrents(
-      anime,
-      start,
-      end,
-      fsDownloadedEpisodes
-    );
-
-    // If we found no torrents, then set a timeout to offlineDB
-    if (torrents === null) {
-      console.log(`No torrents found for ${anime.media.title.romaji}`);
-      return false; // Guard against null torrents (error | not found)
-    }
-
-    if (Array.isArray(torrents))
-      // Proceed to download them using qbit
-      await this.downloadTorrents(anime, false, ...torrents);
-    else await this.downloadTorrents(anime, true, torrents);
-    return true;
   }
 
   /**
@@ -309,7 +288,6 @@ class Scheduler {
     const promises: AniQuery[] = [];
 
     for (const anime of animeList) {
-      
       if (!this.offlineAnimeDB.hasOwnProperty(anime.mediaId)) {
         this.offlineAnimeDB[anime.mediaId] = new OfflineAnime([]);
         promises.push(anime);
@@ -317,10 +295,14 @@ class Scheduler {
         const offlineAnime = this.offlineAnimeDB[anime.mediaId];
 
         if (!!offlineAnime.timeouts) {
-          this.offlineAnimeDB[anime.mediaId].timeouts = --offlineAnime.timeouts;
+          // Log how many minutes left until the next run
           console.log(
-            `Timeouts left for ${anime.media.title.romaji} is ${offlineAnime.timeouts}`
+            `\u2139\uFE0F Next run for ${anime.media.title.romaji} in ${
+              offlineAnime.timeouts * interval
+            } minutes`.blue
           );
+          this.offlineAnimeDB[anime.mediaId].timeouts = --offlineAnime.timeouts;
+
           continue;
         }
 
