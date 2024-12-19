@@ -72,7 +72,6 @@ class Anilist {
     try {
       const response = await this.getData(query, variables);
       const data = response.data.data.Media.airingSchedule.nodes;
-      console.log(data);
       return data
     } catch (error) {
       console.error(error);
