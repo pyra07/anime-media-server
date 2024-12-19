@@ -41,7 +41,7 @@ class Scheduler {
         try {
           isRunning = true; // Lock the job execution
           `===============Running scheduler at ${new Date().toLocaleString()}===============`
-            .black.bold; // Log with current time
+            .blue; // Log with current time
 
           await this.check(); // Execute the job
         } catch (error) {
@@ -241,7 +241,7 @@ class Scheduler {
       console.log(
         `❌ Failed to find ${anime.media.title.romaji}. Next run in ${
           this.offlineAnimeDB[anime.mediaId].timeouts * interval + interval
-        } minutes.`.red.bold
+        } minutes.`.red
       );
     }
 
