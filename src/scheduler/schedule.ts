@@ -40,8 +40,10 @@ class Scheduler {
 
         try {
           isRunning = true; // Lock the job execution
-          `===============Running scheduler at ${new Date().toLocaleString()}===============`
-            .blue; // Log with current time
+          console.log(
+            `===============Running scheduler at ${new Date().toLocaleString()}===============`
+              .white.bold
+          ); // Log with current time
 
           await this.check(); // Execute the job
         } catch (error) {
