@@ -1,6 +1,6 @@
 import axios from "axios";
 import { aniUserName } from "profile.json";
-import { airingSchedule, AniQuery } from "@utils/index";
+import { AiringSchedule, AniQuery } from "@utils/index";
 import { bearerTokenAnilist, useProxy } from "profile.json";
 import { proxy } from "@utils/models";
 class Anilist {
@@ -71,11 +71,11 @@ class Anilist {
 
     try {
       const response = await this.getData(query, variables);
-      const data = response.data.data.Media.airingSchedule.nodes;
-      return data
+      const data = response.data.data.Media.airingSchedule;
+      return data as AiringSchedule;
     } catch (error) {
       console.error(error);
-      return [];
+      return null;
     }
   }
 
