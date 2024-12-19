@@ -1,6 +1,7 @@
-import { Resolution, SearchMode } from "@utils/index";
+import { AiringSchedule, Resolution, SearchMode } from "@utils/index";
 import { BestMatch, findBestMatch } from "string-similarity";
 import anitomy from "anitomy-js";
+import anilist from "@ani/anilist";
 
 /**
  * Generate the episode range required, and exclude the episodes that have already been downloaded
@@ -9,7 +10,6 @@ import anitomy from "anitomy-js";
  * @param  {number[]} inBetween - List of episodes that have already been downloaded to be excluded
  * @returns {number[]}
  */
-
 function getNumbers(start: number, end: number, inBetween: number[]): number[] {
   let numbers = [];
   for (let i = start + 1; i <= end; i++) {
@@ -17,6 +17,24 @@ function getNumbers(start: number, end: number, inBetween: number[]): number[] {
   }
   return numbers;
 }
+
+async function getEpisodeAirDates(mediaId: number, episodeList: number[]) {
+  let schedules: AiringSchedule = { nodes: [] };
+  const startPage = Math.ceil(episodeList[0] / 25);
+  const endPage = Math.ceil(episodeList[episodeList.length - 1] / 25);
+
+  for (let i = startPage; i <= endPage; i++) {
+    const data = await anilist.getAiringSchedule(i, mediaId);
+    if (!data) return null;
+    // Sleep to avoid rate limiting
+    await new Promise((r) => setTimeout(r, 1000));
+
+    schedules.nodes.push(...data.nodes);
+  }
+
+  return schedules;
+}
+
 /**
  * Similarity check for episode range for batch torrents
  * @param  {string} paramEpisodeRange List containing the episode range to check
@@ -34,6 +52,7 @@ function verifyEpisodeRange(
     return true; // If the range is similar, return true
   else return false; // If the range is not similar, return false
 }
+
 /**
  * Functions similary to findBestMatch from string-similarity, but lowercases the strings before comparing
  * @param  {string} mainString The main string to compare
@@ -64,6 +83,8 @@ function verifyQuery(
   animeParsedData: anitomy.AnitomyResult,
   resolution: Resolution,
   searchMode: SearchMode,
+  nyaaPubDate: string,
+  airDates: AiringSchedule,
   ...episodes: number[]
 ): number {
   if (animeParsedData.subtitles?.includes("Dub")) return 0;
@@ -103,7 +124,17 @@ function verifyQuery(
 
       const episodeMatch = episodes[0] === parseInt(parsedEpisode); // Check if episode is similar
 
-      return +episodeMatch + +resolutionMatch + titleMatch.bestMatch.rating; // Return the score
+      const pageNumber = episodes[0] % 25 === 0 ? 0 : (episodes[0] % 25) - 1;
+
+      let episodeDateMatch =
+        airDates.nodes[pageNumber].airingAt < new Date(nyaaPubDate).getTime(); // Check if the episode date is similar
+
+      return (
+        +episodeMatch +
+        +resolutionMatch +
+        +episodeDateMatch +
+        titleMatch.bestMatch.rating
+      ); // Return the score
 
     case SearchMode.BATCH:
       const parsedReleaseInfo = animeParsedData.release_information;
@@ -112,13 +143,18 @@ function verifyQuery(
       /* Usually some batches don't explicitly specify that the torrent itself is a
          batch. This can be combated by proving there is no episode number to be parsed
          Therefore we assume this is a batch (to be tested further) */
-      const isEpisode = animeParsedData.episode_number;
+      // const isEpisode = animeParsedData.episode_number;
+
+      episodeDateMatch =
+        airDates.nodes[airDates.nodes.length - 1].airingAt <
+        new Date(nyaaPubDate).getTime(); // Check if the episode date is similar
 
       const episodeRange = fileName.match(/\d+( *)[-~]( *)\d+/); // Check if the file name contains a range of episodes
       if (episodeRange)
         return (
           +verifyEpisodeRange(episodes, episodeRange) +
           +resolutionMatch +
+          +episodeDateMatch +
           titleMatch.bestMatch.rating
         ); // If so, check if the episode is in the range
 
@@ -133,4 +169,4 @@ function verifyQuery(
   }
 }
 
-export { getNumbers, verifyEpisodeRange, verifyQuery };
+export { getNumbers, verifyEpisodeRange, verifyQuery, getEpisodeAirDates };
