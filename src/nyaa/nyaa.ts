@@ -2,7 +2,15 @@
  and returns it as a json object */
 
 import Parser from "rss-parser";
-import { AnimeTorrent, AniQuery, Resolution, SearchMode } from "@utils/index";
+import "colors";
+import {
+  AnimeStatus,
+  AniQuery,
+  NyaaRSSResult,
+  NyaaTorrent,
+  Resolution,
+  SearchMode,
+} from "@utils/index";
 import { getNumbers, verifyQuery } from "@nyaa/utils";
 import {
   resolution,
@@ -26,6 +34,12 @@ class Nyaa {
     });
   }
 
+  /**
+   * Gets the airing schedule for a given anime and episodes.
+   * @param  {number} mediaId - The AniList media ID
+   * @param  {number[]} episodeList - List of episode numbers
+   * @returns Promise - Contains an array of airing schedule nodes
+   */
   public async getEpisodeAirDates(mediaId: number, episodeList: number[]) {
     const nodes = [];
     const startPage = Math.ceil(episodeList[0] / 25);
@@ -54,54 +68,76 @@ class Nyaa {
     startEpisode: number,
     endEpisode: number,
     downloadedEpisodes: number[]
-  ): Promise<AnimeTorrent[] | AnimeTorrent | null> {
-    let useAltUrl = false;
+  ): Promise<NyaaTorrent[] | null> {
+    let searchUrl = nyaaUrl;
+    const episodeList = getNumbers(
+      startEpisode,
+      endEpisode,
+      downloadedEpisodes
+    );
 
-    if (anime.media.genres) {
-      if (anime.media.genres.includes(triggerGenre)) useAltUrl = true;
+    console.log(
+      `🔍 Searching for ${anime.media.title.romaji} episode(s) ${episodeList}`
+        .green
+    );
+
+    if (anime.media.genres?.includes(triggerGenre)) {
+      searchUrl = altNyaaUrl;
     }
 
     let searchMode =
-      anime.media.status === "FINISHED" &&
+      anime.media.status === AnimeStatus.FINISHED &&
       startEpisode === 0 &&
       downloadedEpisodes.length === 0
         ? SearchMode.BATCH
         : SearchMode.EPISODE;
 
     if (searchMode === SearchMode.BATCH) {
-      const batchTorrent = await this.getTorrent(
+      const rssResult = await this.fetchRSSFeed(
         anime.media.title.romaji,
-        resolution as Resolution,
-        searchMode,
-        [startEpisode.toString(), endEpisode.toString()],
-        useAltUrl
+        searchUrl
       );
 
-      if (batchTorrent) return batchTorrent;
+      if (rssResult.status === 200 && rssResult.data?.length) {
+        const bestTorrent = await this.getBestTorrent(
+          rssResult.data,
+          anime.media.title.romaji,
+          searchMode,
+          searchUrl === altNyaaUrl,
+          startEpisode,
+          endEpisode
+        );
+        if (bestTorrent) return [bestTorrent];
+      }
+
       searchMode = SearchMode.EPISODE;
     }
 
-    const episodeList = getNumbers(
-      startEpisode,
-      endEpisode,
-      downloadedEpisodes
-    );
-    const torrents: AnimeTorrent[] = [];
+    const foundTorrents: NyaaTorrent[] = [];
 
     for (const episode of episodeList) {
-      const episodeString = episode < 10 ? `0${episode}` : `${episode}`;
-      const torrent = await this.getTorrent(
-        anime.media.title.romaji,
-        resolution as Resolution,
-        searchMode,
-        [episodeString],
-        useAltUrl
+      const formattedEpisode = episode.toString().padStart(2, "0");
+      const rssResult = await this.fetchRSSFeed(
+        `${anime.media.title.romaji} ${formattedEpisode}`,
+        searchUrl
       );
 
-      if (torrent) torrents.push(torrent);
+      if (rssResult.status === 200 && rssResult.data?.length) {
+        const bestTorrent = await this.getBestTorrent(
+          rssResult.data,
+          anime.media.title.romaji,
+          searchMode,
+          searchUrl === altNyaaUrl,
+          episode
+        );
+        if (bestTorrent) {
+          bestTorrent.episode = episode;
+          foundTorrents.push(bestTorrent);
+        }
+      }
     }
 
-    return torrents.length ? torrents : null;
+    return foundTorrents.length ? foundTorrents : null;
   }
 
   private setParams(url: string, query: string): URL {
@@ -130,46 +166,37 @@ class Nyaa {
   }
 
   /**
-   * Query nyaa for the anime information. Then look through the RSS feed for the
-   * torrent. The torrent is then verified and returned.
-   * @param {string} searchQuery The title of the anime to look for
-   * @param {Resolution} resolution The resolution of the video we expect
-   * @param {SearchMode} searchMode What format we expect to search
-   * @param {string} episodeRange The episode number to search for, if applicable
+   * Query nyaa for the anime information via RSS.
+   * @param {string} searchQuery The query. Can also include the episode number
+   * @param {boolean} url The url to fetch the RSS feed from
    * @returns {Promise<AnimeTorrent>} Returns the torrent info if a match is found, otherwise returns null
    */
-  private async getTorrent(
+  private async fetchRSSFeed(
     searchQuery: string,
-    resolution: Resolution,
-    searchMode: SearchMode,
-    episodeRange: string[],
-    useAltUrl: boolean
-  ): Promise<AnimeTorrent | null> {
-    const finalQuery =
-      searchMode === SearchMode.EPISODE
-        ? `${searchQuery} ${episodeRange[0]}`
-        : searchQuery;
-
-    // If useAltUrl is true, pass in the alt nyaa url to setParams function
-    const url: string = useAltUrl ? altNyaaUrl : nyaaUrl;
-
-    const rssLink = this.setParams(url, finalQuery);
+    url: string
+  ): Promise<NyaaRSSResult> {
+    const rssLink = this.setParams(url, searchQuery);
 
     try {
       const response = await this.getResponse(rssLink);
+
+      if (response.status !== 200) {
+        return {
+          status: response.status,
+          message: `Failed to fetch RSS feed. HTTP status: ${response.status}`,
+          data: null,
+        };
+      }
+
       const rss = await this.parser.parseString(response.data);
       const items = rss.items;
 
-      if (searchMode === SearchMode.EPISODE) {
-        const finalQueryAlt = `${searchQuery} "E${episodeRange[0]}"`;
-        const rssLinkAlt = this.setParams(url, finalQueryAlt);
-        const responseAlt = await this.getResponse(rssLinkAlt);
-        const rssAlt = await this.parser.parseString(responseAlt.data);
-        items.push(...rssAlt.items);
-      }
-
       if (items.length === 0) {
-        return null;
+        return {
+          status: 404,
+          message: "No items found in the RSS feed.",
+          data: null,
+        };
       }
 
       items.sort(
@@ -177,33 +204,69 @@ class Nyaa {
           parseInt(b["nyaa:seeders"]) - parseInt(a["nyaa:seeders"])
       );
 
-      for (const item of items) {
-        if (parseInt(item["nyaa:seeders"]) === 0) continue;
-
-        const title = item.title;
-        const animeParsedData = anitomy.parseSync(title);
-
-        const isSimilar = verifyQuery(
-          searchQuery,
-          animeParsedData,
-          useAltUrl ? Resolution.NONE : resolution,
-          searchMode,
-          episodeRange
-        );
-
-        if (isSimilar) {
-          // If the title and episode are similar, and the resolution is similar, return
-          item.episode = episodeRange.length === 1 ? episodeRange[0] : "01";
-          return item as AnimeTorrent;
-        }
-      }
+      return {
+        status: 200,
+        message: "RSS feed fetched successfully.",
+        data: items as NyaaTorrent[],
+      };
     } catch (error) {
       console.error(
-        "An error has occured while trying to retreive the RSS feed from Nyaa:",
+        "An error occurred while trying to retrieve the RSS feed from Nyaa:",
         error
       );
-      return null;
+      return {
+        status: 500,
+        message:
+          error instanceof Error ? error.message : "Unknown error occurred.",
+        data: null,
+      };
     }
+  }
+
+  /**
+   * Find the best matching torrent given the search query and the items in the RSS feed.
+   * @param {NyaaTorrent[]} items The items in the RSS feed
+   * @param {string} searchQuery The search query
+   * @param {SearchMode} searchMode The search mode
+   * @param {boolean} useAltUrl Whether the alternative url is used
+   * @param {any} episodeRange The episode range
+   * @returns {Promise<NyaaTorrent | null>} The best match, or null if no torrent is found
+   */
+  private async getBestTorrent(
+    items: NyaaTorrent[],
+    searchQuery: string,
+    searchMode: SearchMode,
+    useAltUrl: boolean,
+    ...episodes: number[]
+  ): Promise<NyaaTorrent | null> {
+    let bestRating = -1;
+    let bestTorrent: NyaaTorrent | null = null;
+    for (const item of items) {
+      if (parseInt(item["nyaa:seeders"]) === 0) continue;
+
+      const title = item.title;
+      const animeParsedData = anitomy.parseSync(title);
+
+      const rating = verifyQuery(
+        searchQuery,
+        animeParsedData,
+        useAltUrl ? Resolution.NONE : (resolution as Resolution),
+        searchMode,
+        ...episodes
+      );
+
+      // If a new best rating is found, replace the best rating
+      if (rating > bestRating) {
+        bestRating = rating;
+        bestTorrent = item;
+        if (bestRating === 3) break;
+      }
+    }
+    if (bestRating >= 2.8 && bestTorrent) {
+      // If the title and episode are similar, and the resolution is similar, return
+      return bestTorrent;
+    }
+
     return null;
   }
 }
