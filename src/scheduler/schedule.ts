@@ -112,7 +112,7 @@ class Scheduler {
         );
 
       console.log(
-        `⬇️ Downloading ${nyaaTorrent.title} ${
+        `⬇️  Downloading ${nyaaTorrent.title} ${
           nyaaTorrent.episode ? nyaaTorrent.episode : ""
         } at ${nyaaTorrent.link}`.green.bold
       );
