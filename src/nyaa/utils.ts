@@ -161,6 +161,7 @@ function verifyQuery(
       return (
         Number(batchMatch ?? false) +
         +resolutionMatch +
+        +episodeDateMatch +
         titleMatch.bestMatch.rating
       ); // If not, check if it is a batch
 
