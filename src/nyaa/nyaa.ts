@@ -4,6 +4,7 @@
 import Parser from "rss-parser";
 import "colors";
 import {
+  AiringSchedule,
   AnimeStatus,
   AniQuery,
   NyaaRSSResult,
@@ -11,7 +12,7 @@ import {
   Resolution,
   SearchMode,
 } from "@utils/index";
-import { getNumbers, verifyQuery } from "@nyaa/utils";
+import { getEpisodeAirDates, getNumbers, verifyQuery } from "@nyaa/utils";
 import {
   resolution,
   useProxy,
@@ -40,20 +41,6 @@ class Nyaa {
    * @param  {number[]} episodeList - List of episode numbers
    * @returns Promise - Contains an array of airing schedule nodes
    */
-  public async getEpisodeAirDates(mediaId: number, episodeList: number[]) {
-    const nodes = [];
-    const startPage = Math.ceil(episodeList[0] / 25);
-    const endPage = Math.ceil(episodeList[episodeList.length - 1] / 25);
-
-    for (let i = startPage; i <= endPage; i++) {
-      const data = await anilist.getAiringSchedule(i, mediaId);
-      // Sleep to avoid rate limiting
-      await new Promise((r) => setTimeout(r, 1400));
-      nodes.push(data);
-    }
-
-    return nodes;
-  }
 
   /**
    * Finds torrents for the given anime and episodes
@@ -81,6 +68,9 @@ class Nyaa {
         .green
     );
 
+    const airDates = await getEpisodeAirDates(anime.mediaId, episodeList);
+    if (!airDates) return null;
+
     if (anime.media.genres?.includes(triggerGenre)) {
       searchUrl = altNyaaUrl;
     }
@@ -104,6 +94,7 @@ class Nyaa {
           anime.media.title.romaji,
           searchMode,
           searchUrl === altNyaaUrl,
+          airDates,
           startEpisode,
           endEpisode
         );
@@ -128,6 +119,7 @@ class Nyaa {
           anime.media.title.romaji,
           searchMode,
           searchUrl === altNyaaUrl,
+          airDates,
           episode
         );
         if (bestTorrent) {
@@ -237,14 +229,17 @@ class Nyaa {
     searchQuery: string,
     searchMode: SearchMode,
     useAltUrl: boolean,
+    airDates: AiringSchedule,
     ...episodes: number[]
   ): Promise<NyaaTorrent | null> {
     let bestRating = -1;
     let bestTorrent: NyaaTorrent | null = null;
+
     for (const item of items) {
       if (parseInt(item["nyaa:seeders"]) === 0) continue;
 
       const title = item.title;
+      const nyaaPubDate = item.pubDate;
       const animeParsedData = anitomy.parseSync(title);
 
       const rating = verifyQuery(
@@ -252,6 +247,8 @@ class Nyaa {
         animeParsedData,
         useAltUrl ? Resolution.NONE : (resolution as Resolution),
         searchMode,
+        nyaaPubDate,
+        airDates,
         ...episodes
       );
 
@@ -259,10 +256,10 @@ class Nyaa {
       if (rating > bestRating) {
         bestRating = rating;
         bestTorrent = item;
-        if (bestRating === 3) break;
+        if (bestRating === 4) break;
       }
     }
-    if (bestRating >= 2.8 && bestTorrent) {
+    if (bestRating >= 3.8 && bestTorrent) {
       // If the title and episode are similar, and the resolution is similar, return
       return bestTorrent;
     }
