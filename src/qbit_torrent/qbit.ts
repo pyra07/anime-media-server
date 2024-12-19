@@ -51,7 +51,7 @@ class QbitTorrent {
   public async addTorrent(
     link: string,
     title: string,
-    episodeStr?: string
+    episode?: number
   ): Promise<boolean> {
     const authLink = new URL(qbit_url);
     authLink.pathname = "/api/v2/torrents/add";
@@ -68,7 +68,7 @@ class QbitTorrent {
         `urls=${encodeURIComponent(link)}&savepath=${encodeURIComponent(
           path.join(rootDir, title)
         )}&rename=${encodeURIComponent(
-          episodeStr ? `${title} - ${episodeStr}` : title
+          episode ? `${title} - ${episode}` : title
         )}&sequentialDownload=true&category=${encodeURIComponent("animu")}`,
         {
           headers: {
