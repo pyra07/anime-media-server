@@ -4,20 +4,21 @@
  */
 /*************************************************************************************** */
 
-import { AnimeFormat, animeStatus } from "@utils/enums";
+import { AnimeFormat, AnimeStatus } from "@utils/enums";
 import { OfflineAnime } from "@utils/classes";
 
 // This interface is used to store the torrent information from an anime retrieved in Nyaa.
-interface AnimeTorrent {
+interface NyaaTorrent {
   title: string;
   link: string;
   pubDate: string;
   "nyaa:seeders": string;
+  "nyaa:size": string;
   content: string;
   contentSnipet: string;
   guid: string;
   isoDate: string;
-  episode?: string;
+  episode?: number;
 }
 
 // Helper interface for Media. It is used to store the next episode number, and the its ID.
@@ -33,7 +34,7 @@ interface airingSchedule {
       airingAt: number;
       episode: number;
     }
-  ]
+  ];
 }
 
 // Helper interface for Media. It is used to define the title of the anime. This can be in 3 different forms.
@@ -63,7 +64,7 @@ interface AniMedia {
   episodes: number;
   genres: string[];
   format: AnimeFormat;
-  status: animeStatus;
+  status: AnimeStatus;
   endDate: {
     year: number | null;
     month: number | null;
@@ -92,8 +93,14 @@ interface qbitSID {
   expires: number;
 }
 
+type NyaaRSSResult = {
+  status: number;
+  message: string;
+  data: NyaaTorrent[] | null;
+};
+
 export {
-  AnimeTorrent,
+  NyaaTorrent,
   nextAiringEpisode,
   AniTitle,
   AniCoverImage,
@@ -103,4 +110,5 @@ export {
   OfflineDB,
   airingSchedule,
   qbitSID,
+  NyaaRSSResult,
 };
