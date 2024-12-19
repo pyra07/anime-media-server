@@ -3,9 +3,10 @@ import { BestMatch, findBestMatch } from "string-similarity";
 import anitomy from "anitomy-js";
 
 /**
- * Gets the numbers between start and end
- * @param  {number} start
- * @param  {number} end
+ * Generate the episode range required, and exclude the episodes that have already been downloaded
+ * @param  {number} start - Starting episode
+ * @param  {number} end - Ending episode
+ * @param  {number[]} inBetween - List of episodes that have already been downloaded to be excluded
  * @returns {number[]}
  */
 
@@ -23,13 +24,13 @@ function getNumbers(start: number, end: number, inBetween: number[]): number[] {
  * @returns boolean
  */
 function verifyEpisodeRange(
-  paramEpisodeRange: string[],
+  paramEpisodeRange: number[],
   episodeRange: RegExpMatchArray
 ): boolean {
   // If the file name contains a range of episodes, check if the episode is in the range
   // If so we can assume the torrent is a batch as well.
   const e = episodeRange[0].split(/[-~]/);
-  if (parseInt(e[0]) === 1 && parseInt(e[1]) === parseInt(paramEpisodeRange[1]))
+  if (parseInt(e[0]) === 1 && parseInt(e[1]) === paramEpisodeRange[1])
     return true; // If the range is similar, return true
   else return false; // If the range is not similar, return false
 }
@@ -55,7 +56,7 @@ function findBestMatchLowerCase(
  * @param  {anitomy.AnitomyResult} animeParsedData The parsed data of the RSS item title
  * @param  {Resolution} resolution The resolution to verify
  * @param  {SearchMode} searchMode What to expect from the query. This can be in multiple forms
- * @param  {string} paramEpisodeRange The episode number to verify, if applicable
+ * @param  {number} episodes The episode number to verify, if applicable
  * @returns {boolean} Returns true if the query is similar to the media we want, otherwise returns false
  */
 function verifyQuery(
@@ -63,9 +64,9 @@ function verifyQuery(
   animeParsedData: anitomy.AnitomyResult,
   resolution: Resolution,
   searchMode: SearchMode,
-  paramEpisodeRange: string[]
-): boolean {
-  if (animeParsedData.subtitles?.includes("Dub")) return false;
+  ...episodes: number[]
+): number {
+  if (animeParsedData.subtitles?.includes("Dub")) return 0;
 
   const fileName = animeParsedData.file_name;
   const parsedTitle = animeParsedData.anime_title;
@@ -75,7 +76,7 @@ function verifyQuery(
       ? Resolution.NONE
       : animeParsedData.video_resolution;
 
-  if (!parsedTitle || !parsedResolution) return false; // Guard against empty parsed data
+  if (!parsedTitle || !parsedResolution) return 0; // Guard against empty parsed data
 
   // If parsedTitle has a title in round brackets, extract it. If found, extract the title out of the brackets
   const subAnimeTitle = parsedTitle.match(/(?<=\().+?(?=\))/);
@@ -95,19 +96,14 @@ function verifyQuery(
     parsedResolution === Resolution.NONE ||
     parsedResolution.includes(resolution);
 
-  // If title is not similar, and resolution is not similar, return false
-  if (titleMatch.bestMatch.rating < 0.8) return false;
-  if (!resolutionMatch) return false;
-
   switch (searchMode) {
     case SearchMode.EPISODE:
       const parsedEpisode = animeParsedData.episode_number;
-      if (!parsedEpisode) return false; // Guard against empty episode
+      if (!parsedEpisode) return 0; // Guard against empty episode
 
-      const episodeMatch =
-        parseInt(paramEpisodeRange[0]) === parseInt(parsedEpisode); // Check if episode is similar
+      const episodeMatch = episodes[0] === parseInt(parsedEpisode); // Check if episode is similar
 
-      return episodeMatch; // Return if all conditions are met
+      return +episodeMatch + +resolutionMatch + titleMatch.bestMatch.rating; // Return the score
 
     case SearchMode.BATCH:
       const parsedReleaseInfo = animeParsedData.release_information;
@@ -120,12 +116,20 @@ function verifyQuery(
 
       const episodeRange = fileName.match(/\d+( *)[-~]( *)\d+/); // Check if the file name contains a range of episodes
       if (episodeRange)
-        return verifyEpisodeRange(paramEpisodeRange, episodeRange); // If so, check if the episode is in the range
+        return (
+          +verifyEpisodeRange(episodes, episodeRange) +
+          +resolutionMatch +
+          titleMatch.bestMatch.rating
+        ); // If so, check if the episode is in the range
 
-      return !!(batchMatch || !isEpisode); // Return if all conditions are met.
+      return (
+        Number(batchMatch ?? false) +
+        +resolutionMatch +
+        titleMatch.bestMatch.rating
+      ); // If not, check if it is a batch
 
     default:
-      return false;
+      return 0;
   }
 }
 
