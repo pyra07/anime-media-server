@@ -5,7 +5,7 @@ enum Resolution {
   NONE = "0"
 }
 
-enum animeStatus {
+enum AnimeStatus {
   FINISHED = "FINISHED",
   RELEASING = "RELEASING",
   NOT_YET_RELEASED = "NOT_YET_RELEASED",
@@ -36,4 +36,4 @@ enum SearchMode {
   TV_SHORT = "TV_SHORT",
 }
 
-export { Resolution, animeStatus, AnimeFormat, SearchMode };
+export { Resolution, AnimeStatus, AnimeFormat, SearchMode };
