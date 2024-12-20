@@ -23,14 +23,13 @@ import {
 import anitomy from "anitomy-js";
 import axios from "axios";
 import { proxy } from "@utils/models";
-import anilist from "@ani/anilist";
 
 class Nyaa {
   private parser: any;
   constructor() {
     this.parser = new Parser({
       customFields: {
-        item: ["nyaa:seeders"],
+        item: ["nyaa:seeders", "nyaa:size"],
       },
     });
   }
