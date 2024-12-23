@@ -3,6 +3,17 @@ import { BestMatch, findBestMatch } from "string-similarity";
 import anitomy from "anitomy-js";
 import anilist from "@ani/anilist";
 
+const pageNumberLimit: number = 5;
+
+/**
+ * Calculates the page number given an episode number
+ * @param  {number} episode - Episode number
+ * @returns {number} The page number
+ */
+function getPageNumber(episode: number): number {
+  return Math.ceil(episode / pageNumberLimit);
+}
+
 /**
  * Generate the episode range required, and exclude the episodes that have already been downloaded
  * @param  {number} start - Starting episode
@@ -20,8 +31,8 @@ function getNumbers(start: number, end: number, inBetween: number[]): number[] {
 
 async function getEpisodeAirDates(mediaId: number, episodeList: number[]) {
   let schedules: AiringSchedule = { nodes: [] };
-  const startPage = Math.ceil(episodeList[0] / 25);
-  const endPage = Math.ceil(episodeList[episodeList.length - 1] / 25);
+  const startPage = getPageNumber(episodeList[0]);
+  const endPage = getPageNumber(episodeList[episodeList.length - 1]);
 
   for (let i = startPage; i <= endPage; i++) {
     const data = await anilist.getAiringSchedule(i, mediaId);
@@ -75,7 +86,9 @@ function findBestMatchLowerCase(
  * @param  {anitomy.AnitomyResult} animeParsedData The parsed data of the RSS item title
  * @param  {Resolution} resolution The resolution to verify
  * @param  {SearchMode} searchMode What to expect from the query. This can be in multiple forms
- * @param  {number} episodes The episode number to verify, if applicable
+ * @param  {string} nyaaPubDate The date of the torrent uploaded
+ * @param  {AiringSchedule} airDates The airing schedule of the anime
+ * @param  {number} episodes The episode(s) number to verify, if applicable
  * @returns {boolean} Returns true if the query is similar to the media we want, otherwise returns false
  */
 function verifyQuery(
@@ -124,7 +137,10 @@ function verifyQuery(
 
       const episodeMatch = episodes[0] === parseInt(parsedEpisode); // Check if episode is similar
 
-      const pageNumber = episodes[0] % 25 === 0 ? 0 : (episodes[0] % 25) - 1;
+      const pageNumber =
+        episodes[0] % pageNumberLimit === 0
+          ? 0
+          : (episodes[0] % pageNumberLimit) - 1;
 
       let episodeDateMatch =
         airDates.nodes[pageNumber].airingAt < new Date(nyaaPubDate).getTime(); // Check if the episode date is similar

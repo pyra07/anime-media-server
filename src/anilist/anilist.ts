@@ -47,7 +47,19 @@ class Anilist {
     return response.data;
   }
 
-  public async getAiringSchedule(page: number, id: number) {
+/**
+ * Retrieves the airing schedule for a specific anime by its ID.
+ * @param {number} page - The page number for pagination.
+ * @param {number} id - The ID of the anime.
+ * @param {number} [perPage=5] - The number of entries per page, default is 5.
+ * @returns {Promise<AiringSchedule | null>} - The airing schedule information, or null if an error occurs.
+ */
+
+  public async getAiringSchedule(
+    page: number,
+    id: number,
+    perPage: number = 5
+  ): Promise<AiringSchedule | null> {
     const query = `
         query($id: Int, $page: Int) {
           Media(id: $id) {
@@ -55,7 +67,7 @@ class Anilist {
               romaji
               english
               }
-            airingSchedule(page: $page) {
+            airingSchedule(page: $page, perPage: 5) {
               nodes {
                 airingAt
                 episode
@@ -65,8 +77,8 @@ class Anilist {
         }
 `;
     const variables = {
-      id: 141182,
-      page: 1,
+      id: id,
+      page: page,
     };
 
     try {
