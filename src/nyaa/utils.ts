@@ -43,6 +43,9 @@ async function getEpisodeAirDates(mediaId: number, episodeList: number[]) {
     schedules.nodes.push(...data.nodes);
   }
 
+  // If the number of nodes is less than the number of episodes, return null
+  if (schedules.nodes.length < episodeList.length) return null;
+
   return schedules;
 }
 
