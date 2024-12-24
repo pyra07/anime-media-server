@@ -44,6 +44,7 @@ async function getEpisodeAirDates(mediaId: number, episodeList: number[]) {
   }
 
   // If the number of nodes is less than the number of episodes, return null
+  // In rare cases, anilist may sometimes have a broken airing schedule
   if (schedules.nodes.length < episodeList.length) return null;
 
   return schedules;
@@ -145,6 +146,7 @@ function verifyQuery(
           ? 0
           : (episodes[0] % pageNumberLimit) - 1;
 
+      console.log("Page Number: ", pageNumber);
       let episodeDateMatch =
         airDates.nodes[pageNumber].airingAt < new Date(nyaaPubDate).getTime(); // Check if the episode date is similar
 
