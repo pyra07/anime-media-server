@@ -147,26 +147,30 @@ function verifyQuery(
           : (episodes[0] % pageNumberLimit) - 1;
 
       console.log("Page Number: ", pageNumber);
-      let episodeDateMatch =
+      let airDateMatch =
         airDates.nodes[pageNumber].airingAt < new Date(nyaaPubDate).getTime(); // Check if the episode date is similar
 
       return (
         +episodeMatch +
         +resolutionMatch +
-        +episodeDateMatch +
+        +airDateMatch +
         titleMatch.bestMatch.rating
       ); // Return the score
 
     case SearchMode.BATCH:
       const parsedReleaseInfo = animeParsedData.release_information;
-      const batchMatch = parsedReleaseInfo?.includes("Batch"); // Check if it is a batch
+      let batchMatch = parsedReleaseInfo?.includes("Batch"); // Check if it is a batch
+      // Assign true to batchMatch if: It is 1 episode or if it is a batch
+      if (episodes[episodes.length - 1] === 1 || Number(batchMatch ?? false))
+        batchMatch = true;
+      else batchMatch = false;
 
       /* Usually some batches don't explicitly specify that the torrent itself is a
          batch. This can be combated by proving there is no episode number to be parsed
          Therefore we assume this is a batch (to be tested further) */
       // const isEpisode = animeParsedData.episode_number;
 
-      episodeDateMatch =
+      airDateMatch =
         airDates.nodes[airDates.nodes.length - 1].airingAt <
         new Date(nyaaPubDate).getTime(); // Check if the episode date is similar
 
@@ -175,14 +179,14 @@ function verifyQuery(
         return (
           +verifyEpisodeRange(episodes, episodeRange) +
           +resolutionMatch +
-          +episodeDateMatch +
+          +airDateMatch +
           titleMatch.bestMatch.rating
         ); // If so, check if the episode is in the range
 
       return (
-        Number(batchMatch ?? false) +
+        +batchMatch +
         +resolutionMatch +
-        +episodeDateMatch +
+        +airDateMatch +
         titleMatch.bestMatch.rating
       ); // If not, check if it is a batch
 
