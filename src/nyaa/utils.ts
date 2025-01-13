@@ -159,10 +159,13 @@ function verifyQuery(
       const episodeMatch = episodes[0] === parseInt(parsedEpisode); // Check if episode is similar
 
       // Find pageNumber
-      const pageNumber = airDates.nodes.findIndex((x) => x.episode === episodes[0]);
+      const pageNumber = airDates.nodes.findIndex(
+        (x) => x.episode === episodes[0]
+      );
 
       let airDateMatch =
-        airDates.nodes[pageNumber].airingAt < new Date(nyaaPubDate).getTime(); // Check if the episode date is similar
+        airDates.nodes[pageNumber].airingAt <
+        new Date(nyaaPubDate).getTime() / 1000; // Check if the episode date is similar
 
       return (
         +episodeMatch +
