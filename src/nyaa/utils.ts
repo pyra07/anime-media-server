@@ -2,6 +2,7 @@ import { AiringSchedule, Resolution, SearchMode } from "@utils/index";
 import { BestMatch, findBestMatch } from "string-similarity";
 import anitomy from "anitomy-js";
 import anilist from "@ani/anilist";
+import { excludeReleaseGroups } from "profile.json";
 
 const pageNumberLimit: number = 5;
 
@@ -104,6 +105,10 @@ function verifyQuery(
   airDates: AiringSchedule,
   ...episodes: number[]
 ): number {
+  const group = animeParsedData.release_group ?? "";
+
+  if (excludeReleaseGroups.includes(group)) return 0;
+
   if (animeParsedData.subtitles?.includes("Dub")) return 0;
 
   const fileName = animeParsedData.file_name;
