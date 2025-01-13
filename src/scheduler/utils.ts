@@ -38,7 +38,7 @@ function getAnimeSeason(animeEntry: string): number {
 }
 
 /**
- * Handles an anime with a delay of 500ms to prevent hitting the rate limit
+ * Handles an anime with a delay of 1000ms to prevent hitting the rate limit
  * @param  {any} anime - Anime object to handle
  * @returns Promise
  */

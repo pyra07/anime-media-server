@@ -46,6 +46,7 @@ class Nyaa {
    * @param anime The anime object
    * @param startEpisode The starting episode number
    * @param endEpisode The ending episode number
+   * @param startingEpisode The offset for the episode numbers
    * @param downloadedEpisodes The episodes that have already been downloaded
    * @returns A list of torrents, or null if none are found
    */
@@ -53,6 +54,7 @@ class Nyaa {
     anime: AniQuery,
     startEpisode: number,
     endEpisode: number,
+    startingEpisode: number,
     downloadedEpisodes: number[]
   ): Promise<NyaaTorrent[] | null> {
     let searchUrl = nyaaUrl;
@@ -67,7 +69,7 @@ class Nyaa {
         .green
     );
 
-    const airDates = await getEpisodeAirDates(anime.mediaId, episodeList);
+    const airDates = await getEpisodeAirDates(anime.mediaId, episodeList, startingEpisode);
     if (!airDates) return null;
 
     if (anime.media.genres?.includes(triggerGenre)) {

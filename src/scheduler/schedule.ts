@@ -231,6 +231,7 @@ class Scheduler {
       anime,
       startEpisode,
       endEpisode,
+      startingEpisode,
       downloadedEpisodes
     );
 
@@ -264,6 +265,7 @@ class Scheduler {
           anime,
           startEpisode,
           endEpisode,
+          startingEpisode,
           downloadedEpisodes
         );
         /* If we found a valid title, then we can stop looping.

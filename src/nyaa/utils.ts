@@ -30,18 +30,30 @@ function getNumbers(start: number, end: number, inBetween: number[]): number[] {
   return numbers;
 }
 
-async function getEpisodeAirDates(mediaId: number, episodeList: number[]) {
+async function getEpisodeAirDates(
+  mediaId: number,
+  episodeList: number[],
+  startingEpisode: number
+) {
   let schedules: AiringSchedule = { nodes: [] };
-  const startPage = getPageNumber(episodeList[0]);
-  const endPage = getPageNumber(episodeList[episodeList.length - 1]);
+  const startPage = getPageNumber(episodeList[0] - startingEpisode);
+  const endPage = getPageNumber(
+    episodeList[episodeList.length - 1] - startingEpisode
+  );
 
   for (let i = startPage; i <= endPage; i++) {
     const data = await anilist.getAiringSchedule(i, mediaId);
     if (!data) return null;
     // Sleep to avoid rate limiting
     await new Promise((r) => setTimeout(r, 1000));
-
-    schedules.nodes.push(...data.nodes);
+    // Adjust offset for starting episode
+    if (startingEpisode != 0) {
+      for (let j = 0; j < data.nodes.length; j++) {
+        const node = data.nodes[j];
+        node.episode += startingEpisode;
+        schedules.nodes.push(node);
+      }
+    } else schedules.nodes.push(...data.nodes);
   }
 
   // If the number of nodes is less than the number of episodes, return null
@@ -146,10 +158,8 @@ function verifyQuery(
 
       const episodeMatch = episodes[0] === parseInt(parsedEpisode); // Check if episode is similar
 
-      const pageNumber =
-        episodes[0] % pageNumberLimit === 0
-          ? 0
-          : (episodes[0] % pageNumberLimit) - 1;
+      // Find pageNumber
+      const pageNumber = airDates.nodes.findIndex((x) => x.episode === episodes[0]);
 
       let airDateMatch =
         airDates.nodes[pageNumber].airingAt < new Date(nyaaPubDate).getTime(); // Check if the episode date is similar
