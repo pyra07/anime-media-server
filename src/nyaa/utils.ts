@@ -146,7 +146,6 @@ function verifyQuery(
           ? 0
           : (episodes[0] % pageNumberLimit) - 1;
 
-      console.log("Page Number: ", pageNumber);
       let airDateMatch =
         airDates.nodes[pageNumber].airingAt < new Date(nyaaPubDate).getTime(); // Check if the episode date is similar
 
